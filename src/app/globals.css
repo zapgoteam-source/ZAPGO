@@ -1,0 +1,317 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --primary: #b10000;
+  --primary-hover: #8b0000;
+  --primary-light: #dc2626;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --radius: 26px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --primary: #b10000;
+    --primary-hover: #8b0000;
+    --primary-light: #dc2626;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* 언어별 글꼴 클래스 */
+.font-korean {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+}
+
+.font-chinese {
+  font-family: 'Microsoft YaHei', 'Microsoft YaHei UI', PingFang SC, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+}
+
+.font-english {
+  font-family: var(--font-inter), 'Avenir', 'Avenir Next', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+}
+
+/* Global border-radius 26px */
+input, select, button, textarea, .rounded, .rounded-sm, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl, .rounded-full {
+  border-radius: 26px !important;
+  overflow: visible !important; /* Prevent icon clipping */
+}
+
+/* Keep circular elements truly circular */
+.w-8.h-8, .w-12.h-12, .w-16.h-16, .w-20.h-20, [class*="rounded-full"] {
+  border-radius: 50% !important;
+  overflow: visible !important;
+}
+
+/* Specific fix for icon containers */
+.rounded-full {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+}
+
+/* Fix for icon containers to prevent clipping */
+.relative {
+  overflow: visible !important;
+}
+
+/* Ensure icons are not clipped - but don't override component z-index */
+.absolute:not([class*="z-"]) {
+  z-index: 1;
+}
+
+/* SVG icons should not be clipped */
+svg {
+  overflow: visible !important;
+  display: block !important;
+}
+
+/* Lucide icons specific fixes */
+[class*="lucide"] {
+  overflow: visible !important;
+  display: block !important;
+}
+
+/* Input 및 Textarea 텍스트 색상 - 입력된 값은 검정색 */
+input,
+textarea {
+  color: #000000; /* 입력된 텍스트는 검정색 */
+}
+
+/* Placeholder styling - 전역 설정 */
+input::placeholder,
+textarea::placeholder {
+  color: #d1d5db; /* text-gray-300 - 연한 회색 */
+  opacity: 1; /* Firefox */
+}
+
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+  color: #d1d5db; /* Chrome, Safari, Edge */
+}
+
+input::-moz-placeholder,
+textarea::-moz-placeholder {
+  color: #d1d5db; /* Firefox */
+  opacity: 1;
+}
+
+input:-ms-input-placeholder,
+textarea:-ms-input-placeholder {
+  color: #d1d5db; /* IE 10-11 */
+}
+
+input::-ms-input-placeholder,
+textarea::-ms-input-placeholder {
+  color: #d1d5db; /* Edge */
+}
+
+/* Select placeholder styling */
+select option:first-child {
+  color: #d1d5db; /* text-gray-300 */
+}
+
+select:invalid {
+  color: #d1d5db; /* text-gray-300 - for placeholder */
+}
+
+select:valid {
+  color: #111827; /* text-gray-900 - for selected value */
+}
+
+/* Select dropdown arrow positioning */
+select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 40px !important;
+}
+
+/* Remove default arrow on all browsers */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Safari 및 모바일 브라우저 지원 - Enhanced */
+html {
+  height: 100vh; /* Safari에서 더 안정적 */
+  height: 100dvh; /* Dynamic viewport height 지원 브라우저용 */
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  /* Safari safe area 지원 */
+  background-color: var(--background);
+}
+
+body {
+  min-height: 100vh; /* 최소 높이 보장 */
+  min-height: 100dvh; /* Dynamic viewport height 지원 브라우저용 */
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  overscroll-behavior: contain;
+  /* Safari 검정 영역 방지를 위한 배경색 설정 */
+  background-color: var(--background);
+  /* Safari safe area 지원 */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* Force touch scrolling on all scrollable elements */
+* {
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Specific scrollable areas - More aggressive */
+.overflow-y-auto, .overflow-x-auto, .overflow-auto,
+[class*="overflow-"], .max-h-48, .max-h-60, .max-h-80 {
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+  overscroll-behavior: contain !important;
+  transform: translateZ(0) !important; /* Force hardware acceleration */
+  will-change: scroll-position !important;
+}
+
+/* Fix for dropdown and modal scrolling on mobile */
+[role="listbox"], [role="menu"], .dropdown-content, 
+.max-h-48, .max-h-60, .absolute.z-50 {
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+  overscroll-behavior: contain !important;
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+}
+
+/* Prevent iOS bounce on main container */
+.min-h-screen {
+  touch-action: pan-x pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
+  /* Safari에서 전체 화면 높이 보장 */
+  min-height: 100vh !important;
+  min-height: 100dvh !important; /* Dynamic viewport height 지원 */
+}
+
+/* Safari safe area 지원을 위한 추가 클래스 */
+.safe-area-inset {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Safari 검정 영역 방지를 위한 전체 컨테이너 스타일 */
+#__next, [data-nextjs-scroll-focus-boundary] {
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height 지원 */
+  background-color: var(--background);
+}
+
+/* iOS Safari 주소창 숨김/표시에 대응하는 동적 높이 */
+@supports (height: 100dvh) {
+  .min-h-screen {
+    min-height: 100dvh !important;
+  }
+  
+  html, body {
+    height: 100dvh;
+  }
+}
+
+/* 이미지 보호 - 저장 및 드래그앤드랍 방지 */
+img {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
+}
+
+/* 로고 이미지 특별 보호 */
+img[src*="2555936eae5a1"] {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
+}
+
+/* 우클릭 방지 */
+.logo-protected {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+/* Custom scrollbar styling for dropdown */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 3px;
+  border: none;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
+.scrollbar-track-transparent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+}
+
+.scrollbar-thumb-gray-400::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
