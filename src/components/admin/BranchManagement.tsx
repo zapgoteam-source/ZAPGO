@@ -455,8 +455,7 @@ function BranchDetailModal({ branch, onClose, onUpdate }: {
     setError(null);
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         name: editData.name,
         type: editData.type,
         contact_phone: editData.contact_phone || null,
@@ -907,8 +906,7 @@ export default function BranchManagement({
           }
 
           // 점주 정보 찾기 (대리점 관리자 또는 직영점 관리자)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const owner = branch.users?.find((user: any) =>  
+          const owner = branch.users?.find((user: { role: string }) =>
             user.role === 'DEALER_ADMIN' || user.role === 'OWNED_BRANCH_ADMIN'
           );
 

@@ -14,7 +14,6 @@ import { Input } from '@/components/ui/Input';
 import { Logo } from '@/components/ui/Logo';
 import { isValidUsername } from '@/lib/utils';
 import { UserRole } from '@/lib/permissions';
-import { supabase } from '@/lib/supabase';
 import { UNASSIGNED_TENANT } from '@/lib/constants';
 import { CheckCircle, Info } from 'lucide-react';
 

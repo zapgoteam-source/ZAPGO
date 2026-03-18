@@ -83,6 +83,8 @@ const LOGOUT_FLAG_KEY = 'zapgo_logout_in_progress';
  * 모던한 토스트 알림 표시 (alert 대체)
  * DOM에 직접 토스트 요소를 생성하여 표시
  */
+const TOAST_STYLE_ID = 'zapgo-toast-keyframes';
+
 const showLogoutNotification = (message: string) => {
   // 기존 토스트가 있으면 제거
   const existingToast = document.getElementById('zapgo-logout-toast');
@@ -109,45 +111,45 @@ const showLogoutNotification = (message: string) => {
     display: flex;
     align-items: center;
     gap: 12px;
-    animation: slideIn 0.3s ease-out;
+    animation: zapgoSlideIn 0.3s ease-out;
   `;
 
   // 아이콘 추가
   const icon = document.createElement('span');
   icon.textContent = '⏰';
   icon.style.fontSize = '20px';
-  
+
   const text = document.createElement('span');
   text.textContent = message;
 
   toast.appendChild(icon);
   toast.appendChild(text);
 
-  // 애니메이션 스타일 추가
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes slideIn {
-      from {
-        transform: translateX(400px);
-        opacity: 0;
+  // 애니메이션 스타일 - 한 번만 추가 (메모리 누수 방지)
+  if (!document.getElementById(TOAST_STYLE_ID)) {
+    const style = document.createElement('style');
+    style.id = TOAST_STYLE_ID;
+    style.textContent = `
+      @keyframes zapgoSlideIn {
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
       }
-      to {
-        transform: translateX(0);
-        opacity: 1;
+      @keyframes zapgoSlideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(400px); opacity: 0; }
       }
-    }
-  `;
-  document.head.appendChild(style);
+    `;
+    document.head.appendChild(style);
+  }
 
   // DOM에 추가
   document.body.appendChild(toast);
 
   // 3초 후 자동 제거
   setTimeout(() => {
-    toast.style.animation = 'slideIn 0.3s ease-out reverse';
+    toast.style.animation = 'zapgoSlideOut 0.3s ease-out forwards';
     setTimeout(() => {
       toast.remove();
-      style.remove();
     }, 300);
   }, 3000);
 };
@@ -163,7 +165,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [permissionChecker, setPermissionChecker] = useState<PermissionChecker | null>(null);
   const [loading, setLoading] = useState(true);
-  const [lastActivityTime, setLastActivityTime] = useState<number>(Date.now());
 
   /**
    * 사용자 프로필 정보를 로드합니다.
@@ -174,7 +175,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const loadUserProfile = async (userId: string, userObject?: User | null) => {
     try {
        // 사용자 프로필 정보 조회 (테넌트 정보 포함)
-       // 필요한 필드만 선택하여 성능 최적화
        const { data: profileData, error: profileError } = await supabase
          .from('users')
          .select(`
@@ -193,17 +193,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
          `)
          .eq('id', userId)
          .single();
-      
-       // tenant의 구독 정보 조회 (subscriptions 테이블)
+
+       // 구독 정보는 프로필의 tenant_id가 필요하므로 순차 조회
        let tenantSubscriptionEndDate: string | undefined = undefined;
-       if (profileData && profileData.tenant_id) {
+       if (profileData?.tenant_id) {
          const { data: subscriptionData, error: subscriptionError } = await supabase
            .from('subscriptions')
            .select('subscription_end_date')
            .eq('tenant_id', profileData.tenant_id)
            .eq('is_active', true)
-           .maybeSingle(); // single() 대신 maybeSingle() 사용 (결과가 0개 또는 1개일 수 있음)
-         
+           .maybeSingle();
+
          if (subscriptionError) {
            console.warn('구독 정보 조회 오류:', subscriptionError.message);
          } else if (subscriptionData?.subscription_end_date) {
@@ -241,9 +241,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
             setUserProfile(basicProfile);
             setPermissionChecker(new PermissionChecker(basicProfile));
             console.log('메타데이터에서 프로필 생성 완료:', basicProfile.name, basicProfile.role);
-            
-            // 백그라운드에서 public.users 테이블에 프로필 생성 시도
-            createMissingProfile(basicProfile);
           } else {
             // 메타데이터도 없는 경우 최소한의 기본 프로필 생성 (미배정)
             const basicProfile: UserProfile = {
@@ -350,7 +347,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           
           // 로그인 페이지로 리다이렉트 (현재 페이지가 로그인 페이지가 아닐 때만)
           if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-            alert('⏰ 세션이 만료되었습니다. 다시 로그인해주세요.');
+            showLogoutNotification('세션이 만료되었습니다. 다시 로그인해주세요.');
             window.location.href = '/login';
           }
           
@@ -395,96 +392,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  /**
-   * 누락된 사용자 프로필을 public.users 테이블에 생성합니다.
-   * 비동기로 실행하여 메인 플로우를 차단하지 않습니다.
-   */
-  const createMissingProfile = async (profile: UserProfile) => {
-    // 백그라운드 실행을 위해 Promise로 감싸서 비동기 처리
-    Promise.resolve().then(async () => {
-      try {
-        console.log('누락된 프로필을 데이터베이스에 생성 시도:', profile.email);
-        
-        const { error } = await supabase
-          .from('users')
-          .insert({
-            id: profile.id,
-            role: profile.role,
-            tenant_id: profile.tenant_id || UNASSIGNED_TENANT.ID,
-            name: profile.name,
-            email: profile.email,
-            phone: profile.phone || '',
-            department: profile.department,
-            position: profile.position,
-            is_active: profile.is_active,
-            created_by: profile.id,
-            updated_by: profile.id,
-          });
+  // createMissingProfile은 DB 트리거(handle_new_user)로 대체됨
+  // 회원가입 시 auth.users INSERT 후 자동으로 public.users 프로필이 생성됨
 
-        if (error) {
-          console.error('누락된 프로필 생성 실패:', error.message);
-        } else {
-          console.log('누락된 프로필 생성 성공:', profile.email);
-        }
-      } catch (error) {
-        console.error('누락된 프로필 생성 중 오류:', error);
-      }
-    });
-  };
-
-  /**
-   * 사용자 메타데이터를 최신 정보로 업데이트합니다.
-   * 비동기로 실행하여 메인 플로우를 차단하지 않습니다.
-   */
-  const updateUserMetadata = async (profile: UserProfile) => {
-    // 백그라운드 실행을 위해 Promise로 감싸서 비동기 처리
-    Promise.resolve().then(async () => {
-      try {
-        // 현재 사용자의 메타데이터와 비교하여 실제로 변경이 필요한지 확인
-        const currentUser = user;
-        if (!currentUser) return;
-        
-        const currentMetadata = currentUser.user_metadata || {};
-        const hasChanges = 
-          currentMetadata.role !== profile.role || 
-          currentMetadata.tenant_id !== profile.tenant_id ||
-          currentMetadata.is_active !== profile.is_active ||
-          currentMetadata.name !== profile.name;
-        
-        if (!hasChanges) {
-          console.log('메타데이터 업데이트 불필요 - 이미 최신 상태');
-          return;
-        }
-
-        console.log('사용자 메타데이터 업데이트 시작:', profile.email);
-        
-        const { error } = await supabase.auth.updateUser({
-          data: {
-            name: profile.name,
-            role: profile.role,
-            tenant_id: profile.tenant_id,
-            is_active: profile.is_active,
-          }
-        });
-
-        if (error) {
-          console.error('사용자 메타데이터 업데이트 실패:', error.message);
-        } else {
-          console.log('사용자 메타데이터 업데이트 성공:', profile.email);
-        }
-      } catch (error) {
-        console.error('사용자 메타데이터 업데이트 중 오류:', error);
-      }
-    });
-  };
-
-  /**
-   * 사용자 활동을 기록합니다.
-   * (더 이상 사용되지 않음 - handleActivity로 대체)
-   */
-  const updateActivity = () => {
-    setLastActivityTime(Date.now());
-  };
+  // updateUserMetadata, updateActivity 함수는 사용되지 않아 제거됨
 
   /**
    * 로그아웃 함수
@@ -506,7 +417,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         // 로그아웃 플래그 설정 (다른 탭에서도 감지 가능)
         localStorage.setItem(LOGOUT_FLAG_KEY, 'true');
-        (window as any).__LOGOUT_IN_PROGRESS__ = true;
+
       }
       
       // 상태 먼저 초기화 (로딩 화면 방지)
@@ -554,7 +465,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (key.startsWith('sb-')) localStorage.removeItem(key);
         });
         sessionStorage.clear();
-        (window as any).__LOGOUT_IN_PROGRESS__ = true;
+
         window.history.replaceState(null, '', '/login');
         window.location.replace('/login');
       }
@@ -591,11 +502,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     getInitialSession();
 
-    // 안전장치: 10초 후에도 로딩 중이면 강제로 로딩 해제
+    // 안전장치: 5초 후에도 로딩 중이면 강제로 로딩 해제
     const safetyTimeout = setTimeout(() => {
       setLoading(false);
-      console.warn('로딩 타임아웃: 10초 경과로 인해 강제로 로딩 상태 해제');
-    }, 10000);
+      console.warn('로딩 타임아웃: 5초 경과로 인해 강제로 로딩 상태 해제');
+    }, 5000);
 
     // 인증 상태 변경 리스너 설정
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -642,6 +553,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       subscription.unsubscribe();
       clearTimeout(safetyTimeout);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount
   }, []);
 
   /**
@@ -849,25 +761,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return { user: null, error };
       }
 
-      // 회원가입 성공 - 트리거가 자동으로 public.users 프로필 생성
+      // 회원가입 성공 - DB 트리거(handle_new_user)가 자동으로 public.users 프로필 생성
       if (authData.user) {
         console.log('회원가입 성공:', data.username);
-        console.log('트리거가 자동으로 프로필을 생성합니다.');
-        
-        // 프로필 생성 확인 (트리거 실행 대기 시간 제거, 비동기 확인으로 변경)
-        // 백그라운드에서 프로필 확인만 수행 (결과를 기다리지 않음)
-        supabase
-          .from('users')
-          .select('id, name, role, is_active')
-          .eq('id', authData.user.id)
-          .single()
-          .then(({ data: profileData, error: profileCheckError }) => {
-            if (profileCheckError) {
-              console.warn('프로필 확인 실패 (트리거가 아직 실행 중일 수 있음):', profileCheckError.message);
-            } else if (profileData) {
-              console.log('프로필 생성 확인 완료:', profileData);
-            }
-          });
       }
 
       return { user: authData.user, error };

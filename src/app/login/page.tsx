@@ -14,15 +14,25 @@ import { LoginForm } from '@/components/auth/LoginForm';
 import { LogIn } from 'lucide-react';
 
 export default function LoginPage() {
-  const { user, loading } = useAuth();
+  const { user, userProfile, loading } = useAuth();
   const router = useRouter();
 
-  // 이미 로그인된 사용자는 홈으로 리다이렉트
+  // 이미 로그인된 사용자는 상태에 따라 적절한 페이지로 리다이렉트
   useEffect(() => {
-    if (user && !loading) {
-      router.replace('/home');
+    if (!loading && user) {
+      if (userProfile) {
+        if (userProfile.is_active) {
+          router.replace('/home');
+        } else {
+          router.replace('/pending-approval');
+        }
+      } else {
+        // userProfile이 아직 없어도 로그인 상태면 홈으로 이동
+        // (홈에서 프로필 로드 재시도)
+        router.replace('/home');
+      }
     }
-  }, [user, loading, router]);
+  }, [user, userProfile, loading, router]);
 
   // 브라우저 뒤로가기로 로그인 페이지 접근 시 캐시 방지
   useEffect(() => {
@@ -58,8 +68,8 @@ export default function LoginPage() {
     router.push('/signup');
   };
 
-  // 로딩 중 또는 이미 로그인된 경우
-  if (loading || user) {
+  // 로딩 중일 때만 스피너 표시 (user만 있고 loading이 끝났으면 로그인 폼 표시)
+  if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="relative">

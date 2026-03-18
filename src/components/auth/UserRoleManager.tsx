@@ -203,6 +203,7 @@ export function UserRoleManager({ tenantId, showPendingOnly = false }: UserRoleM
   useEffect(() => {
     loadUsers();
     loadTenants();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tenantId]);
 
   return (

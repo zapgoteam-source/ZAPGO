@@ -31,10 +31,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     // 세션 지속성 설정 - 브라우저 종료 후에도 세션 유지
     persistSession: true,
-    // 토큰 만료 감지 활성화
-    detectSessionInUrl: true,
-    // 플로우 타입: PKCE (보안 강화)
-    flowType: 'pkce',
+    // URL에서 세션 감지 비활성화 (아이디/비밀번호 인증만 사용)
+    detectSessionInUrl: false,
+    // implicit flow 사용 (패스워드 로그인 전용 앱)
+    flowType: 'implicit',
   },
   global: {
     headers: {

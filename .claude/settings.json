@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''''scripts'''',{}\\), indent=2\\)\\)\")",
+      "Bash(curl -s \"https://ajdsmodlpaxhydvnckyb.supabase.co/rest/v1/\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqZHNtb2RscGF4aHlkdm5ja3liIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNzMxNzIsImV4cCI6MjA4ODg0OTE3Mn0.V47hm_uOMqKlva0o6cs8NK5qrJxiEqHvG5DjwAuqbSY\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqZHNtb2RscGF4aHlkdm5ja3liIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNzMxNzIsImV4cCI6MjA4ODg0OTE3Mn0.V47hm_uOMqKlva0o6cs8NK5qrJxiEqHvG5DjwAuqbSY\")",
+      "Bash(curl -s -w \"\\\\n%{http_code} %{time_total}s\" \"https://ajdsmodlpaxhydvnckyb.supabase.co/auth/v1/settings\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqZHNtb2RscGF4aHlkdm5ja3liIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNzMxNzIsImV4cCI6MjA4ODg0OTE3Mn0.V47hm_uOMqKlva0o6cs8NK5qrJxiEqHvG5DjwAuqbSY\")",
+      "Bash(supabase --version)",
+      "Bash(supabase status:*)",
+      "Bash(supabase projects:*)",
+      "Bash(supabase login:*)",
+      "Bash(supabase migration:*)",
+      "Bash(yes)",
+      "Bash(supabase inspect:*)",
+      "Bash(gh auth:*)",
+      "Bash(brew install:*)",
+      "Bash(gh repo:*)",
+      "Bash(git remote:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

@@ -39,7 +39,7 @@ export default function PendingApprovalPage() {
         router.replace('/home');
       } else {
         // 비활성 사용자는 즉시 콘텐츠 표시 (지연 시간 제거)
-        setShowContent(true);
+        queueMicrotask(() => setShowContent(true));
       }
     } else if (!loading && !user) {
       // 로그인하지 않은 사용자는 로그인 페이지로

@@ -7,7 +7,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Eye, EyeOff } from 'lucide-react';
 
@@ -53,7 +53,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ...props
   }, ref) => {
     // ID 생성 (라벨과 연결하기 위해)
-    const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+    const generatedId = useId();
+    const inputId = id || generatedId;
     
     // 비밀번호 표시/숨김 상태 (password 타입인 경우에만)
     const [showPassword, setShowPassword] = useState(false);

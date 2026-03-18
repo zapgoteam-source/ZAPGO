@@ -92,7 +92,7 @@ function TabBarComponent({ hidden = false }: TabBarProps) {
     if (!tab.requiresRole) return true;
     if (!userProfile) return false;
     return tab.requiresRole.includes(userProfile.role);
-  }), [userProfile?.role]);
+  }), [userProfile]);
 
   /**
    * 탭 클릭 핸들러

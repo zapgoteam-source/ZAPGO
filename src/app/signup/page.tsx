@@ -44,8 +44,8 @@ export default function SignUpPage() {
     router.push('/login');
   };
 
-  // 로딩 중이거나 user/userProfile 준비 중 또는 리다이렉트 중
-  if (loading || (user && !userProfile) || (user && userProfile)) {
+  // 로딩 중이거나 이미 로그인된 사용자 (리다이렉트 대기 중)
+  if (loading || user) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="relative">

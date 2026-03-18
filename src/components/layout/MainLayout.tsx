@@ -42,7 +42,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
   // 클라이언트 마운트 확인 (hydration mismatch 방지)
   useEffect(() => {
-    setMounted(true);
+    queueMicrotask(() => setMounted(true));
   }, []);
 
   // 탭바를 숨길지 여부 결정

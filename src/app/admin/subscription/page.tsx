@@ -531,6 +531,7 @@ export default function SubscriptionManagementPage() {
       const subscriptionStatus = getTenantSubscriptionStatus(selectedTenant);
       setTempDate(subscriptionStatus.subscriptionDate ? subscriptionStatus.subscriptionDate.split('T')[0] : '');
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- getTenantSubscriptionStatus is stable
   }, [selectedTenant]);
 
   /**

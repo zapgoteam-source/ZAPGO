@@ -119,14 +119,15 @@ export function useNetworkReconnect({
     }
 
     // 클린업
+    const currentTimeout = timeoutRef.current;
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('pageshow', handlePageShow);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+
+      if (currentTimeout) {
+        clearTimeout(currentTimeout);
       }
 
       if (enableLog) {
