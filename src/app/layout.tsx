@@ -1,26 +1,21 @@
-import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { MainLayout } from "@/components/layout/MainLayout";
-import { ActiveUserGuard } from "@/components/auth/ActiveUserGuard";
+import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { QueryProvider } from '@/components/providers/QueryProvider';
 
-const inter = Inter({ 
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter"
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
 });
 
 export const metadata: Metadata = {
-  title: "ZAPGO - 빠른 서비스 관리",
-  description: "효율적인 비즈니스 관리 시스템",
+  title: '에너지잡고 셀프견적',
+  description: '창문 단열 시공 셀프견적 서비스',
   icons: {
-    icon: [
-      {
-        url: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23b10000'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>Z</text></svg>",
-        type: "image/svg+xml",
-      },
-    ],
+    icon: '/APP LOGO.webp',
+    apple: '/APP LOGO.webp',
   },
 };
 
@@ -29,8 +24,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  viewportFit: 'cover', // Safari의 safe area 전체를 사용
-  themeColor: '#b10000', // 상단바 색상 지정
+  viewportFit: 'cover',
+  themeColor: '#FEE500',
 };
 
 export default function RootLayout({
@@ -43,19 +38,22 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet" />
+        <link
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+          rel="stylesheet"
+        />
       </head>
-      <body className={`${inter.variable} min-h-screen`} style={{ 
-        touchAction: 'pan-x pan-y', 
-        WebkitOverflowScrolling: 'touch',
-      }}>
-        <AuthProvider>
-          <ActiveUserGuard>
-            <MainLayout>
-              {children}
-            </MainLayout>
-          </ActiveUserGuard>
-        </AuthProvider>
+      <body
+        className={`${inter.variable} min-h-screen bg-white`}
+        style={{
+          touchAction: 'pan-x pan-y',
+          WebkitOverflowScrolling: 'touch',
+          fontFamily: 'Pretendard, sans-serif',
+        }}
+      >
+        <QueryProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { SubscriptionGuard } from '@/components/auth/PermissionGuard';
+import { SubscriptionGuard } from '@/components/guards/PermissionGuard';
 import { FileText, Plus, Search, Filter } from 'lucide-react';
 
 export default function QuotationPage() {

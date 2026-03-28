@@ -11,9 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
-import { UserRole } from '@/lib/permissions';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { SubscriptionGuard } from '@/components/auth/PermissionGuard';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -69,50 +67,12 @@ export default function HomePage() {
   };
 
 
-  // 리다이렉트 처리
+  // 비로그인 사용자 리다이렉트
   useEffect(() => {
-    // 로그아웃 중이면 리다이렉션 중단
-    if (typeof window !== 'undefined' && (window as any).__LOGOUT_IN_PROGRESS__) {
-      return;
+    if (!loading && !user) {
+      router.replace('/login');
     }
-    
-    if (!loading && user && userProfile) {
-      if (!userProfile.is_active) {
-        // 비활성 사용자는 승인 대기 페이지로
-        router.replace('/pending-approval');
-      }
-    } else if (!loading && !user) {
-      // 로그인하지 않은 사용자는 루트로
-      router.replace('/');
-    }
-  }, [user, userProfile, loading]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // 브라우저 뒤로가기로 접근 시 인증 체크
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.onpageshow = (event) => {
-        // 로그아웃 중이면 중단
-        if ((window as any).__LOGOUT_IN_PROGRESS__) {
-          return;
-        }
-        
-        // bfcache에서 로드된 경우 (뒤로가기)
-        if (event.persisted) {
-          console.log('뒤로가기 감지 - 인증 상태 확인');
-          // 로그인 상태가 아니면 로그인 페이지로
-          if (!user) {
-            window.location.replace('/login');
-          }
-        }
-      };
-    }
-
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.onpageshow = null;
-      }
-    };
-  }, [user]);
+  }, [user, loading, router]);
 
   // 로딩 중이거나 체크가 완료되지 않은 경우 로딩 화면 표시
   if (loading || !user || !userProfile) {
@@ -132,11 +92,6 @@ export default function HomePage() {
     );
   }
 
-  // 비활성 사용자는 이미 리다이렉트됨
-  if (!userProfile.is_active) {
-    return null;
-  }
-
   return (
     <div className="bg-gray-50">
       {/* 통일된 헤더 */}
@@ -144,7 +99,7 @@ export default function HomePage() {
 
       {/* 메인 컨텐츠 */}
       <main className="px-4 sm:px-6 lg:px-8 py-6">
-        <SubscriptionGuard>
+        <>
 
         {/* 주요 지표 카드들 */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -340,7 +295,7 @@ export default function HomePage() {
                 <Users className="w-4 h-4 mr-2" />
                 프로필 관리
               </Button>
-              {userProfile?.role === UserRole.HQ_ADMIN && (
+              {userProfile?.role === 'ADMIN' && (
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -377,7 +332,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        </SubscriptionGuard>
+        </>
       </main>
     </div>
   );

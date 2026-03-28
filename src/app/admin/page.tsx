@@ -8,7 +8,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { AdminGuard, usePermissions } from '@/components/auth/PermissionGuard';
+import { AdminGuard, usePermissions } from '@/components/guards/PermissionGuard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Building2, FileText, Users, CreditCard, ArrowRight, Settings, Receipt, Shield } from 'lucide-react';
 import { supabase } from '@/lib/supabase';

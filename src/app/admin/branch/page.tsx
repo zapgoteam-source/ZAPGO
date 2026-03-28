@@ -8,7 +8,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AdminGuard } from '@/components/auth/PermissionGuard';
+import { AdminGuard } from '@/components/guards/PermissionGuard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import BranchManagement from '@/components/admin/BranchManagement';
 import { Building2, ArrowLeft, Plus } from 'lucide-react';

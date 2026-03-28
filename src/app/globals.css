@@ -19,15 +19,6 @@
   --radius: 26px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --primary: #b10000;
-    --primary-hover: #8b0000;
-    --primary-light: #dc2626;
-  }
-}
 
 body {
   background: var(--background);
