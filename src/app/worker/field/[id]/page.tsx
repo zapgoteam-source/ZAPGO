@@ -60,7 +60,7 @@ export default function WorkerFieldPage() {
   if (loading || !estimate) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+        <div className="animate-spin h-8 w-8 border-b-2 border-gray-900" />
       </div>
     );
   }
@@ -78,13 +78,13 @@ export default function WorkerFieldPage() {
               <p className="text-sm text-gray-500">{estimate.customer_phone}</p>
             </div>
             {isLocked && (
-              <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">잠김</span>
+              <span className="text-xs bg-red-100 text-red-700 px-2 py-1">잠김</span>
             )}
           </div>
         </div>
 
         {/* 견적 요약 */}
-        <div className="bg-gray-900 rounded-xl p-4 mb-4">
+        <div className="bg-gray-900 p-4 mb-4">
           <p className="text-gray-400 text-xs mb-1">예상 견적 (부가세 별도)</p>
           <p className="text-2xl font-bold text-white">{formatKRW(estimate.self_estimated_amount)}</p>
           <p className="text-gray-400 text-xs mt-1">
@@ -93,7 +93,7 @@ export default function WorkerFieldPage() {
         </div>
 
         {/* 고객 정보 */}
-        <div className="bg-white rounded-xl border border-gray-200 mb-4 p-4">
+        <div className="bg-white border border-gray-200 mb-4 p-4">
           <p className="text-sm font-bold text-gray-800 mb-3">현장 정보</p>
           <div className="space-y-2 text-sm">
             <Row label="주소" value={estimate.address || '-'} />
@@ -103,7 +103,7 @@ export default function WorkerFieldPage() {
               <Row label="요청사항" value={estimate.extra_request} />
             )}
             {estimate.warning_unknown_frame && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2 mt-2">
+              <div className="bg-yellow-50 border border-yellow-200 p-2 mt-2">
                 <p className="text-xs text-yellow-700">⚠️ 창틀 미확인 창문 있음 - 현장 실측 필요</p>
               </div>
             )}
@@ -112,24 +112,24 @@ export default function WorkerFieldPage() {
 
         {/* 기타 금액 가감 */}
         {!isLocked && (
-          <div className="bg-white rounded-xl border border-gray-200 mb-4 p-4">
+          <div className="bg-white border border-gray-200 mb-4 p-4">
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-bold text-gray-800">금액 가감</p>
               <button
                 onClick={() => setAddingAdj(!addingAdj)}
-                className="text-xs text-blue-600 border border-blue-200 px-2 py-1 rounded-lg"
+                className="text-xs text-blue-600 border border-blue-200 px-2 py-1"
               >
                 + 추가
               </button>
             </div>
 
             {addingAdj && (
-              <div className="bg-gray-50 rounded-lg p-3 mb-3 space-y-2">
+              <div className="bg-gray-50 p-3 mb-3 space-y-2">
                 <div className="flex gap-2">
                   <select
                     value={newAdj.type}
                     onChange={(e) => setNewAdj((a) => ({ ...a, type: e.target.value }))}
-                    className="flex-1 py-2 px-2 border border-gray-200 rounded-lg text-sm"
+                    className="flex-1 py-2 px-2 border border-gray-200 text-sm"
                   >
                     <option value="ADD">추가금</option>
                     <option value="DISCOUNT">할인금</option>
@@ -139,19 +139,19 @@ export default function WorkerFieldPage() {
                     value={newAdj.amount || ''}
                     onChange={(e) => setNewAdj((a) => ({ ...a, amount: Number(e.target.value) }))}
                     placeholder="금액"
-                    className="flex-1 py-2 px-2 border border-gray-200 rounded-lg text-sm"
+                    className="flex-1 py-2 px-2 border border-gray-200 text-sm"
                   />
                 </div>
                 <input
                   value={newAdj.reason}
                   onChange={(e) => setNewAdj((a) => ({ ...a, reason: e.target.value }))}
                   placeholder="사유 (필수)"
-                  className="w-full py-2 px-3 border border-gray-200 rounded-lg text-sm"
+                  className="w-full py-2 px-3 border border-gray-200 text-sm"
                 />
                 <button
                   onClick={handleAddAdj}
                   disabled={!newAdj.reason || newAdj.amount === 0}
-                  className="w-full py-2 bg-gray-900 text-white text-sm rounded-lg disabled:opacity-40"
+                  className="w-full py-2 bg-gray-900 text-white text-sm disabled:opacity-40"
                 >
                   적용
                 </button>
@@ -180,14 +180,14 @@ export default function WorkerFieldPage() {
         {!isLocked && (
           <button
             onClick={() => router.push(`/worker/sign/${id}`)}
-            className="w-full py-4 bg-gray-900 text-white font-semibold rounded-xl text-base hover:bg-gray-800 transition-colors"
+            className="w-full py-4 bg-gray-900 text-white font-semibold text-base hover:bg-gray-800 transition-colors"
           >
             서명 받기
           </button>
         )}
 
         {isLocked && (
-          <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+          <div className="bg-green-50 border border-green-200 p-4 text-center">
             <p className="text-green-700 font-semibold">✓ 서명 완료 - 견적 확정</p>
             {estimate.completed_at && (
               <p className="text-xs text-green-500 mt-1">

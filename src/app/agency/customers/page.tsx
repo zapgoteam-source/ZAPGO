@@ -58,7 +58,7 @@ export default function AgencyCustomersPage() {
 
         {dataLoading ? (
           <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900" />
+            <div className="animate-spin h-6 w-6 border-b-2 border-gray-900" />
           </div>
         ) : customers.length === 0 ? (
           <div className="text-center py-12">
@@ -70,7 +70,7 @@ export default function AgencyCustomersPage() {
               <div
                 key={c.id}
                 onClick={() => router.push(`/agency/estimate/${c.id}`)}
-                className="bg-white rounded-xl border border-gray-200 p-4 cursor-pointer hover:border-gray-300 transition-colors"
+                className="bg-white border border-gray-200 p-4 cursor-pointer hover:border-gray-300 transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -81,7 +81,7 @@ export default function AgencyCustomersPage() {
                     )}
                   </div>
                   <div className="text-right">
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5">
                       {c.status}
                     </span>
                     <p className="text-xs text-gray-400 mt-2">

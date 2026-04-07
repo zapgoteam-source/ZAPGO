@@ -139,7 +139,7 @@ export default function WindowsPage() {
                     onClick={() =>
                       setEditor((e) => e && { ...e, data: { ...e.data, location_label: tag } })
                     }
-                    className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                    className={`px-3 py-1.5 text-sm border transition-colors ${
                       editor.data.location_label === tag
                         ? 'bg-gray-900 text-white border-gray-900'
                         : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
@@ -156,7 +156,7 @@ export default function WindowsPage() {
                   setEditor((e2) => e2 && { ...e2, data: { ...e2.data, location_label: e.target.value } })
                 }
                 placeholder="직접 입력 (예: 거실 큰창)"
-                className="w-full py-3 px-4 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-900"
+                className="w-full py-3 px-4 border-2 border-gray-200 text-sm focus:outline-none focus:border-gray-900"
               />
             </div>
           )}
@@ -172,7 +172,7 @@ export default function WindowsPage() {
                     onClick={() =>
                       setEditor((e) => e && { ...e, data: { ...e.data, window_type_code: wt.code } })
                     }
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                    className={`w-full text-left p-4 border-2 transition-all ${
                       editor.data.window_type_code === wt.code
                         ? 'border-gray-900 bg-gray-900 text-white'
                         : 'border-gray-200 bg-white text-gray-800'
@@ -199,7 +199,7 @@ export default function WindowsPage() {
                     onClick={() =>
                       setEditor((e) => e && { ...e, data: { ...e.data, layout_code: lc } })
                     }
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                    className={`w-full text-left p-4 border-2 transition-all ${
                       editor.data.layout_code === lc
                         ? 'border-gray-900 bg-gray-900 text-white'
                         : 'border-gray-200 bg-white text-gray-800'
@@ -224,7 +224,7 @@ export default function WindowsPage() {
                   onClick={() =>
                     setEditor((e) => e && { ...e, data: { ...e.data, is_double_window: false } })
                   }
-                  className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                  className={`w-full text-left p-4 border-2 transition-all ${
                     !editor.data.is_double_window
                       ? 'border-gray-900 bg-gray-900 text-white'
                       : 'border-gray-200 bg-white text-gray-800'
@@ -239,7 +239,7 @@ export default function WindowsPage() {
                   onClick={() =>
                     setEditor((e) => e && { ...e, data: { ...e.data, is_double_window: true } })
                   }
-                  className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                  className={`w-full text-left p-4 border-2 transition-all ${
                     editor.data.is_double_window
                       ? 'border-gray-900 bg-gray-900 text-white'
                       : 'border-gray-200 bg-white text-gray-800'
@@ -260,7 +260,7 @@ export default function WindowsPage() {
                         onClick={() =>
                           setEditor((e) => e && { ...e, data: { ...e.data, service_type: st } })
                         }
-                        className={`flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
+                        className={`flex-1 py-3 border-2 text-sm font-medium transition-all ${
                           editor.data.service_type === st
                             ? 'border-gray-900 bg-gray-900 text-white'
                             : 'border-gray-200 bg-white text-gray-700'
@@ -287,7 +287,7 @@ export default function WindowsPage() {
                     onClick={() =>
                       setEditor((e) => e && { ...e, data: { ...e.data, frame_mohair_state: fs.value } })
                     }
-                    className={`w-full text-left p-3 rounded-xl border-2 transition-all ${
+                    className={`w-full text-left p-3 border-2 transition-all ${
                       editor.data.frame_mohair_state === fs.value
                         ? 'border-gray-900 bg-gray-900 text-white'
                         : 'border-gray-200 bg-white text-gray-800'
@@ -296,7 +296,7 @@ export default function WindowsPage() {
                     <div className="flex items-center justify-between">
                       <p className="font-semibold text-sm">{frameMohairLabel(fs.value)}</p>
                       {fs.value === 'UNKNOWN' && (
-                        <span className="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full">
+                        <span className="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-700">
                           경고
                         </span>
                       )}
@@ -313,7 +313,7 @@ export default function WindowsPage() {
                 const screenTarget = isWindowScreenTarget(editor.data);
                 const autoCount = screenTarget ? getAutoScreenCountForWindow(editor.data.layout_code) : 0;
                 return screenTarget ? (
-                  <div className="mt-4 bg-blue-50 rounded-xl p-3">
+                  <div className="mt-4 bg-blue-50 p-3">
                     <p className="text-sm font-semibold text-blue-800 mb-1">방충망 자동 계산</p>
                     <p className="text-xs text-blue-600">
                       위치(베란다/세탁실/화장실/주방) 또는 이중창으로 방충망 대상입니다
@@ -339,7 +339,7 @@ export default function WindowsPage() {
                               }
                             )
                           }
-                          className="w-7 h-7 rounded-full bg-blue-200 text-blue-800 font-bold text-sm"
+                          className="w-7 h-7 bg-blue-200 text-blue-800 font-bold text-sm"
                         >
                           -
                         </button>
@@ -358,7 +358,7 @@ export default function WindowsPage() {
                               }
                             )
                           }
-                          className="w-7 h-7 rounded-full bg-blue-200 text-blue-800 font-bold text-sm"
+                          className="w-7 h-7 bg-blue-200 text-blue-800 font-bold text-sm"
                         >
                           +
                         </button>
@@ -377,7 +377,7 @@ export default function WindowsPage() {
             <button
               onClick={handleSave}
               disabled={!editor.data.location_label}
-              className="w-full py-4 bg-gray-900 text-white font-semibold rounded-xl disabled:opacity-40"
+              className="w-full py-4 bg-gray-900 text-white font-semibold disabled:opacity-40"
             >
               저장
             </button>
@@ -388,7 +388,7 @@ export default function WindowsPage() {
                 setEditor((e) => e && { ...e, step: nextStep(e.step) });
               }}
               disabled={editor.step === 'location' && !editor.data.location_label}
-              className="w-full py-4 bg-gray-900 text-white font-semibold rounded-xl disabled:opacity-40"
+              className="w-full py-4 bg-gray-900 text-white font-semibold disabled:opacity-40"
             >
               다음
             </button>
@@ -424,18 +424,18 @@ export default function WindowsPage() {
               const screenTarget = isWindowScreenTarget(w);
               const screenCount = w.confirmed_screen_count || (screenTarget ? getAutoScreenCountForWindow(w.layout_code) : 0);
               return (
-                <div key={w.id} className="bg-gray-50 rounded-xl p-4">
+                <div key={w.id} className="bg-gray-50 p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-semibold text-gray-900 text-sm">{w.location_label}</span>
                         {w.is_double_window && (
-                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5">
                             이중창
                           </span>
                         )}
                         {w.frame_mohair_state === 'UNKNOWN' && (
-                          <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
+                          <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5">
                             창틀 미확인
                           </span>
                         )}
@@ -452,13 +452,13 @@ export default function WindowsPage() {
                     <div className="flex gap-2 ml-2">
                       <button
                         onClick={() => openEdit(w)}
-                        className="text-xs text-blue-600 px-2 py-1 border border-blue-200 rounded-lg"
+                        className="text-xs text-blue-600 px-2 py-1 border border-blue-200"
                       >
                         수정
                       </button>
                       <button
                         onClick={() => removeWindow(w.id)}
-                        className="text-xs text-red-500 px-2 py-1 border border-red-200 rounded-lg"
+                        className="text-xs text-red-500 px-2 py-1 border border-red-200"
                       >
                         삭제
                       </button>
@@ -472,7 +472,7 @@ export default function WindowsPage() {
 
         <button
           onClick={openAdd}
-          className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors"
+          className="w-full py-3 border-2 border-dashed border-gray-300 text-sm font-medium text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors"
         >
           + 창문 추가
         </button>
@@ -482,20 +482,20 @@ export default function WindowsPage() {
         <button
           onClick={() => router.push('/estimate')}
           disabled={windows.length === 0}
-          className="w-full py-4 bg-gray-900 text-white font-semibold rounded-xl disabled:opacity-40 hover:bg-gray-800 transition-colors"
+          className="w-full py-4 bg-gray-900 text-white font-semibold disabled:opacity-40 hover:bg-gray-800 transition-colors"
         >
           견적 확인
         </button>
         <div className="flex gap-2">
           <a
             href="tel:0000000000"
-            className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
+            className="flex-1 py-3 border border-gray-200 text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
           >
             📞 상담원 연결
           </a>
           <a
             href="/visit-request"
-            className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
+            className="flex-1 py-3 border border-gray-200 text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
           >
             방문 견적 요청
           </a>

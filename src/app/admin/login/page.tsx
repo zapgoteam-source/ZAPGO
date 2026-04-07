@@ -46,7 +46,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm">
         {/* 로고 */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 bg-gray-900 flex items-center justify-center mx-auto mb-4">
             <span className="text-2xl font-bold text-white">Z</span>
           </div>
           <h1 className="text-xl font-bold text-gray-900">에너지잡고</h1>
@@ -54,7 +54,7 @@ export default function AdminLoginPage() {
         </div>
 
         {/* 폼 */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-white border border-gray-200 p-6 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1.5">이메일</label>
             <input
@@ -64,7 +64,7 @@ export default function AdminLoginPage() {
               required
               autoComplete="email"
               placeholder="admin@example.com"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400 transition-colors"
+              className="w-full px-4 py-3 border border-gray-200 text-sm focus:outline-none focus:border-gray-400 transition-colors"
             />
           </div>
           <div>
@@ -76,18 +76,18 @@ export default function AdminLoginPage() {
               required
               autoComplete="current-password"
               placeholder="비밀번호 입력"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400 transition-colors"
+              className="w-full px-4 py-3 border border-gray-200 text-sm focus:outline-none focus:border-gray-400 transition-colors"
             />
           </div>
 
           {error && (
-            <p className="text-xs text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
+            <p className="text-xs text-red-500 bg-red-50 px-3 py-2">{error}</p>
           )}
 
           <button
             type="submit"
             disabled={submitting || !email || !password}
-            className="w-full py-3.5 bg-gray-900 text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full py-3.5 bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {submitting ? '로그인 중...' : '로그인'}
           </button>

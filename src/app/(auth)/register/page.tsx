@@ -84,7 +84,7 @@ export default function RegisterPage() {
   if (loading || !user) {
     return (
       <div className="h-dvh flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+        <div className="animate-spin h-8 w-8 border-b-2 border-gray-900" />
       </div>
     );
   }
@@ -106,24 +106,24 @@ export default function RegisterPage() {
       {/* 약관 동의 */}
       <div className="flex-1">
         {/* 전체 동의 */}
-        <label className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl cursor-pointer mb-3">
+        <label className="flex items-center gap-3 p-4 bg-gray-50 cursor-pointer mb-3">
           <input
             type="checkbox"
             checked={agreedAll}
             onChange={(e) => handleToggleAll(e.target.checked)}
-            className="w-5 h-5 rounded accent-yellow-400"
+            className="w-5 h-5 accent-yellow-400"
           />
           <span className="font-semibold text-gray-900">전체 동의</span>
         </label>
 
-        <div className="border border-gray-100 rounded-2xl overflow-hidden divide-y divide-gray-100">
+        <div className="border border-gray-100 overflow-hidden divide-y divide-gray-100">
           {/* 이용약관 */}
           <label className="flex items-center gap-3 px-4 py-3.5 cursor-pointer hover:bg-gray-50 transition-colors">
             <input
               type="checkbox"
               checked={agreedTerms}
               onChange={(e) => handleTerms(e.target.checked)}
-              className="w-5 h-5 rounded accent-yellow-400"
+              className="w-5 h-5 accent-yellow-400"
             />
             <div className="flex-1">
               <span className="text-sm text-gray-700">
@@ -146,7 +146,7 @@ export default function RegisterPage() {
               type="checkbox"
               checked={agreedPrivacy}
               onChange={(e) => handlePrivacy(e.target.checked)}
-              className="w-5 h-5 rounded accent-yellow-400"
+              className="w-5 h-5 accent-yellow-400"
             />
             <div className="flex-1">
               <span className="text-sm text-gray-700">
@@ -174,7 +174,7 @@ export default function RegisterPage() {
         <button
           onClick={handleSubmit}
           disabled={!agreedTerms || !agreedPrivacy || submitting}
-          className="w-full py-4 rounded-xl font-bold text-base bg-[#FEE500] text-[#191919] disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+          className="w-full py-4 font-bold text-base bg-[#FEE500] text-[#191919] disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
         >
           {submitting ? '가입 처리 중...' : '동의하고 시작하기'}
         </button>

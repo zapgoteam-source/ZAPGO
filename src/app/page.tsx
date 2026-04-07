@@ -42,10 +42,10 @@ export default function RootPage() {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="text-center">
-        <div className="w-16 h-16 bg-yellow-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-yellow-400 flex items-center justify-center mx-auto mb-4">
           <span className="text-3xl font-bold text-gray-900">Z</span>
         </div>
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-3" />
+        <div className="animate-spin h-8 w-8 border-b-2 border-gray-900 mx-auto mb-3" />
         <p className="text-sm text-gray-500">에너지잡고 로딩 중...</p>
       </div>
     </div>

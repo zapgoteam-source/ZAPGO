@@ -43,7 +43,7 @@ export default function UsersManagementPage() {
   if (dataLoading) {
     return (
       <div className="flex justify-center py-16">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900" />
+        <div className="animate-spin h-6 w-6 border-b-2 border-gray-900" />
       </div>
     );
   }
@@ -51,7 +51,7 @@ export default function UsersManagementPage() {
   return (
     <div>
       <h1 className="text-xl font-bold text-gray-900 mb-6">사용자 관리</h1>
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white border border-gray-200 overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
@@ -75,7 +75,7 @@ export default function UsersManagementPage() {
                     value={u.role}
                     disabled={updating === u.id}
                     onChange={e => handleRoleChange(u.id, e.target.value as UserRole)}
-                    className="border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-gray-400 disabled:opacity-50"
+                    className="border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:border-gray-400 disabled:opacity-50"
                   >
                     {ROLES.map(r => (
                       <option key={r} value={r}>{getRoleDisplayName(r)}</option>

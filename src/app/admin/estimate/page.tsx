@@ -6,7 +6,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { Estimate, EstimateStatus } from '@/types';
 import { formatKRW } from '@/lib/estimateCalculator';
-import { DUMMY_ESTIMATES } from '@/data/estimates';
 import { fetchEstimateList } from '@/lib/queries';
 
 const STATUS_LABELS: Record<EstimateStatus, string> = {
@@ -50,12 +49,6 @@ export default function AdminEstimateListPage() {
     queryFn: () => fetchEstimateList({ page, search, statusFilter, dateFrom }),
     enabled: role === 'ADMIN',
     placeholderData: (prev) => prev,
-    select: (res) => {
-      if (res.data.length === 0 && !search && !statusFilter && !dateFrom && page === 0) {
-        return { data: DUMMY_ESTIMATES as Estimate[], total: DUMMY_ESTIMATES.length };
-      }
-      return res;
-    },
   });
 
   const estimates = data?.data ?? [];
@@ -97,7 +90,7 @@ export default function AdminEstimateListPage() {
 
       {/* 필터 영역 */}
       <section className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="md:col-span-2 bg-[#f2f4f6] p-6 rounded-xl flex flex-col gap-3">
+        <div className="md:col-span-2 bg-[#f2f4f6] p-6 flex flex-col gap-3">
           <span className="text-[10px] font-bold tracking-[0.05em] text-[#434655] uppercase">STEP 01. 기간 및 검색어</span>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
@@ -106,7 +99,7 @@ export default function AdminEstimateListPage() {
                 type="date"
                 value={dateFrom}
                 onChange={(e) => { setDateFrom(e.target.value); setPage(0); }}
-                className="w-full bg-[#e0e3e5] border-none rounded px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all"
+                className="w-full bg-[#e0e3e5] border-none px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all"
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -116,20 +109,20 @@ export default function AdminEstimateListPage() {
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(0); }}
                 placeholder="검색어 입력..."
-                className="w-full bg-[#e0e3e5] border-none rounded px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all"
+                className="w-full bg-[#e0e3e5] border-none px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all"
               />
             </div>
           </div>
         </div>
 
-        <div className="bg-[#f2f4f6] p-6 rounded-xl flex flex-col gap-3">
+        <div className="bg-[#f2f4f6] p-6 flex flex-col gap-3">
           <span className="text-[10px] font-bold tracking-[0.05em] text-[#434655] uppercase">STEP 02. 진행 상태</span>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-[#434655]">상태 선택</label>
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value as EstimateStatus | ''); setPage(0); }}
-              className="w-full bg-[#e0e3e5] border-none rounded px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all"
+              className="w-full bg-[#e0e3e5] border-none px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all"
             >
               <option value="">전체</option>
               {(Object.keys(STATUS_LABELS) as EstimateStatus[]).map((s) => (
@@ -139,21 +132,21 @@ export default function AdminEstimateListPage() {
           </div>
         </div>
 
-        <div className="bg-[#f2f4f6] p-6 rounded-xl flex flex-col gap-3">
+        <div className="bg-[#f2f4f6] p-6 flex flex-col gap-3">
           <span className="text-[10px] font-bold tracking-[0.05em] text-[#434655] uppercase">STEP 03. 대리점</span>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-[#434655]">대리점 코드</label>
             <input
               type="text"
               placeholder="코드 입력..."
-              className="w-full bg-[#e0e3e5] border-none rounded px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all"
+              className="w-full bg-[#e0e3e5] border-none px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all"
             />
           </div>
         </div>
       </section>
 
       {/* 데이터 테이블 */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-[#c3c6d7]/20">
+      <div className="bg-white shadow-sm overflow-hidden border border-[#c3c6d7]/20">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -175,7 +168,7 @@ export default function AdminEstimateListPage() {
                 <tr>
                   <td colSpan={10} className="px-6 py-12 text-center">
                     <div className="flex justify-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#B10000]" />
+                      <div className="animate-spin h-6 w-6 border-b-2 border-[#B10000]" />
                     </div>
                   </td>
                 </tr>
@@ -201,11 +194,11 @@ export default function AdminEstimateListPage() {
                         {fmtDate(est.created_at)}
                       </td>
                       <td className="px-5 py-5">
-                        <span className={`px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap ${statusCls}`}>
+                        <span className={`px-3 py-1 text-[11px] font-bold whitespace-nowrap ${statusCls}`}>
                           {statusLabel}
                         </span>
                         {est.locked_at && (
-                          <span className="ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#ffdad6] text-[#93000a]">
+                          <span className="ml-1.5 px-2 py-0.5 text-[10px] font-bold bg-[#ffdad6] text-[#93000a]">
                             잠김
                           </span>
                         )}
@@ -254,7 +247,7 @@ export default function AdminEstimateListPage() {
             <button
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
-              className="w-8 h-8 flex items-center justify-center rounded-lg border border-[#c3c6d7]/30 hover:bg-white text-[#434655] disabled:opacity-40 text-lg leading-none"
+              className="w-8 h-8 flex items-center justify-center border border-[#c3c6d7]/30 hover:bg-white text-[#434655] disabled:opacity-40 text-lg leading-none"
             >
               ‹
             </button>
@@ -262,7 +255,7 @@ export default function AdminEstimateListPage() {
               <button
                 key={p}
                 onClick={() => setPage(p)}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold ${
+                className={`w-8 h-8 flex items-center justify-center text-xs font-bold ${
                   p === page
                     ? 'bg-[#B10000] text-white'
                     : 'border border-[#c3c6d7]/30 hover:bg-white text-[#434655]'
@@ -274,7 +267,7 @@ export default function AdminEstimateListPage() {
             <button
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
-              className="w-8 h-8 flex items-center justify-center rounded-lg border border-[#c3c6d7]/30 hover:bg-white text-[#434655] disabled:opacity-40 text-lg leading-none"
+              className="w-8 h-8 flex items-center justify-center border border-[#c3c6d7]/30 hover:bg-white text-[#434655] disabled:opacity-40 text-lg leading-none"
             >
               ›
             </button>
@@ -284,7 +277,7 @@ export default function AdminEstimateListPage() {
 
       {/* 하단 통계 */}
       <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-6 bg-[#f2f4f6] rounded-xl flex flex-col justify-between h-32 relative overflow-hidden">
+        <div className="p-6 bg-[#f2f4f6] flex flex-col justify-between h-32 relative overflow-hidden">
           <span className="text-[10px] font-bold tracking-[0.05em] text-[#434655] uppercase">이번 달 신규 접수</span>
           <div className="flex items-baseline gap-2">
             <span
@@ -296,7 +289,7 @@ export default function AdminEstimateListPage() {
             <span className="text-sm font-bold text-[#434655]">건</span>
           </div>
         </div>
-        <div className="p-6 bg-[#f2f4f6] rounded-xl flex flex-col justify-between h-32 relative overflow-hidden">
+        <div className="p-6 bg-[#f2f4f6] flex flex-col justify-between h-32 relative overflow-hidden">
           <span className="text-[10px] font-bold tracking-[0.05em] text-[#434655] uppercase">진행 중인 견적</span>
           <div className="flex items-baseline gap-2">
             <span
@@ -308,7 +301,7 @@ export default function AdminEstimateListPage() {
             <span className="text-sm font-bold text-[#434655]">건</span>
           </div>
         </div>
-        <div className="p-6 bg-[#f2f4f6] rounded-xl flex flex-col justify-between h-32 relative overflow-hidden">
+        <div className="p-6 bg-[#f2f4f6] flex flex-col justify-between h-32 relative overflow-hidden">
           <span className="text-[10px] font-bold tracking-[0.05em] text-[#434655] uppercase">총 견적 금액</span>
           <div className="flex items-baseline gap-2">
             <span

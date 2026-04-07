@@ -168,9 +168,9 @@ function AdminDashboard() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="relative">
           {/* 외곽 회전 원 */}
-          <div className="w-20 h-20 border-4 border-primary/20 rounded-full"></div>
+          <div className="w-20 h-20 border-4 border-primary/20"></div>
           {/* 회전 애니메이션 원 */}
-          <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
+          <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-primary animate-spin"></div>
           {/* 중앙 아이콘 */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <Shield className="w-8 h-8 text-primary animate-pulse" />
@@ -214,9 +214,9 @@ function AdminDashboard() {
       {/* 관리자 권한 체크 */}
       <AdminGuard 
         fallback={
-          <div className="bg-white rounded-2xl p-6 text-center">
+          <div className="bg-white p-6 text-center">
             <div className="flex justify-center mb-3">
-              <div className="p-3 bg-gray-100 rounded-full">
+              <div className="p-3 bg-gray-100">
                 <Settings className="w-8 h-8 text-gray-400" />
               </div>
             </div>
@@ -239,18 +239,18 @@ function AdminDashboard() {
               <div
                 key={menu.id}
                 onClick={() => handleMenuClick(menu.path)}
-                className="relative bg-white rounded-2xl p-4 cursor-pointer transition-all duration-200 active:scale-95 select-none border-2 border-gray-200"
+                className="relative bg-white p-4 cursor-pointer transition-all duration-200 active:scale-95 select-none border-2 border-gray-200"
               >
                 {/* 배지 (승인 대기 사용자 수) */}
                 {menuStats?.badge && (
-                  <div className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg">
+                  <div className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-red-500 text-white text-xs font-bold flex items-center justify-center shadow-lg">
                     {menuStats.badge}
                   </div>
                 )}
 
                 <div className="flex flex-col items-center text-center gap-3">
                   {/* 아이콘 */}
-                  <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center">
+                  <div className="w-14 h-14 bg-primary/10 flex items-center justify-center">
                     <Icon className="w-7 h-7 text-primary" />
                   </div>
 
@@ -264,7 +264,7 @@ function AdminDashboard() {
                     {menuStats && (
                       <div className="flex items-baseline justify-center gap-1">
                         {loading ? (
-                          <div className="w-8 h-5 bg-gray-100 rounded animate-pulse" />
+                          <div className="w-8 h-5 bg-gray-100 animate-pulse" />
                         ) : (
                           <>
                             <span className="text-2xl font-bold text-primary">

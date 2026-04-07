@@ -61,7 +61,7 @@ export default function WorkerListPage() {
 
         {dataLoading ? (
           <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900" />
+            <div className="animate-spin h-6 w-6 border-b-2 border-gray-900" />
           </div>
         ) : estimates.length === 0 ? (
           <div className="text-center py-12">
@@ -73,7 +73,7 @@ export default function WorkerListPage() {
               <div
                 key={e.id}
                 onClick={() => router.push(`/worker/field/${e.id}`)}
-                className="bg-white rounded-xl border border-gray-200 p-4 cursor-pointer hover:border-gray-300 transition-colors"
+                className="bg-white border border-gray-200 p-4 cursor-pointer hover:border-gray-300 transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -87,7 +87,7 @@ export default function WorkerListPage() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <span className="inline-block text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                    <span className="inline-block text-xs bg-blue-100 text-blue-700 px-2 py-1">
                       {STATUS_LABELS[e.status as EstimateStatus] || e.status}
                     </span>
                     <p className="text-sm font-bold text-gray-900 mt-2">

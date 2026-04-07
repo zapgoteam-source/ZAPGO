@@ -5,12 +5,12 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Supabase 환경 변수가 설정되지 않았습니다. .env.local 파일을 확인해주세요.'
+if (supabaseUrl === 'https://placeholder.supabase.co') {
+  console.warn(
+    'Supabase 환경 변수가 설정되지 않았습니다. .env.local 파일을 확인해주세요. DB 기능이 비활성화됩니다.'
   );
 }
 
@@ -50,7 +50,7 @@ export async function signInWithKakao() {
     provider: 'kakao',
     options: {
       redirectTo,
-      scopes: 'profile_nickname profile_image account_email phone_number',
+      scopes: 'profile_nickname profile_image account_email phone_number name',
     },
   });
 

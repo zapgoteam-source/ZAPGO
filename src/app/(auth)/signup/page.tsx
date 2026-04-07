@@ -47,7 +47,7 @@ export default function SignUpPage() {
   if (done) {
     return (
       <div className="h-dvh flex flex-col items-center justify-center bg-white max-w-md mx-auto px-6 text-center">
-        <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-4">
+        <div className="w-16 h-16 bg-yellow-100 flex items-center justify-center mb-4">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
             <path d="M5 13l4 4L19 7" stroke="#CA8A04" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -59,7 +59,7 @@ export default function SignUpPage() {
         </p>
         <button
           onClick={() => router.push('/login')}
-          className="w-full py-3.5 bg-[#FEE500] text-[#191919] font-bold rounded-xl text-sm"
+          className="w-full py-3.5 bg-[#FEE500] text-[#191919] font-bold text-sm"
         >
           로그인하러 가기
         </button>
@@ -87,7 +87,7 @@ export default function SignUpPage() {
             onChange={(e) => setName(e.target.value)}
             required
             placeholder="홍길동"
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition"
+            className="w-full px-4 py-3 border border-gray-200 text-sm outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition"
           />
         </div>
 
@@ -99,7 +99,7 @@ export default function SignUpPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             placeholder="example@email.com"
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition"
+            className="w-full px-4 py-3 border border-gray-200 text-sm outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition"
           />
         </div>
 
@@ -111,7 +111,7 @@ export default function SignUpPage() {
             onChange={(e) => setPassword(e.target.value)}
             required
             placeholder="8자 이상"
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition"
+            className="w-full px-4 py-3 border border-gray-200 text-sm outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition"
           />
         </div>
 
@@ -123,7 +123,7 @@ export default function SignUpPage() {
             onChange={(e) => setPasswordConfirm(e.target.value)}
             required
             placeholder="비밀번호 재입력"
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition"
+            className="w-full px-4 py-3 border border-gray-200 text-sm outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition"
           />
         </div>
 
@@ -142,7 +142,7 @@ export default function SignUpPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-4 bg-[#FEE500] text-[#191919] font-bold rounded-xl text-base disabled:opacity-50 transition-opacity"
+          className="w-full py-4 bg-[#FEE500] text-[#191919] font-bold text-base disabled:opacity-50 transition-opacity"
         >
           {loading ? '가입 중...' : '가입하기'}
         </button>

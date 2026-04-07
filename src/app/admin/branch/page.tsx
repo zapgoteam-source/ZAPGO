@@ -48,7 +48,7 @@ export default function BranchManagementPage() {
             
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
+                <div className="p-2 bg-primary/10">
                   <Building2 className="w-6 h-6 text-primary" />
                 </div>
                 <div>
@@ -64,7 +64,7 @@ export default function BranchManagementPage() {
               {/* 추가 버튼 */}
               <button
                 onClick={() => setShowAddForm(true)}
-                className="flex-shrink-0 p-2.5 bg-primary rounded-xl hover:bg-primary/90 active:scale-95 transition-all"
+                className="flex-shrink-0 p-2.5 bg-primary hover:bg-primary/90 active:scale-95 transition-all"
               >
                 <Plus size={20} className="text-white" />
               </button>
@@ -74,7 +74,7 @@ export default function BranchManagementPage() {
           {/* 관리자 권한 체크 */}
           <AdminGuard 
             fallback={
-              <div className="bg-white border border-gray-200 rounded-md p-6 text-center">
+              <div className="bg-white border border-gray-200 p-6 text-center">
                 <div className="flex justify-center mb-4">
                   <Building2 className="w-12 h-12 text-gray-400" />
                 </div>

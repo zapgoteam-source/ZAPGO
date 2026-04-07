@@ -11,10 +11,6 @@ import {
   Window as EstimateWindow,
 } from '@/types';
 import { formatKRW } from '@/lib/estimateCalculator';
-import { DUMMY_ESTIMATES } from '@/data/estimates';
-import {
-  DUMMY_WINDOWS, DUMMY_SURVEYS, DUMMY_REVISIONS, DUMMY_ADJUSTMENTS,
-} from '@/data/estimateDetails';
 import { fetchEstimateDetail } from '@/lib/queries';
 
 // ─── 상태 ─────────────────────────────────────────────────────────────────────
@@ -83,20 +79,6 @@ export default function AdminEstimateDetailPage() {
     queryFn: () => fetchEstimateDetail(id),
     enabled: role === 'ADMIN' && !!id,
     staleTime: 5 * 60 * 1000,
-    select: (res) => {
-      // DB에 데이터 없으면 더미 fallback
-      if (!res.estimate) {
-        const dummy = DUMMY_ESTIMATES.find((e) => e.id === id);
-        if (dummy) return {
-          estimate: dummy as Estimate,
-          adjustments: (DUMMY_ADJUSTMENTS[id] || []) as EstimateAdjustment[],
-          revisions: (DUMMY_REVISIONS[id] || []) as EstimateRevision[],
-          survey: (DUMMY_SURVEYS[id] || null) as EstimateSurvey | null,
-          windows: (DUMMY_WINDOWS[id] || []) as unknown as WindowWithServices[],
-        };
-      }
-      return res as typeof res & { windows: WindowWithServices[] };
-    },
   });
 
   const estimate = detail?.estimate ?? null;
@@ -158,7 +140,7 @@ export default function AdminEstimateDetailPage() {
   if (dataLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B10000]" />
+        <div className="animate-spin h-8 w-8 border-b-2 border-[#B10000]" />
       </div>
     );
   }
@@ -201,11 +183,11 @@ export default function AdminEstimateDetailPage() {
             >
               {estCode}
             </h1>
-            <span className="px-3 py-1 bg-[#ffdad6] text-[#3b0000] text-xs font-bold rounded-full">
+            <span className="px-3 py-1 bg-[#ffdad6] text-[#3b0000] text-xs font-bold">
               {STATUS_LABELS[estimate.status]}
             </span>
             {estimate.locked_at && (
-              <span className="px-3 py-1 bg-[#ffdad6] text-[#93000a] text-xs font-bold rounded-full">잠김</span>
+              <span className="px-3 py-1 bg-[#ffdad6] text-[#93000a] text-xs font-bold">잠김</span>
             )}
           </div>
           <p className="mt-2 text-[#434655] font-medium">
@@ -219,7 +201,7 @@ export default function AdminEstimateDetailPage() {
                 key={s}
                 onClick={() => handleStatusChange(s)}
                 disabled={savingStatus || estimate.status === s || !!estimate.locked_at}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors disabled:cursor-not-allowed ${
+                className={`px-3 py-1.5 text-xs font-bold border transition-colors disabled:cursor-not-allowed ${
                   estimate.status === s
                     ? 'bg-[#191c1e] text-white border-[#191c1e]'
                     : 'bg-white text-[#434655] border-[#c3c6d7]/50 hover:border-[#737686] disabled:opacity-40'
@@ -237,9 +219,9 @@ export default function AdminEstimateDetailPage() {
         {/* Left Column */}
         <div className="lg:col-span-4 space-y-8">
           {/* 고객 정보 */}
-          <section className="bg-white rounded-xl p-6 shadow-sm border border-[#c3c6d7]/10">
+          <section className="bg-white p-6 shadow-sm border border-[#c3c6d7]/10">
             <h3 className="text-lg font-extrabold mb-6 flex items-center gap-2" style={{ fontFamily: 'Manrope, sans-serif' }}>
-              <span className="w-1.5 h-6 bg-[#B10000] rounded-full" />
+              <span className="w-1.5 h-6 bg-[#B10000]" />
               고객 정보
             </h3>
             <div className="space-y-5">
@@ -267,7 +249,7 @@ export default function AdminEstimateDetailPage() {
                 </div>
               )}
               {estimate.warning_unknown_frame && (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <div className="bg-amber-50 border border-amber-200 p-3">
                   <p className="text-xs text-amber-700 font-medium">⚠️ 창틀 미확인 창문 있음 — 실측 후 금액 변동 가능</p>
                 </div>
               )}
@@ -276,9 +258,9 @@ export default function AdminEstimateDetailPage() {
 
           {/* 설문 결과 */}
           {survey && (
-            <section className="bg-white rounded-xl p-6 shadow-sm border border-[#c3c6d7]/10">
+            <section className="bg-white p-6 shadow-sm border border-[#c3c6d7]/10">
               <h3 className="text-lg font-extrabold mb-6 flex items-center gap-2" style={{ fontFamily: 'Manrope, sans-serif' }}>
-                <span className="w-1.5 h-6 bg-[#954949] rounded-full" />
+                <span className="w-1.5 h-6 bg-[#954949]" />
                 설문 결과
               </h3>
               <div className="space-y-3">
@@ -286,9 +268,9 @@ export default function AdminEstimateDetailPage() {
                   const level = (survey[key] as number) ?? 0;
                   const meta = LEVEL_META[level] || LEVEL_META[0];
                   return (
-                    <div key={key} className="p-4 bg-[#f2f4f6] rounded-lg flex flex-col gap-1">
+                    <div key={key} className="p-4 bg-[#f2f4f6] flex flex-col gap-1">
                       <span className="text-xs text-[#434655] font-bold uppercase tracking-wider">{label}</span>
-                      <span className={`self-start px-2.5 py-1 text-xs font-black rounded-full ${meta.cls}`}>
+                      <span className={`self-start px-2.5 py-1 text-xs font-black ${meta.cls}`}>
                         {meta.label}
                       </span>
                     </div>
@@ -300,17 +282,17 @@ export default function AdminEstimateDetailPage() {
 
           {/* 수정 이력 타임라인 */}
           {revisions.length > 0 && (
-            <section className="bg-[#f7f9fb] rounded-xl p-2">
+            <section className="bg-[#f7f9fb] p-2">
               <h3 className="text-sm font-black text-[#737686] mb-4 px-2 uppercase tracking-tighter">수정 이력 타임라인</h3>
               <div className="space-y-6 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-[#c3c6d7]/30">
                 {revisions.map((rev, i) => (
                   <div key={rev.id} className="relative pl-8">
                     <div
-                      className={`absolute left-0 top-1.5 w-6 h-6 rounded-full z-10 flex items-center justify-center border-2 ${
+                      className={`absolute left-0 top-1.5 w-6 h-6 z-10 flex items-center justify-center border-2 ${
                         i === 0 ? 'bg-white border-[#B10000]' : 'bg-white border-[#c3c6d7]'
                       }`}
                     >
-                      {i === 0 && <div className="w-2 h-2 bg-[#B10000] rounded-full" />}
+                      {i === 0 && <div className="w-2 h-2 bg-[#B10000]" />}
                     </div>
                     <p className="text-xs text-[#434655] font-medium">{fmtDate(rev.created_at)}</p>
                     <p className="text-sm font-bold text-[#191c1e] mt-0.5">{rev.revision_type}</p>
@@ -328,13 +310,13 @@ export default function AdminEstimateDetailPage() {
           <section>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-extrabold flex items-center gap-2" style={{ fontFamily: 'Manrope, sans-serif' }}>
-                <span className="w-1.5 h-6 bg-[#B10000] rounded-full" />
+                <span className="w-1.5 h-6 bg-[#B10000]" />
                 창문 목록{' '}
                 <span className="text-[#B10000] text-sm font-medium ml-1">총 {windows.length}개소</span>
               </h3>
             </div>
             {windows.length === 0 ? (
-              <div className="bg-white rounded-xl p-8 text-center text-[#434655] text-sm border border-[#c3c6d7]/10">
+              <div className="bg-white p-8 text-center text-[#434655] text-sm border border-[#c3c6d7]/10">
                 창문 데이터가 없습니다
               </div>
             ) : (
@@ -342,7 +324,7 @@ export default function AdminEstimateDetailPage() {
                 {windows.map((win) => (
                   <div
                     key={win.id}
-                    className="bg-white rounded-xl p-6 border border-[#c3c6d7]/10 hover:border-[#B10000]/20 transition-all"
+                    className="bg-white p-6 border border-[#c3c6d7]/10 hover:border-[#B10000]/20 transition-all"
                   >
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="col-span-2">
@@ -370,7 +352,7 @@ export default function AdminEstimateDetailPage() {
                             {win.services.map((s) => (
                               <span
                                 key={s.id}
-                                className="px-2 py-1 bg-[#B10000]/10 text-[#B10000] text-[11px] font-bold rounded"
+                                className="px-2 py-1 bg-[#B10000]/10 text-[#B10000] text-[11px] font-bold"
                               >
                                 {s.service_family} · {formatKRW(s.total_price)}
                               </span>
@@ -388,9 +370,9 @@ export default function AdminEstimateDetailPage() {
           {/* 하단 2열 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* 추가 / 할인 조정 */}
-            <section className="bg-white rounded-xl p-6 border border-[#c3c6d7]/10 shadow-sm self-start">
+            <section className="bg-white p-6 border border-[#c3c6d7]/10 shadow-sm self-start">
               <h3 className="text-lg font-extrabold mb-6 flex items-center gap-2" style={{ fontFamily: 'Manrope, sans-serif' }}>
-                <span className="w-1.5 h-6 bg-[#943700] rounded-full" />
+                <span className="w-1.5 h-6 bg-[#943700]" />
                 추가 / 할인 조정
               </h3>
               <div className="space-y-4">
@@ -406,7 +388,7 @@ export default function AdminEstimateDetailPage() {
                         className="hidden"
                       />
                       <div
-                        className={`text-center py-2 rounded-md border-2 font-bold text-sm transition-colors ${
+                        className={`text-center py-2 border-2 font-bold text-sm transition-colors ${
                           adjType === t
                             ? 'border-[#B10000] bg-[#B10000]/5 text-[#B10000]'
                             : 'border-[#c3c6d7]/30 text-[#434655]'
@@ -428,7 +410,7 @@ export default function AdminEstimateDetailPage() {
                       onChange={(e) => setAdjAmount(e.target.value)}
                       placeholder="금액 입력"
                       disabled={!!estimate.locked_at}
-                      className="w-full bg-[#f2f4f6] border-none rounded-md py-3 px-4 font-bold text-right pr-12 text-sm focus:ring-1 focus:ring-[#B10000]/30 outline-none disabled:opacity-50"
+                      className="w-full bg-[#f2f4f6] border-none py-3 px-4 font-bold text-right pr-12 text-sm focus:ring-1 focus:ring-[#B10000]/30 outline-none disabled:opacity-50"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-sm text-[#434655]">원</span>
                   </div>
@@ -442,14 +424,14 @@ export default function AdminEstimateDetailPage() {
                     onChange={(e) => setAdjReason(e.target.value)}
                     placeholder="조정 사유를 입력하세요."
                     disabled={!!estimate.locked_at}
-                    className="w-full bg-[#f2f4f6] border-none rounded-md py-3 px-4 text-sm min-h-[80px] resize-none focus:ring-1 focus:ring-[#B10000]/30 outline-none disabled:opacity-50"
+                    className="w-full bg-[#f2f4f6] border-none py-3 px-4 text-sm min-h-[80px] resize-none focus:ring-1 focus:ring-[#B10000]/30 outline-none disabled:opacity-50"
                   />
                 </div>
 
                 <button
                   onClick={handleAddAdjustment}
                   disabled={!adjReason || !adjAmount || savingAdj || !!estimate.locked_at}
-                  className="w-full py-3 bg-[#B10000] text-white font-bold rounded-md text-sm disabled:opacity-40 active:scale-[0.98] transition-all"
+                  className="w-full py-3 bg-[#B10000] text-white font-bold text-sm disabled:opacity-40 active:scale-[0.98] transition-all"
                 >
                   {savingAdj ? '적용 중...' : '조정 적용'}
                 </button>
@@ -478,9 +460,9 @@ export default function AdminEstimateDetailPage() {
             </section>
 
             {/* 최종 견적 요약 */}
-            <section className="bg-gradient-to-br from-[#2d3133] to-[#1a1f22] text-white rounded-xl p-8 shadow-2xl">
+            <section className="bg-gradient-to-br from-[#2d3133] to-[#1a1f22] text-white p-8 shadow-2xl">
               <h3 className="text-lg font-extrabold mb-8 flex items-center gap-2" style={{ fontFamily: 'Manrope, sans-serif' }}>
-                <span className="w-1.5 h-6 bg-[#ffdad6] rounded-full" />
+                <span className="w-1.5 h-6 bg-[#ffdad6]" />
                 최종 견적 요약
               </h3>
               <div className="space-y-6">
@@ -513,7 +495,7 @@ export default function AdminEstimateDetailPage() {
                   {formatKRW(finalAmount)} · Inc. VAT
                 </p>
                 <div className="pt-2">
-                  <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+                  <div className="bg-white/5 border border-white/10 p-4">
                     <p className="text-xs text-slate-400 leading-relaxed">
                       상기 금액은 실측 데이터 기반으로 산정되었으며, 현장 상황에 따라 시공 시 일부 변경될 수 있습니다.
                     </p>

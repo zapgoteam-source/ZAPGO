@@ -53,9 +53,9 @@ export default function PendingApprovalPage() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="relative">
           {/* 외곽 회전 원 */}
-          <div className="w-20 h-20 border-4 border-primary/20 rounded-full"></div>
+          <div className="w-20 h-20 border-4 border-primary/20"></div>
           {/* 회전 애니메이션 원 */}
-          <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
+          <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-primary animate-spin"></div>
           {/* 중앙 아이콘 */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <UserCheck className="w-8 h-8 text-primary animate-pulse" />
@@ -74,12 +74,12 @@ export default function PendingApprovalPage() {
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="w-full max-w-md mx-auto">
         {/* 메인 카드 */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white shadow-sm border border-gray-200 overflow-hidden">
           {/* 헤더 - 아이콘과 타이틀 */}
           <div className="px-6 pt-8 pb-6 text-center">
             {/* 아이콘 - ZAPGO 로고 컬러와 일관성 있는 레드 계열 */}
             <div className="flex justify-center mb-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10">
                 <UserCheck className="w-8 h-8 text-primary" />
               </div>
             </div>
@@ -97,10 +97,10 @@ export default function PendingApprovalPage() {
           <div className="px-6 pb-6">
             {/* 사용자 정보 - 모던한 카드 디자인 */}
             <div className="mb-6">
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-xl p-5 border border-gray-200/60 space-y-4">
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100/50 p-5 border border-gray-200/60 space-y-4">
                 {/* 이름 */}
                 <div className="flex items-center space-x-3">
-                  <div className="flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                  <div className="flex-shrink-0 w-10 h-10 bg-white flex items-center justify-center shadow-sm">
                     <User className="w-5 h-5 text-gray-700" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -116,7 +116,7 @@ export default function PendingApprovalPage() {
 
                 {/* 아이디 */}
                 <div className="flex items-center space-x-3">
-                  <div className="flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                  <div className="flex-shrink-0 w-10 h-10 bg-white flex items-center justify-center shadow-sm">
                     <IdCard className="w-5 h-5 text-gray-700" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -130,7 +130,7 @@ export default function PendingApprovalPage() {
             </div>
 
             {/* 안내 메시지 */}
-            <div className="bg-primary/5 rounded-lg p-4 mb-6">
+            <div className="bg-primary/5 p-4 mb-6">
               <div className="text-center space-y-2">
                 <div className="flex justify-center">
                   <AlertCircle className="w-6 h-6 text-primary" />

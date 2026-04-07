@@ -45,7 +45,7 @@ export default function AgencyDashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+        <div className="animate-spin h-8 w-8 border-b-2 border-gray-900" />
       </div>
     );
   }
@@ -65,14 +65,14 @@ export default function AgencyDashboardPage() {
 
         {/* 추천 링크 */}
         {agency && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
+          <div className="bg-yellow-50 border border-yellow-200 p-4 mb-4">
             <p className="text-sm font-bold text-yellow-800 mb-2">추천 링크</p>
             <p className="text-xs text-yellow-700 mb-2">고객에게 이 링크를 공유하세요</p>
-            <div className="bg-white rounded-lg p-2 flex items-center gap-2">
+            <div className="bg-white p-2 flex items-center gap-2">
               <p className="text-xs text-gray-600 flex-1 truncate">{referralUrl}</p>
               <button
                 onClick={() => navigator.clipboard?.writeText(referralUrl)}
-                className="text-xs text-yellow-700 font-medium px-2 py-1 bg-yellow-100 rounded"
+                className="text-xs text-yellow-700 font-medium px-2 py-1 bg-yellow-100"
               >
                 복사
               </button>
@@ -83,13 +83,13 @@ export default function AgencyDashboardPage() {
 
         {/* 통계 */}
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="bg-white border border-gray-200 p-4">
             <p className="text-xs text-gray-500">유입 고객</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">
               {customerCount}<span className="text-sm font-normal ml-1">명</span>
             </p>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="bg-white border border-gray-200 p-4">
             <p className="text-xs text-gray-500">이번 달</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">
               {recentCustomers.filter(
@@ -101,7 +101,7 @@ export default function AgencyDashboardPage() {
         </div>
 
         {/* 최근 고객 */}
-        <div className="bg-white rounded-xl border border-gray-200">
+        <div className="bg-white border border-gray-200">
           <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
             <h2 className="text-sm font-bold text-gray-800">최근 유입 고객</h2>
             <button

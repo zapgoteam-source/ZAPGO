@@ -86,7 +86,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (isGenuinelyLoading || !user || role !== 'ADMIN') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+        <div className="animate-spin h-8 w-8 border-b-2 border-gray-900" />
       </div>
     );
   }
@@ -108,7 +108,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               key={href}
               href={href}
               onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors ${
                 active
                   ? 'bg-gray-900 text-white'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
@@ -125,7 +125,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="px-3 py-4 border-t border-gray-100">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+          className="flex items-center gap-3 px-3 py-2.5 w-full text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
         >
           <LogOut size={18} />
           로그아웃
@@ -192,13 +192,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="고객명, 연락처 검색..."
-                className="w-full pl-8 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-yellow-400 focus:bg-white focus:ring-2 focus:ring-yellow-100 transition"
+                className="w-full pl-8 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 outline-none focus:border-yellow-400 focus:bg-white focus:ring-2 focus:ring-yellow-100 transition"
               />
             </div>
 
             <div className="flex items-center gap-1 ml-auto">
               {/* 알림 버튼 */}
-              <button className="relative p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+              <button className="relative p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors">
                 <Bell size={18} />
               </button>
 
@@ -206,9 +206,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setProfileOpen((v) => !v)}
-                  className="flex items-center gap-2 pl-2 pr-1 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex items-center gap-2 pl-2 pr-1 py-1.5 hover:bg-gray-100 transition-colors"
                 >
-                  <div className="w-7 h-7 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center justify-center">
+                  <div className="w-7 h-7 bg-gray-900 text-white text-xs font-bold flex items-center justify-center">
                     {avatarLetter}
                   </div>
                   <span className="hidden md:block text-sm font-medium text-gray-700 max-w-[100px] truncate">
@@ -218,7 +218,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </button>
 
                 {profileOpen && (
-                  <div className="absolute right-0 top-full mt-1.5 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+                  <div className="absolute right-0 top-full mt-1.5 w-48 bg-white shadow-lg border border-gray-100 py-1 z-50">
                     <div className="px-4 py-2.5 border-b border-gray-100">
                       <p className="text-sm font-semibold text-gray-900 truncate">{displayName}</p>
                       <p className="text-xs text-gray-400 truncate">{user?.email}</p>

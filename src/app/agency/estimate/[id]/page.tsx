@@ -38,7 +38,7 @@ export default function AgencyEstimatePage() {
   if (loading || !customer) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+        <div className="animate-spin h-8 w-8 border-b-2 border-gray-900" />
       </div>
     );
   }
@@ -55,7 +55,7 @@ export default function AgencyEstimatePage() {
         </div>
 
         {/* 고객 정보 (읽기 전용) */}
-        <div className="bg-white rounded-xl border border-gray-200 mb-4 p-4">
+        <div className="bg-white border border-gray-200 mb-4 p-4">
           <p className="text-sm font-bold text-gray-800 mb-3">고객 정보</p>
           <div className="space-y-2 text-sm">
             <Row label="상태" value={customer.status} />
@@ -68,14 +68,14 @@ export default function AgencyEstimatePage() {
         </div>
 
         {/* 견적 목록 (읽기 전용) */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-white border border-gray-200 p-4">
           <p className="text-sm font-bold text-gray-800 mb-3">견적 내역</p>
           {estimates.length === 0 ? (
             <p className="text-sm text-gray-400">견적이 없습니다</p>
           ) : (
             <div className="space-y-3">
               {estimates.map((e) => (
-                <div key={e.id} className="p-3 bg-gray-50 rounded-lg">
+                <div key={e.id} className="p-3 bg-gray-50">
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="text-sm font-medium text-gray-800">

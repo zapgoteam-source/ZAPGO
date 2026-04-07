@@ -61,7 +61,7 @@ export default function SurveyPage() {
       {/* 설문 항목 */}
       <div className="flex-1 px-5 space-y-5 pb-4">
         {SURVEY_QUESTIONS.map((q) => (
-          <div key={q.key} className="bg-gray-50 rounded-2xl p-4">
+          <div key={q.key} className="bg-gray-50 p-4">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xl">{q.icon}</span>
               <div>
@@ -74,7 +74,7 @@ export default function SurveyPage() {
                 <button
                   key={opt.value}
                   onClick={() => handleSelect(q.key, opt.value)}
-                  className={`py-2 px-1 rounded-lg border text-xs font-medium transition-all ${
+                  className={`py-2 px-1 border text-xs font-medium transition-all ${
                     answers[q.key] === opt.value
                       ? 'ring-2 ring-offset-1 ring-gray-900 ' + opt.color
                       : opt.color + ' opacity-70'
@@ -89,7 +89,7 @@ export default function SurveyPage() {
 
         {/* 추천 표시 */}
         {allAnswered && recommendations.length > 0 && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
+          <div className="bg-yellow-50 border border-yellow-200 p-4">
             <p className="text-sm font-bold text-yellow-800 mb-2">💡 추천 시공</p>
             <ul className="space-y-2">
               {recommendations.map((rec, i) => (
@@ -114,20 +114,20 @@ export default function SurveyPage() {
         <button
           onClick={handleNext}
           disabled={!allAnswered}
-          className="w-full py-4 bg-gray-900 text-white font-semibold rounded-xl text-base disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors"
+          className="w-full py-4 bg-gray-900 text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors"
         >
           다음
         </button>
         <div className="flex gap-2">
           <a
             href="tel:0000000000"
-            className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
+            className="flex-1 py-3 border border-gray-200 text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
           >
             📞 상담원 연결
           </a>
           <a
             href="/visit-request"
-            className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
+            className="flex-1 py-3 border border-gray-200 text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
           >
             방문 견적 요청
           </a>

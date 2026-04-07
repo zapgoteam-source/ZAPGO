@@ -31,7 +31,7 @@ export default function EstimatePage() {
         <p className="text-gray-500 text-sm">창문 정보를 먼저 입력해주세요</p>
         <button
           onClick={() => router.push('/windows')}
-          className="mt-4 px-6 py-3 bg-gray-900 text-white rounded-xl text-sm"
+          className="mt-4 px-6 py-3 bg-gray-900 text-white text-sm"
         >
           창문 입력하러 가기
         </button>
@@ -64,7 +64,7 @@ export default function EstimatePage() {
         <h1 className="text-xl font-bold text-gray-900">견적 결과</h1>
 
         {/* 총액 강조 */}
-        <div className="mt-3 bg-gray-900 rounded-2xl p-4">
+        <div className="mt-3 bg-gray-900 p-4">
           <p className="text-gray-300 text-sm mb-1">총 예상 금액 (부가세 별도)</p>
           <p className="text-3xl font-bold text-white">{formatKRW(result.total)}</p>
           <p className="text-gray-400 text-xs mt-1">
@@ -74,7 +74,7 @@ export default function EstimatePage() {
 
         {/* 창틀 미확인 경고 */}
         {result.has_unknown_frame && (
-          <div className="mt-3 bg-yellow-50 border border-yellow-300 rounded-xl p-3">
+          <div className="mt-3 bg-yellow-50 border border-yellow-300 p-3">
             <p className="text-sm font-semibold text-yellow-800">⚠️ 실측 후 금액이 변동될 수 있습니다</p>
             <p className="text-xs text-yellow-600 mt-0.5">
               창틀 모헤어를 모르겠음으로 선택한 창문이 있습니다. 실측 시 추가 비용이 발생할 수 있습니다.
@@ -172,7 +172,7 @@ export default function EstimatePage() {
         <div>
           <button
             onClick={() => setShowAlternative(!showAlternative)}
-            className="w-full py-3 border border-gray-200 rounded-xl text-sm text-gray-600 font-medium hover:bg-gray-50"
+            className="w-full py-3 border border-gray-200 text-sm text-gray-600 font-medium hover:bg-gray-50"
           >
             {showAlternative ? '▲ 대안 견적 숨기기' : '▼ 비용 부담 시 대안 견적 보기'}
           </button>
@@ -200,7 +200,7 @@ export default function EstimatePage() {
         </div>
 
         {/* 금액 합산 */}
-        <div className="bg-gray-50 rounded-xl p-4">
+        <div className="bg-gray-50 p-4">
           <div className="space-y-2 text-sm">
             <Row label="인건비" value={formatKRW(result.labor_cost)} />
             <Row label="메인 시공비" value={formatKRW(result.subtotal_service)} />
@@ -225,27 +225,27 @@ export default function EstimatePage() {
       <div className="px-5 pb-6 pt-3 space-y-2 border-t border-gray-100 bg-white">
         <button
           onClick={() => router.push('/submit')}
-          className="w-full py-4 bg-gray-900 text-white font-semibold rounded-xl text-base hover:bg-gray-800 transition-colors"
+          className="w-full py-4 bg-gray-900 text-white font-semibold text-base hover:bg-gray-800 transition-colors"
         >
           시공 요청하기
         </button>
         <button
           onClick={handleSaveEstimate}
           disabled={saving}
-          className="w-full py-3 border-2 border-gray-900 text-gray-900 font-medium rounded-xl text-sm hover:bg-gray-50 disabled:opacity-40"
+          className="w-full py-3 border-2 border-gray-900 text-gray-900 font-medium text-sm hover:bg-gray-50 disabled:opacity-40"
         >
           {saving ? '저장 중...' : '견적 저장'}
         </button>
         <div className="flex gap-2">
           <a
             href="tel:0000000000"
-            className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
+            className="flex-1 py-3 border border-gray-200 text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
           >
             📞 상담원 연결
           </a>
           <a
             href="/visit-request"
-            className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
+            className="flex-1 py-3 border border-gray-200 text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
           >
             방문 견적 요청
           </a>
@@ -257,7 +257,7 @@ export default function EstimatePage() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white border border-gray-100 rounded-xl p-4">
+    <div className="bg-white border border-gray-100 p-4">
       <p className="text-sm font-bold text-gray-800 mb-3">{title}</p>
       {children}
     </div>
@@ -285,7 +285,7 @@ function AlternativeCard({
   desc: string;
 }) {
   return (
-    <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+    <div className="bg-blue-50 border border-blue-100 p-4">
       <div className="flex justify-between items-start">
         <div>
           <p className="text-sm font-semibold text-blue-900">{title}</p>

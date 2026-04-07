@@ -48,7 +48,7 @@ export default function QuotationManagementPage() {
             
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-2 sm:p-2.5 bg-primary/10 rounded-lg flex-shrink-0">
+                <div className="p-2 sm:p-2.5 bg-primary/10 flex-shrink-0">
                   <Receipt className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -64,7 +64,7 @@ export default function QuotationManagementPage() {
               {/* 추가 버튼 */}
               <button
                 onClick={() => setShowAddForm(true)}
-                className="flex-shrink-0 p-2 sm:p-2.5 bg-primary rounded-xl hover:bg-primary/90 active:scale-95 transition-all"
+                className="flex-shrink-0 p-2 sm:p-2.5 bg-primary hover:bg-primary/90 active:scale-95 transition-all"
               >
                 <Plus size={20} className="text-white" />
               </button>
@@ -74,7 +74,7 @@ export default function QuotationManagementPage() {
           {/* 관리자 권한 체크 */}
           <AdminGuard 
             fallback={
-              <div className="bg-white border border-gray-200 rounded-md p-6 text-center">
+              <div className="bg-white border border-gray-200 p-6 text-center">
                 <div className="flex justify-center mb-4">
                   <Receipt className="w-12 h-12 text-gray-400" />
                 </div>

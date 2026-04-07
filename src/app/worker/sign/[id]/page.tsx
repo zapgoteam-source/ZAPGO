@@ -141,7 +141,7 @@ export default function WorkerSignPage() {
   if (saved) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center px-5 text-center bg-white">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-green-100 flex items-center justify-center mx-auto mb-4">
           <span className="text-3xl">✓</span>
         </div>
         <h1 className="text-xl font-bold text-gray-900 mb-2">서명 완료</h1>
@@ -153,7 +153,7 @@ export default function WorkerSignPage() {
         )}
         <button
           onClick={() => router.replace('/worker/list')}
-          className="px-8 py-4 bg-gray-900 text-white font-semibold rounded-xl"
+          className="px-8 py-4 bg-gray-900 text-white font-semibold"
         >
           목록으로
         </button>
@@ -164,7 +164,7 @@ export default function WorkerSignPage() {
   if (loading || !estimate) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+        <div className="animate-spin h-8 w-8 border-b-2 border-gray-900" />
       </div>
     );
   }
@@ -181,7 +181,7 @@ export default function WorkerSignPage() {
         </p>
 
         {/* 최종 금액 */}
-        <div className="mt-3 bg-gray-50 rounded-xl p-3">
+        <div className="mt-3 bg-gray-50 p-3">
           <p className="text-xs text-gray-500">최종 견적 금액 (부가세 별도)</p>
           <p className="text-xl font-bold text-gray-900">{formatKRW(estimate.self_estimated_amount)}</p>
           <p className="text-xs text-gray-400 mt-0.5">
@@ -197,7 +197,7 @@ export default function WorkerSignPage() {
         </p>
 
         {/* 서명 패드 */}
-        <div className="relative border-2 border-gray-200 rounded-xl overflow-hidden bg-white">
+        <div className="relative border-2 border-gray-200 overflow-hidden bg-white">
           <canvas
             ref={canvasRef}
             width={600}
@@ -231,7 +231,7 @@ export default function WorkerSignPage() {
         <button
           onClick={handleConfirm}
           disabled={!hasSignature || saving}
-          className="w-full py-4 bg-gray-900 text-white font-semibold rounded-xl text-base disabled:opacity-40 hover:bg-gray-800 transition-colors"
+          className="w-full py-4 bg-gray-900 text-white font-semibold text-base disabled:opacity-40 hover:bg-gray-800 transition-colors"
         >
           {saving ? '저장 중...' : '서명 확인 및 견적 확정'}
         </button>

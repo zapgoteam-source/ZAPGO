@@ -98,29 +98,29 @@ export default function AdminDashboardPage() {
             </h1>
           </div>
           {/* 상태 카운터 */}
-          <div className="hidden md:flex items-center gap-5 bg-gray-50 px-5 py-2.5 rounded-xl text-sm font-medium">
+          <div className="hidden md:flex items-center gap-5 bg-gray-50 px-5 py-2.5 text-sm font-medium">
             <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-500" />
+              <span className="w-2 h-2 bg-amber-500" />
               대기 {counts.waiting}
             </span>
             <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-primary" />
+              <span className="w-2 h-2 bg-primary" />
               상담 {counts.consulting}
             </span>
             <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-500" />
+              <span className="w-2 h-2 bg-green-500" />
               완료 {counts.done}
             </span>
           </div>
         </div>
 
         {/* 필터 바 */}
-        <div className="bg-gray-50 p-2 rounded-xl flex items-center gap-3 flex-wrap">
+        <div className="bg-gray-50 p-2 flex items-center gap-3 flex-wrap">
           <div className="flex-1 min-w-[140px]">
             <select
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
-              className="w-full bg-white rounded-lg text-sm px-4 py-2.5 shadow-sm border-0 focus:ring-2 focus:ring-primary/20 outline-none"
+              className="w-full bg-white text-sm px-4 py-2.5 shadow-sm border-0 focus:ring-2 focus:ring-primary/20 outline-none"
             >
               {STATUS_FILTER_OPTIONS.map(o => (
                 <option key={o.value} value={o.value}>{o.label}</option>
@@ -131,7 +131,7 @@ export default function AdminDashboardPage() {
             <select
               value={referralFilter}
               onChange={e => setReferralFilter(e.target.value)}
-              className="w-full bg-white rounded-lg text-sm px-4 py-2.5 shadow-sm border-0 focus:ring-2 focus:ring-primary/20 outline-none"
+              className="w-full bg-white text-sm px-4 py-2.5 shadow-sm border-0 focus:ring-2 focus:ring-primary/20 outline-none"
             >
               <option value="ALL">유입 경로 (전체)</option>
               {referralCodes.map(c => (
@@ -140,13 +140,13 @@ export default function AdminDashboardPage() {
             </select>
           </div>
           <div className="flex-1 min-w-[140px]">
-            <select className="w-full bg-white rounded-lg text-sm px-4 py-2.5 shadow-sm border-0 focus:ring-2 focus:ring-primary/20 outline-none">
+            <select className="w-full bg-white text-sm px-4 py-2.5 shadow-sm border-0 focus:ring-2 focus:ring-primary/20 outline-none">
               <option>대리점 코드</option>
             </select>
           </div>
           <button
             onClick={() => refetchEstimates()}
-            className="bg-white p-2.5 rounded-lg shadow-sm hover:bg-red-50 transition-colors"
+            className="bg-white p-2.5 shadow-sm hover:bg-red-50 transition-colors"
             title="새로고침"
           >
             <RefreshCw size={18} className={`text-gray-500 ${isFetching ? 'animate-spin' : ''}`} />
@@ -165,7 +165,7 @@ export default function AdminDashboardPage() {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="text-center py-16 text-gray-400 text-sm bg-gray-50 rounded-xl">
+            <div className="text-center py-16 text-gray-400 text-sm bg-gray-50">
               견적 데이터가 없습니다
             </div>
           ) : (
@@ -178,7 +178,7 @@ export default function AdminDashboardPage() {
                   <div
                     key={e.id}
                     onClick={() => setSelected(e)}
-                    className={`p-5 rounded-xl cursor-pointer transition-all flex items-center justify-between
+                    className={`p-5 cursor-pointer transition-all flex items-center justify-between
                       ${isActive
                         ? 'bg-white shadow-sm border-l-4 border-primary'
                         : 'bg-gray-50 hover:bg-white hover:shadow-sm border-l-4 border-transparent'
@@ -186,7 +186,7 @@ export default function AdminDashboardPage() {
                   >
                     <div className="flex items-center gap-4">
                       {/* 아바타 */}
-                      <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-base flex-shrink-0
+                      <div className={`w-11 h-11 flex items-center justify-center font-bold text-base flex-shrink-0
                         ${isActive ? 'bg-red-50 text-primary' : 'bg-gray-200 text-gray-500'}`}
                       >
                         {initial}
@@ -196,7 +196,7 @@ export default function AdminDashboardPage() {
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-bold text-gray-900">{e.customer_name || '고객명 미입력'}</span>
                           {meta && (
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${meta.pill}`}>
+                            <span className={`px-2.5 py-0.5 text-[10px] font-bold ${meta.pill}`}>
                               {meta.label}
                             </span>
                           )}
@@ -231,7 +231,7 @@ export default function AdminDashboardPage() {
                 onAssign={() => router.push(`/admin/customers`)}
               />
             ) : (
-              <div className="rounded-2xl bg-gray-50 flex items-center justify-center h-64 text-gray-400 text-sm">
+              <div className=" bg-gray-50 flex items-center justify-center h-64 text-gray-400 text-sm">
                 고객을 선택하면 상세 정보가 표시됩니다
               </div>
             )}
@@ -256,13 +256,13 @@ function DetailPanel({
   const meta = STATUS_META[e.status as EstimateStatus];
 
   return (
-    <div className="rounded-2xl overflow-hidden shadow-xl bg-white">
+    <div className=" overflow-hidden shadow-xl bg-white">
 
       {/* 히어로 — 빨간 그라디언트 */}
       <div className="p-7 bg-gradient-to-br from-[#8a0000] to-primary text-white">
         <div className="flex justify-between items-start mb-5">
           <div>
-            <span className="text-[10px] font-bold tracking-widest bg-white/20 px-2 py-1 rounded">
+            <span className="text-[10px] font-bold tracking-widest bg-white/20 px-2 py-1">
               DETAIL VIEW
             </span>
             <h2 className="text-2xl font-black mt-2">
@@ -272,18 +272,18 @@ function DetailPanel({
           </div>
           <button
             onClick={onViewDetail}
-            className="bg-white/10 p-2 rounded-full backdrop-blur-sm hover:bg-white/20 transition-colors"
+            className="bg-white/10 p-2 backdrop-blur-sm hover:bg-white/20 transition-colors"
           >
             <Edit size={16} className="text-white" />
           </button>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white/10 p-3.5 rounded-xl backdrop-blur-sm">
+          <div className="bg-white/10 p-3.5 backdrop-blur-sm">
             <p className="text-[10px] text-white/60 mb-1">연락처</p>
             <p className="font-bold text-sm">{e.customer_phone || '—'}</p>
           </div>
-          <div className="bg-white/10 p-3.5 rounded-xl backdrop-blur-sm">
+          <div className="bg-white/10 p-3.5 backdrop-blur-sm">
             <p className="text-[10px] text-white/60 mb-1">접수 경로</p>
             <p className="font-bold text-sm">{e.referral_code || '직접 접수'}</p>
           </div>
@@ -298,7 +298,7 @@ function DetailPanel({
           <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">
             최근 견적 요약
           </h4>
-          <div className="bg-gray-50 p-4 rounded-xl">
+          <div className="bg-gray-50 p-4">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-700">
                 {e.material_type === 'FABRIC' ? '패브릭씰러' : '일반모헤어'} · {e.housing_area_pyeong}평
@@ -322,7 +322,7 @@ function DetailPanel({
             시공 배정 상태
           </h4>
           <div className="flex gap-3">
-            <div className="flex-1 flex items-center gap-3 bg-gray-50 p-3 rounded-xl">
+            <div className="flex-1 flex items-center gap-3 bg-gray-50 p-3">
               <span className="text-xl">👷</span>
               <div>
                 <p className="text-[10px] text-gray-400">팀장</p>
@@ -331,7 +331,7 @@ function DetailPanel({
                 </p>
               </div>
             </div>
-            <div className="flex-1 flex items-center gap-3 bg-gray-50 p-3 rounded-xl">
+            <div className="flex-1 flex items-center gap-3 bg-gray-50 p-3">
               <span className="text-xl">📅</span>
               <div>
                 <p className="text-[10px] text-gray-400">일정</p>
@@ -365,13 +365,13 @@ function DetailPanel({
         <div className="grid grid-cols-2 gap-3 pt-1">
           <button
             onClick={onAssign}
-            className="bg-gray-100 text-primary py-3.5 rounded-xl text-sm font-bold hover:bg-gray-200 transition-all active:scale-95"
+            className="bg-gray-100 text-primary py-3.5 text-sm font-bold hover:bg-gray-200 transition-all active:scale-95"
           >
             배정하기
           </button>
           <button
             onClick={onViewDetail}
-            className="bg-primary text-white py-3.5 rounded-xl text-sm font-bold shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-95"
+            className="bg-primary text-white py-3.5 text-sm font-bold shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-95"
           >
             상세 보기
           </button>

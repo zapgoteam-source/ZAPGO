@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEstimateStore } from '@/store/estimateStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { formatKRW } from '@/lib/estimateCalculator';
+import { formatKRW, calcServiceCost, calcFrameCosts, calcScreenCosts } from '@/lib/estimateCalculator';
 
 interface SubmitForm {
   name: string;
@@ -14,6 +14,18 @@ interface SubmitForm {
   preferred_date: string;
   extra_request: string;
   marketing_consent: boolean;
+}
+
+/** 카카오 전화번호 형식을 한국 형식으로 변환 (+82 10-1234-5678 → 010-1234-5678) */
+function formatKakaoPhone(phone: string): string {
+  if (!phone) return '';
+  // +82 접두사 제거 후 0 추가
+  let cleaned = phone.replace(/\s/g, '').replace(/^\+82/, '0');
+  // 하이픈 없으면 추가 (01012345678 → 010-1234-5678)
+  if (/^0\d{10}$/.test(cleaned)) {
+    cleaned = cleaned.replace(/^(\d{3})(\d{4})(\d{4})$/, '$1-$2-$3');
+  }
+  return cleaned;
 }
 
 export default function SubmitPage() {
@@ -30,6 +42,19 @@ export default function SubmitPage() {
     extra_request: '',
     marketing_consent: false,
   });
+
+  // 카카오 로그인 정보로 이름/전화번호 자동 입력
+  useEffect(() => {
+    if (!user) return;
+    const meta = user.user_metadata;
+    if (!meta) return;
+
+    setForm((prev) => ({
+      ...prev,
+      name: prev.name || meta.name || meta.full_name || '',
+      phone: prev.phone || formatKakaoPhone(meta.phone_number || meta.phone || ''),
+    }));
+  }, [user]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -109,6 +134,7 @@ export default function SubmitPage() {
       }
 
       // 4. 창문 데이터 저장
+      const windowIdMap = new Map<string, string>(); // store_id → db_id
       for (const w of windows) {
         const { data: winRow, error: winErr } = await supabase
           .from('windows')
@@ -129,6 +155,72 @@ export default function SubmitPage() {
           .single();
 
         if (winErr || !winRow) continue;
+        windowIdMap.set(w.id, winRow.id);
+      }
+
+      // 5. 서비스 라인 저장 (estimate_window_services)
+      const serviceLines = calcServiceCost(windows, housingAreaPyeong, materialType);
+      const frameLines = calcFrameCosts(windows, housingAreaPyeong, materialType);
+      const screenLines = calcScreenCosts(windows);
+      const serviceFamily = materialType === 'FABRIC' ? '패브릭씰러' : '일반모헤어';
+
+      const serviceInserts: Record<string, unknown>[] = [];
+
+      for (const line of serviceLines) {
+        serviceInserts.push({
+          estimate_id: estimate.id,
+          window_id: windowIdMap.get(line.window_id) ?? null,
+          service_family: serviceFamily,
+          service_type: line.service_type,
+          selected: true,
+          quantity: line.quantity,
+          unit_price: line.unit_price,
+          total_price: line.total_price,
+        });
+      }
+
+      for (const line of frameLines) {
+        serviceInserts.push({
+          estimate_id: estimate.id,
+          window_id: windowIdMap.get(line.window_id) ?? null,
+          service_family: '창틀',
+          service_type: 'FRAME',
+          selected: true,
+          quantity: line.quantity,
+          unit_price: line.unit_price,
+          total_price: line.total_price,
+        });
+      }
+
+      for (const line of screenLines) {
+        if (line.replacement_total > 0) {
+          serviceInserts.push({
+            estimate_id: estimate.id,
+            window_id: windowIdMap.get(line.window_id) ?? null,
+            service_family: '방충망 교체',
+            service_type: 'SCREEN_REPLACEMENT',
+            selected: true,
+            quantity: line.screen_count,
+            unit_price: line.replacement_unit_price,
+            total_price: line.replacement_total,
+          });
+        }
+        if (line.bug_solution_total > 0) {
+          serviceInserts.push({
+            estimate_id: estimate.id,
+            window_id: windowIdMap.get(line.window_id) ?? null,
+            service_family: '방충솔루션',
+            service_type: 'BUG_SOLUTION',
+            selected: true,
+            quantity: line.screen_count,
+            unit_price: line.bug_solution_unit_price,
+            total_price: line.bug_solution_total,
+          });
+        }
+      }
+
+      if (serviceInserts.length > 0) {
+        await supabase.from('estimate_window_services').insert(serviceInserts);
       }
 
       setSubmitted(true);
@@ -145,7 +237,7 @@ export default function SubmitPage() {
   if (submitted) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center px-5 text-center">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-green-100 flex items-center justify-center mx-auto mb-4">
           <span className="text-3xl">✓</span>
         </div>
         <h1 className="text-xl font-bold text-gray-900 mb-2">시공 요청 완료!</h1>
@@ -159,7 +251,7 @@ export default function SubmitPage() {
         )}
         <button
           onClick={() => router.push('/login')}
-          className="w-full max-w-xs py-4 bg-gray-900 text-white font-semibold rounded-xl"
+          className="w-full max-w-xs py-4 bg-gray-900 text-white font-semibold"
         >
           홈으로
         </button>
@@ -184,7 +276,7 @@ export default function SubmitPage() {
 
       {/* 견적 요약 */}
       {result && (
-        <div className="mx-5 mb-4 bg-gray-50 rounded-xl p-4">
+        <div className="mx-5 mb-4 bg-gray-50 p-4">
           <p className="text-sm text-gray-500 mb-1">예상 견적 금액</p>
           <p className="text-2xl font-bold text-gray-900">{formatKRW(result.total)}</p>
           <p className="text-xs text-gray-400">부가세 별도 · 참고용 금액</p>
@@ -199,7 +291,7 @@ export default function SubmitPage() {
             value={form.name}
             onChange={(e) => handleChange('name', e.target.value)}
             placeholder="홍길동"
-            className="w-full py-3 px-4 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-900"
+            className="w-full py-3 px-4 border-2 border-gray-200 text-sm focus:outline-none focus:border-gray-900"
           />
         </FormField>
 
@@ -210,7 +302,7 @@ export default function SubmitPage() {
             value={form.phone}
             onChange={(e) => handleChange('phone', e.target.value)}
             placeholder="010-0000-0000"
-            className="w-full py-3 px-4 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-900"
+            className="w-full py-3 px-4 border-2 border-gray-200 text-sm focus:outline-none focus:border-gray-900"
           />
         </FormField>
 
@@ -221,7 +313,7 @@ export default function SubmitPage() {
             value={form.address}
             onChange={(e) => handleChange('address', e.target.value)}
             placeholder="시공 주소를 입력해주세요"
-            className="w-full py-3 px-4 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-900"
+            className="w-full py-3 px-4 border-2 border-gray-200 text-sm focus:outline-none focus:border-gray-900"
           />
         </FormField>
 
@@ -231,7 +323,7 @@ export default function SubmitPage() {
             type="date"
             value={form.preferred_date}
             onChange={(e) => handleChange('preferred_date', e.target.value)}
-            className="w-full py-3 px-4 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-900"
+            className="w-full py-3 px-4 border-2 border-gray-200 text-sm focus:outline-none focus:border-gray-900"
           />
         </FormField>
 
@@ -242,7 +334,7 @@ export default function SubmitPage() {
             onChange={(e) => handleChange('extra_request', e.target.value)}
             placeholder="특이사항이나 요청사항을 입력해주세요"
             rows={3}
-            className="w-full py-3 px-4 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-900 resize-none"
+            className="w-full py-3 px-4 border-2 border-gray-200 text-sm focus:outline-none focus:border-gray-900 resize-none"
           />
         </FormField>
 
@@ -252,7 +344,7 @@ export default function SubmitPage() {
             type="checkbox"
             checked={form.marketing_consent}
             onChange={(e) => handleChange('marketing_consent', e.target.checked)}
-            className="mt-0.5 w-5 h-5 rounded border-gray-300"
+            className="mt-0.5 w-5 h-5 border-gray-300"
           />
           <span className="text-sm text-gray-600">
             마케팅 정보 수신에 동의합니다 (선택)
@@ -260,7 +352,7 @@ export default function SubmitPage() {
         </label>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-3">
+          <div className="bg-red-50 border border-red-200 p-3">
             <p className="text-sm text-red-600">{error}</p>
           </div>
         )}
@@ -270,20 +362,20 @@ export default function SubmitPage() {
         <button
           onClick={handleSubmit}
           disabled={submitting || !form.name || !form.phone}
-          className="w-full py-4 bg-gray-900 text-white font-semibold rounded-xl text-base disabled:opacity-40 hover:bg-gray-800 transition-colors"
+          className="w-full py-4 bg-gray-900 text-white font-semibold text-base disabled:opacity-40 hover:bg-gray-800 transition-colors"
         >
           {submitting ? '제출 중...' : '시공 요청 제출'}
         </button>
         <div className="flex gap-2">
           <a
             href="tel:0000000000"
-            className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
+            className="flex-1 py-3 border border-gray-200 text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
           >
             📞 상담원 연결
           </a>
           <a
             href="/visit-request"
-            className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
+            className="flex-1 py-3 border border-gray-200 text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
           >
             방문 견적 요청
           </a>

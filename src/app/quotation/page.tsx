@@ -37,9 +37,9 @@ export default function QuotationPage() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="relative">
           {/* 외곽 회전 원 */}
-          <div className="w-20 h-20 border-4 border-primary/20 rounded-full"></div>
+          <div className="w-20 h-20 border-4 border-primary/20"></div>
           {/* 회전 애니메이션 원 */}
-          <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
+          <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-primary animate-spin"></div>
           {/* 중앙 아이콘 */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <FileText className="w-8 h-8 text-primary animate-pulse" />
@@ -81,7 +81,7 @@ export default function QuotationPage() {
             <input
               type="text"
               placeholder="견적서 검색..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary font-korean"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary font-korean"
             />
           </div>
           <Button variant="outline" className="flex items-center gap-2">
@@ -91,10 +91,10 @@ export default function QuotationPage() {
         </div>
 
         {/* 견적서 목록 */}
-        <div className="bg-white rounded-lg shadow">
+        <div className="bg-white shadow">
           {/* 빈 상태 */}
           <div className="text-center py-12">
-            <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+            <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 flex items-center justify-center">
               <FileText size={32} className="text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2 font-korean">
@@ -113,7 +113,7 @@ export default function QuotationPage() {
         {/* 최근 활동 */}
         <div className="mt-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 font-korean">최근 활동</h2>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white shadow p-6">
             <p className="text-center text-gray-500 font-korean">
               최근 활동이 없습니다
             </p>

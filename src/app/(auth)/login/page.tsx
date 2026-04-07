@@ -25,7 +25,7 @@ export default function LoginPage() {
   if (loading || (user && !profileReady)) {
     return (
       <div className="h-dvh flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+        <div className="animate-spin h-8 w-8 border-b-2 border-gray-900" />
       </div>
     );
   }
@@ -44,7 +44,7 @@ export default function LoginPage() {
       </div>
 
       {/* 혜택 카드 */}
-      <div className="bg-gray-50 rounded-2xl px-5 py-4 mb-6">
+      <div className="bg-gray-50 px-5 py-4 mb-6">
         <ul className="space-y-2 text-sm text-gray-600">
           <li className="flex items-center gap-2">
             <span className="text-yellow-500 font-bold">✓</span>
@@ -65,7 +65,7 @@ export default function LoginPage() {
       <button
         onClick={signInWithKakao}
         disabled={loading}
-        className="w-full flex items-center justify-center gap-2.5 bg-[#FEE500] hover:bg-[#F5D800] active:bg-[#EDD000] text-[#191919] font-bold py-4 rounded-xl text-base transition-colors disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-2.5 bg-[#FEE500] hover:bg-[#F5D800] active:bg-[#EDD000] text-[#191919] font-bold py-4 text-base transition-colors disabled:opacity-50"
       >
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
           <path fillRule="evenodd" clipRule="evenodd"
@@ -87,13 +87,13 @@ export default function LoginPage() {
       <div className="mt-auto pb-8 space-y-2.5">
         <a
           href="tel:0000000000"
-          className="block w-full text-center py-3.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+          className="block w-full text-center py-3.5 border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
         >
           📞 상담원 연결
         </a>
         <a
           href="/visit-request"
-          className="block w-full text-center py-3.5 bg-gray-900 rounded-xl text-sm font-medium text-white hover:bg-gray-800 transition-colors"
+          className="block w-full text-center py-3.5 bg-gray-900 text-sm font-medium text-white hover:bg-gray-800 transition-colors"
         >
           방문 견적 요청
         </a>

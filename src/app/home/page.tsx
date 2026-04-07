@@ -80,9 +80,9 @@ export default function HomePage() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="relative">
           {/* 외곽 회전 원 */}
-          <div className="w-20 h-20 border-4 border-primary/20 rounded-full"></div>
+          <div className="w-20 h-20 border-4 border-primary/20"></div>
           {/* 회전 애니메이션 원 */}
-          <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
+          <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-primary animate-spin"></div>
           {/* 중앙 아이콘 */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <Home className="w-8 h-8 text-primary animate-pulse" />
@@ -104,9 +104,9 @@ export default function HomePage() {
         {/* 주요 지표 카드들 */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {/* 총 사용자 */}
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+          <div className="bg-white p-4 shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
+              <div className="p-2 bg-primary/10">
                 <Users className="w-5 h-5 text-primary" />
               </div>
               <div className="flex items-center text-green-600 text-xs">
@@ -123,9 +123,9 @@ export default function HomePage() {
           </div>
 
           {/* 활성 사용자 */}
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+          <div className="bg-white p-4 shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
+              <div className="p-2 bg-primary/10">
                 <Activity className="w-5 h-5 text-primary" />
               </div>
               <div className="text-xs text-gray-500">
@@ -141,9 +141,9 @@ export default function HomePage() {
           </div>
 
           {/* 총 견적서 */}
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+          <div className="bg-white p-4 shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
+              <div className="p-2 bg-primary/10">
                 <FileText className="w-5 h-5 text-primary" />
               </div>
               <div className="text-xs text-gray-500">
@@ -159,9 +159,9 @@ export default function HomePage() {
           </div>
 
           {/* 대기중 견적서 */}
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+          <div className="bg-white p-4 shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
+              <div className="p-2 bg-primary/10">
                 <Clock className="w-5 h-5 text-primary" />
               </div>
               <div className="text-xs text-orange-600">
@@ -180,9 +180,9 @@ export default function HomePage() {
         {/* 주요 기능 카드들 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {/* 견적서 관리 */}
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+          <div className="bg-white p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
             <div className="flex items-center mb-4">
-              <div className="p-3 bg-primary/10 rounded-lg mr-3">
+              <div className="p-3 bg-primary/10 mr-3">
                 <FileText className="w-6 h-6 text-primary" />
               </div>
               <div>
@@ -220,9 +220,9 @@ export default function HomePage() {
           </div>
 
           {/* 분석 대시보드 */}
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+          <div className="bg-white p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
             <div className="flex items-center mb-4">
-              <div className="p-3 bg-primary/10 rounded-lg mr-3">
+              <div className="p-3 bg-primary/10 mr-3">
                 <BarChart3 className="w-6 h-6 text-primary" />
               </div>
               <div>
@@ -260,9 +260,9 @@ export default function HomePage() {
           </div>
 
           {/* 빠른 액션 */}
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+          <div className="bg-white p-6 shadow-sm border border-gray-200">
             <div className="flex items-center mb-4">
-              <div className="p-3 bg-primary/10 rounded-lg mr-3">
+              <div className="p-3 bg-primary/10 mr-3">
                 <CheckCircle className="w-6 h-6 text-primary" />
               </div>
               <div>
@@ -312,7 +312,7 @@ export default function HomePage() {
         </div>
 
         {/* 최근 활동 섹션 */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white shadow-sm border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 font-korean">
               최근 활동

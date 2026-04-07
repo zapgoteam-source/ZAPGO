@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { Customer } from '@/types';
-import { DUMMY_CUSTOMERS } from '@/data/customers';
 import { fetchCustomerList } from '@/lib/queries';
 
 function getStatusMeta(status: string): { label: string; cls: string } {
@@ -43,14 +42,7 @@ export default function AdminCustomersPage() {
     queryKey: ['customers', { page, search, dateFrom }],
     queryFn: () => fetchCustomerList({ page, search, dateFrom }),
     enabled: role === 'ADMIN',
-    placeholderData: (prev) => prev, // 페이지 전환 시 이전 데이터 유지
-    select: (res) => {
-      // DB가 비어있으면 더미 데이터
-      if (res.data.length === 0 && !search && !dateFrom && page === 0) {
-        return { data: DUMMY_CUSTOMERS as Customer[], total: DUMMY_CUSTOMERS.length };
-      }
-      return res;
-    },
+    placeholderData: (prev) => prev,
   });
 
   const customers = data?.data ?? [];
@@ -84,7 +76,7 @@ export default function AdminCustomersPage() {
           </h1>
           <p className="text-[#434655] text-sm">에너지잡고 전체 고객 데이터를 조회하고 관리할 수 있습니다.</p>
         </div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-[#B10000] text-white rounded-md font-bold text-sm active:scale-95 transition-transform shadow-md">
+        <button className="flex items-center gap-2 px-6 py-3 bg-[#B10000] text-white font-bold text-sm active:scale-95 transition-transform shadow-md">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
           </svg>
@@ -94,7 +86,7 @@ export default function AdminCustomersPage() {
 
       {/* Filter Bento Box */}
       <section className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="md:col-span-2 bg-[#f2f4f6] p-6 rounded-xl flex flex-col gap-3">
+        <div className="md:col-span-2 bg-[#f2f4f6] p-6 flex flex-col gap-3">
           <span className="text-[10px] font-bold tracking-[0.05em] text-[#434655] uppercase">STEP 01. 기간 및 검색어</span>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
@@ -103,7 +95,7 @@ export default function AdminCustomersPage() {
                 type="date"
                 value={dateFrom}
                 onChange={(e) => { setDateFrom(e.target.value); setPage(0); }}
-                className="w-full bg-[#e0e3e5] border-none rounded px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all"
+                className="w-full bg-[#e0e3e5] border-none px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all"
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -113,25 +105,25 @@ export default function AdminCustomersPage() {
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(0); }}
                 placeholder="검색어 입력..."
-                className="w-full bg-[#e0e3e5] border-none rounded px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all"
+                className="w-full bg-[#e0e3e5] border-none px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all"
               />
             </div>
           </div>
         </div>
-        <div className="bg-[#f2f4f6] p-6 rounded-xl flex flex-col gap-3">
+        <div className="bg-[#f2f4f6] p-6 flex flex-col gap-3">
           <span className="text-[10px] font-bold tracking-[0.05em] text-[#434655] uppercase">STEP 02. 담당자</span>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-[#434655]">상담자 선택</label>
-            <select className="w-full bg-[#e0e3e5] border-none rounded px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all">
+            <select className="w-full bg-[#e0e3e5] border-none px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all">
               <option>전체</option>
             </select>
           </div>
         </div>
-        <div className="bg-[#f2f4f6] p-6 rounded-xl flex flex-col gap-3">
+        <div className="bg-[#f2f4f6] p-6 flex flex-col gap-3">
           <span className="text-[10px] font-bold tracking-[0.05em] text-[#434655] uppercase">STEP 03. 현장</span>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-[#434655]">시공팀장 선택</label>
-            <select className="w-full bg-[#e0e3e5] border-none rounded px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all">
+            <select className="w-full bg-[#e0e3e5] border-none px-3 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-[#B10000]/40 outline-none transition-all">
               <option>전체</option>
             </select>
           </div>
@@ -139,7 +131,7 @@ export default function AdminCustomersPage() {
       </section>
 
       {/* Data Table */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-[#c3c6d7]/20">
+      <div className="bg-white shadow-sm overflow-hidden border border-[#c3c6d7]/20">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -159,7 +151,7 @@ export default function AdminCustomersPage() {
                 <tr>
                   <td colSpan={9} className="px-6 py-12 text-center">
                     <div className="flex justify-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#B10000]" />
+                      <div className="animate-spin h-6 w-6 border-b-2 border-[#B10000]" />
                     </div>
                   </td>
                 </tr>
@@ -182,7 +174,7 @@ export default function AdminCustomersPage() {
                         {fmtDate(c.created_at)}
                       </td>
                       <td className="px-6 py-5">
-                        <span className={`px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap ${status.cls}`}>
+                        <span className={`px-3 py-1 text-[11px] font-bold whitespace-nowrap ${status.cls}`}>
                           {status.label}
                         </span>
                       </td>
@@ -215,7 +207,7 @@ export default function AdminCustomersPage() {
             <button
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
-              className="w-8 h-8 flex items-center justify-center rounded-lg border border-[#c3c6d7]/30 hover:bg-white text-[#434655] disabled:opacity-40 text-lg leading-none"
+              className="w-8 h-8 flex items-center justify-center border border-[#c3c6d7]/30 hover:bg-white text-[#434655] disabled:opacity-40 text-lg leading-none"
             >
               ‹
             </button>
@@ -223,7 +215,7 @@ export default function AdminCustomersPage() {
               <button
                 key={p}
                 onClick={() => setPage(p)}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold ${
+                className={`w-8 h-8 flex items-center justify-center text-xs font-bold ${
                   p === page
                     ? 'bg-[#B10000] text-white'
                     : 'border border-[#c3c6d7]/30 hover:bg-white text-[#434655]'
@@ -235,7 +227,7 @@ export default function AdminCustomersPage() {
             <button
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
-              className="w-8 h-8 flex items-center justify-center rounded-lg border border-[#c3c6d7]/30 hover:bg-white text-[#434655] disabled:opacity-40 text-lg leading-none"
+              className="w-8 h-8 flex items-center justify-center border border-[#c3c6d7]/30 hover:bg-white text-[#434655] disabled:opacity-40 text-lg leading-none"
             >
               ›
             </button>
@@ -245,7 +237,7 @@ export default function AdminCustomersPage() {
 
       {/* Footer Stats */}
       <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-6 bg-[#f2f4f6] rounded-xl flex flex-col justify-between h-32 relative overflow-hidden">
+        <div className="p-6 bg-[#f2f4f6] flex flex-col justify-between h-32 relative overflow-hidden">
           <span className="text-[10px] font-bold tracking-[0.05em] text-[#434655] uppercase">이번 달 신규 고객</span>
           <div className="flex items-baseline gap-2">
             <span className="text-4xl font-black text-[#191c1e] tracking-tighter" style={{ fontFamily: 'Manrope, sans-serif' }}>
@@ -254,7 +246,7 @@ export default function AdminCustomersPage() {
             <span className="text-sm font-bold text-[#434655]">명</span>
           </div>
         </div>
-        <div className="p-6 bg-[#f2f4f6] rounded-xl flex flex-col justify-between h-32 relative overflow-hidden">
+        <div className="p-6 bg-[#f2f4f6] flex flex-col justify-between h-32 relative overflow-hidden">
           <span className="text-[10px] font-bold tracking-[0.05em] text-[#434655] uppercase">진행 중인 시공</span>
           <div className="flex items-baseline gap-2">
             <span className="text-4xl font-black text-[#191c1e] tracking-tighter" style={{ fontFamily: 'Manrope, sans-serif' }}>
@@ -263,7 +255,7 @@ export default function AdminCustomersPage() {
             <span className="text-sm font-bold text-[#434655]">건</span>
           </div>
         </div>
-        <div className="p-6 bg-[#f2f4f6] rounded-xl flex flex-col justify-between h-32 relative overflow-hidden">
+        <div className="p-6 bg-[#f2f4f6] flex flex-col justify-between h-32 relative overflow-hidden">
           <span className="text-[10px] font-bold tracking-[0.05em] text-[#434655] uppercase">총 누적 매출</span>
           <div className="flex items-baseline gap-2">
             <span className="text-4xl font-black text-[#191c1e] tracking-tighter" style={{ fontFamily: 'Manrope, sans-serif' }}>

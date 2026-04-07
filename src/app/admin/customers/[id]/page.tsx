@@ -5,7 +5,6 @@ import { useRouter, useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Customer, Estimate } from '@/types';
-import { DUMMY_CUSTOMERS } from '@/data/customers';
 
 // ─── 상태 메타 ─────────────────────────────────────────────────────────────────
 const STATUS_META: Record<string, { label: string; cls: string }> = {
@@ -81,13 +80,6 @@ export default function CustomerDetailPage() {
   useEffect(() => {
     if (role !== 'ADMIN' || !id) return;
 
-    // 더미 데이터 ID이면 로컬에서 로드
-    if (id.startsWith('d-')) {
-      const dummy = DUMMY_CUSTOMERS.find((c) => c.id === id);
-      if (dummy) { setCustomer(dummy); setForm(dummy); }
-      return;
-    }
-
     async function load() {
       const { data: cust } = await supabase.from('customers').select('*').eq('id', id).single();
       if (cust) { setCustomer(cust as Customer); setForm(cust as Customer); }
@@ -99,7 +91,7 @@ export default function CustomerDetailPage() {
   }, [role, id]);
 
   const handleSave = async () => {
-    if (!customer || id.startsWith('d-')) { setEditing(false); return; }
+    if (!customer) { setEditing(false); return; }
     setSaving(true);
     try {
       await supabase.from('customers').update({ ...form, updated_at: new Date().toISOString() }).eq('id', customer.id);
@@ -113,7 +105,7 @@ export default function CustomerDetailPage() {
   if (loading || !customer) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B10000]" />
+        <div className="animate-spin h-8 w-8 border-b-2 border-[#B10000]" />
       </div>
     );
   }
@@ -146,36 +138,36 @@ export default function CustomerDetailPage() {
             <select
               value={form.status || customer.status}
               onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
-              className="px-3 py-1.5 rounded-full text-xs font-bold border border-[#c3c6d7] bg-white"
+              className="px-3 py-1.5 text-xs font-bold border border-[#c3c6d7] bg-white"
             >
               {STATUSES.map((s) => (
                 <option key={s} value={s}>{STATUS_META[s].label}</option>
               ))}
             </select>
           ) : (
-            <span className={`px-3 py-1 rounded-full text-xs font-bold ${status.cls}`}>{status.label}</span>
+            <span className={`px-3 py-1 text-xs font-bold ${status.cls}`}>{status.label}</span>
           )}
           <span className="text-[#434655] text-sm font-medium">{customer.phone}</span>
         </div>
         <div className="flex gap-2 flex-wrap">
           {editing ? (
             <>
-              <button onClick={() => setEditing(false)} className="px-4 py-2.5 rounded-lg border border-[#c3c6d7] text-sm font-semibold text-[#434655] hover:bg-[#f2f4f6] transition-colors">
+              <button onClick={() => setEditing(false)} className="px-4 py-2.5 border border-[#c3c6d7] text-sm font-semibold text-[#434655] hover:bg-[#f2f4f6] transition-colors">
                 취소
               </button>
-              <button onClick={handleSave} disabled={saving} className="px-6 py-2.5 rounded-lg bg-[#B10000] text-white text-sm font-bold disabled:opacity-40 hover:bg-[#8e0000] transition-colors">
+              <button onClick={handleSave} disabled={saving} className="px-6 py-2.5 bg-[#B10000] text-white text-sm font-bold disabled:opacity-40 hover:bg-[#8e0000] transition-colors">
                 {saving ? '저장 중...' : '저장'}
               </button>
             </>
           ) : (
             <>
-              <button onClick={() => setEditing(true)} className="px-4 py-2.5 rounded-lg border border-[#c3c6d7] text-sm font-semibold text-[#434655] hover:bg-[#f2f4f6] transition-colors">
+              <button onClick={() => setEditing(true)} className="px-4 py-2.5 border border-[#c3c6d7] text-sm font-semibold text-[#434655] hover:bg-[#f2f4f6] transition-colors">
                 수정
               </button>
-              <button className="px-4 py-2.5 rounded-lg border border-[#c3c6d7] text-sm font-semibold text-[#434655] hover:bg-[#f2f4f6] transition-colors">
+              <button className="px-4 py-2.5 border border-[#c3c6d7] text-sm font-semibold text-[#434655] hover:bg-[#f2f4f6] transition-colors">
                 견적 생성
               </button>
-              <button className="px-5 py-2.5 rounded-lg bg-[#B10000] text-white text-sm font-bold hover:bg-[#8e0000] transition-colors">
+              <button className="px-5 py-2.5 bg-[#B10000] text-white text-sm font-bold hover:bg-[#8e0000] transition-colors">
                 방문 견적 등록
               </button>
             </>
@@ -193,9 +185,9 @@ export default function CustomerDetailPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
             {/* 기본 정보 */}
-            <div className="bg-white rounded-xl border border-[#c3c6d7]/30 p-5 shadow-sm">
+            <div className="bg-white border border-[#c3c6d7]/30 p-5 shadow-sm">
               <h3 className="text-sm font-bold text-[#191c1e] mb-4 flex items-center gap-2">
-                <span className="w-1 h-4 bg-[#B10000] rounded-full" />
+                <span className="w-1 h-4 bg-[#B10000]" />
                 기본 정보
               </h3>
               <div className="space-y-3">
@@ -204,7 +196,7 @@ export default function CustomerDetailPage() {
                   label="주소"
                   value={
                     editing
-                      ? <input value={form.address || ''} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} className="w-full px-2 py-1 border border-[#e0e3e5] rounded text-sm" />
+                      ? <input value={form.address || ''} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} className="w-full px-2 py-1 border border-[#e0e3e5] text-sm" />
                       : customer.address || '-'
                   }
                 />
@@ -212,16 +204,16 @@ export default function CustomerDetailPage() {
                 {customer.referral_code && (
                   <InfoRow
                     label="유입경로"
-                    value={<span className="px-2 py-0.5 bg-[#f2f4f6] rounded text-xs font-medium">{customer.referral_code}</span>}
+                    value={<span className="px-2 py-0.5 bg-[#f2f4f6] text-xs font-medium">{customer.referral_code}</span>}
                   />
                 )}
               </div>
             </div>
 
             {/* 설문 결과 */}
-            <div className="bg-white rounded-xl border border-[#c3c6d7]/30 p-5 shadow-sm">
+            <div className="bg-white border border-[#c3c6d7]/30 p-5 shadow-sm">
               <h3 className="text-sm font-bold text-[#191c1e] mb-4 flex items-center gap-2">
-                <span className="w-1 h-4 bg-[#434655] rounded-full" />
+                <span className="w-1 h-4 bg-[#434655]" />
                 설문 결과
               </h3>
               <div className="space-y-3">
@@ -230,7 +222,7 @@ export default function CustomerDetailPage() {
                   {problems.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                       {problems.map((p) => (
-                        <span key={p} className="px-2.5 py-1 bg-[#ffdad6] text-[#3b0000] rounded-full text-[11px] font-bold">
+                        <span key={p} className="px-2.5 py-1 bg-[#ffdad6] text-[#3b0000] text-[11px] font-bold">
                           {p}
                         </span>
                       ))}
@@ -242,7 +234,7 @@ export default function CustomerDetailPage() {
                 {customer.extra_request && (
                   <div>
                     <p className="text-[10px] font-bold text-[#434655] uppercase tracking-wider mb-1.5">요청사항</p>
-                    <blockquote className="bg-[#f2f4f6] rounded-lg px-3 py-2 text-sm text-[#434655] italic leading-relaxed">
+                    <blockquote className="bg-[#f2f4f6] px-3 py-2 text-sm text-[#434655] italic leading-relaxed">
                       "{customer.extra_request}"
                     </blockquote>
                   </div>
@@ -252,10 +244,10 @@ export default function CustomerDetailPage() {
           </div>
 
           {/* 상담 관리 */}
-          <div className="bg-white rounded-xl border border-[#c3c6d7]/30 p-5 shadow-sm">
+          <div className="bg-white border border-[#c3c6d7]/30 p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-[#191c1e] flex items-center gap-2">
-                <span className="w-1 h-4 bg-[#0053db] rounded-full" />
+                <span className="w-1 h-4 bg-[#0053db]" />
                 상담 관리
               </h3>
               <span className="text-xs text-[#434655]">
@@ -273,9 +265,9 @@ export default function CustomerDetailPage() {
                 onChange={(e) => setMemo(e.target.value)}
                 placeholder="메모를 입력해 주세요..."
                 rows={3}
-                className="w-full bg-[#f2f4f6] border-none rounded-lg px-4 py-3 text-sm resize-none focus:ring-1 focus:ring-[#B10000]/40 outline-none"
+                className="w-full bg-[#f2f4f6] border-none px-4 py-3 text-sm resize-none focus:ring-1 focus:ring-[#B10000]/40 outline-none"
               />
-              <button className="absolute bottom-3 right-3 px-4 py-1.5 bg-[#B10000] text-white text-xs font-bold rounded-md hover:bg-[#8e0000] transition-colors">
+              <button className="absolute bottom-3 right-3 px-4 py-1.5 bg-[#B10000] text-white text-xs font-bold hover:bg-[#8e0000] transition-colors">
                 기록하기
               </button>
             </div>
@@ -284,7 +276,7 @@ export default function CustomerDetailPage() {
             {customer.consult_memo && (
               <div className="space-y-3">
                 <div className="flex gap-3 items-start">
-                  <div className="w-7 h-7 rounded-full bg-[#B10000] flex items-center justify-center text-white text-[10px] font-black flex-shrink-0">
+                  <div className="w-7 h-7 bg-[#B10000] flex items-center justify-center text-white text-[10px] font-black flex-shrink-0">
                     관
                   </div>
                   <div className="flex-1">
@@ -296,7 +288,7 @@ export default function CustomerDetailPage() {
                   </div>
                 </div>
                 <div className="flex gap-3 items-start">
-                  <div className="w-7 h-7 rounded-full bg-[#e0e3e5] flex items-center justify-center text-[#434655] text-[10px] font-black flex-shrink-0">
+                  <div className="w-7 h-7 bg-[#e0e3e5] flex items-center justify-center text-[#434655] text-[10px] font-black flex-shrink-0">
                     AD
                   </div>
                   <div className="flex-1">
@@ -312,10 +304,10 @@ export default function CustomerDetailPage() {
           </div>
 
           {/* 견적 이력 */}
-          <div className="bg-white rounded-xl border border-[#c3c6d7]/30 shadow-sm overflow-hidden">
+          <div className="bg-white border border-[#c3c6d7]/30 shadow-sm overflow-hidden">
             <div className="px-5 py-4 border-b border-[#f2f4f6]">
               <h3 className="text-sm font-bold text-[#191c1e] flex items-center gap-2">
-                <span className="w-1 h-4 bg-[#943700] rounded-full" />
+                <span className="w-1 h-4 bg-[#943700]" />
                 견적 이력
               </h3>
             </div>
@@ -341,7 +333,7 @@ export default function CustomerDetailPage() {
                           {fmtKRW(customer.final_construction_amount)}
                         </td>
                         <td className="px-5 py-4">
-                          <span className="px-2.5 py-1 bg-[#dbe1ff] text-[#003ea8] rounded-full text-[11px] font-bold">
+                          <span className="px-2.5 py-1 bg-[#dbe1ff] text-[#003ea8] text-[11px] font-bold">
                             확정 대기
                           </span>
                         </td>
@@ -355,7 +347,7 @@ export default function CustomerDetailPage() {
                           {fmtKRW(Math.round(customer.final_construction_amount * 0.85))}
                         </td>
                         <td className="px-5 py-4">
-                          <span className="px-2.5 py-1 bg-[#e0e3e5] text-[#434655] rounded-full text-[11px] font-bold">
+                          <span className="px-2.5 py-1 bg-[#e0e3e5] text-[#434655] text-[11px] font-bold">
                             만료
                           </span>
                         </td>
@@ -376,7 +368,7 @@ export default function CustomerDetailPage() {
                       <td className="px-5 py-4 text-[#434655]">{fmtDate(e.created_at)}</td>
                       <td className="px-5 py-4 font-bold" style={{ fontFamily: 'Manrope, sans-serif' }}>{fmtKRW(e.self_estimated_amount)}</td>
                       <td className="px-5 py-4">
-                        <span className="px-2.5 py-1 bg-[#dbe1ff] text-[#003ea8] rounded-full text-[11px] font-bold">{e.status}</span>
+                        <span className="px-2.5 py-1 bg-[#dbe1ff] text-[#003ea8] text-[11px] font-bold">{e.status}</span>
                       </td>
                     </tr>
                   ))
@@ -390,7 +382,7 @@ export default function CustomerDetailPage() {
         <div className="space-y-5">
 
           {/* PAYMENT SUMMARY */}
-          <div className="bg-[#B10000] rounded-xl p-6 text-white shadow-lg">
+          <div className="bg-[#B10000] p-6 text-white shadow-lg">
             <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/70 mb-3">Payment Summary</p>
             <div className="mb-5">
               <p className="text-xs text-white/60 mb-1">최종 시공 금액</p>
@@ -399,7 +391,7 @@ export default function CustomerDetailPage() {
                   type="number"
                   value={form.final_construction_amount || 0}
                   onChange={(e) => setForm((f) => ({ ...f, final_construction_amount: Number(e.target.value) }))}
-                  className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white font-bold text-xl"
+                  className="w-full px-3 py-2 bg-white/20 border border-white/30 text-white font-bold text-xl"
                 />
               ) : (
                 <p className="text-4xl font-black tracking-tighter" style={{ fontFamily: 'Manrope, sans-serif' }}>
@@ -411,15 +403,15 @@ export default function CustomerDetailPage() {
               )}
             </div>
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-white/10 rounded-lg p-3">
+              <div className="bg-white/10 p-3">
                 <p className="text-[10px] text-white/60 mb-1">예약금</p>
                 <p className="text-sm font-bold" style={{ fontFamily: 'Manrope, sans-serif' }}>
                   {fmtKRW(customer.deposit_amount)}
                 </p>
               </div>
-              <div className="bg-white/10 rounded-lg p-3">
+              <div className="bg-white/10 p-3">
                 <p className="text-[10px] text-white/60 mb-1">입금 상태</p>
-                <span className={`text-xs font-black px-2 py-0.5 rounded-full ${isPaid ? 'bg-green-400 text-white' : 'bg-white/20 text-white'}`}>
+                <span className={`text-xs font-black px-2 py-0.5 ${isPaid ? 'bg-green-400 text-white' : 'bg-white/20 text-white'}`}>
                   {isPaid ? '입금 완료' : '입금 대기'}
                 </span>
               </div>
@@ -439,17 +431,17 @@ export default function CustomerDetailPage() {
           </div>
 
           {/* 시공 일정 및 배정 */}
-          <div className="bg-white rounded-xl border border-[#c3c6d7]/30 p-5 shadow-sm">
+          <div className="bg-white border border-[#c3c6d7]/30 p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-[#191c1e] flex items-center gap-2">
-                <span className="w-1 h-4 bg-[#943700] rounded-full" />
+                <span className="w-1 h-4 bg-[#943700]" />
                 시공 일정 및 배정
               </h3>
               {editing && <span className="text-xs text-[#B10000] font-semibold cursor-pointer">수정</span>}
             </div>
 
             {customer.scheduled_date ? (
-              <div className="bg-[#fff5f5] border border-[#B10000]/20 rounded-lg px-4 py-3 mb-4">
+              <div className="bg-[#fff5f5] border border-[#B10000]/20 px-4 py-3 mb-4">
                 <p className="text-[10px] font-bold text-[#B10000] uppercase tracking-wider mb-1">Schedule</p>
                 <p className="text-base font-extrabold text-[#B10000]">
                   {(() => {
@@ -461,13 +453,13 @@ export default function CustomerDetailPage() {
                 <p className="text-xs text-[#434655] mt-0.5">09:00 AM 시작 예정</p>
               </div>
             ) : (
-              <div className="bg-[#f2f4f6] rounded-lg px-4 py-3 mb-4 text-sm text-[#434655]">
+              <div className="bg-[#f2f4f6] px-4 py-3 mb-4 text-sm text-[#434655]">
                 {editing ? (
                   <input
                     type="date"
                     value={form.scheduled_date || ''}
                     onChange={(e) => setForm((f) => ({ ...f, scheduled_date: e.target.value }))}
-                    className="w-full border border-[#c3c6d7] rounded px-2 py-1 text-sm"
+                    className="w-full border border-[#c3c6d7] px-2 py-1 text-sm"
                   />
                 ) : (
                   '일정 미정'
@@ -480,7 +472,7 @@ export default function CustomerDetailPage() {
                 <div>
                   <p className="text-[10px] font-bold text-[#434655] uppercase tracking-wider mb-2">시공 팀장</p>
                   <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-full bg-[#e0e3e5] flex items-center justify-center text-[#191c1e] font-black text-sm">
+                    <div className="w-9 h-9 bg-[#e0e3e5] flex items-center justify-center text-[#191c1e] font-black text-sm">
                       {teamMembers[0]?.charAt(0)}
                     </div>
                     <div>
@@ -494,12 +486,12 @@ export default function CustomerDetailPage() {
                     <p className="text-[10px] font-bold text-[#434655] uppercase tracking-wider mb-2">배정 팀원</p>
                     <div className="flex items-center gap-1">
                       {teamMembers.slice(1, 4).map((m, i) => (
-                        <div key={i} className="w-7 h-7 rounded-full bg-[#ffdad6] flex items-center justify-center text-[#B10000] font-black text-xs border-2 border-white -ml-1 first:ml-0">
+                        <div key={i} className="w-7 h-7 bg-[#ffdad6] flex items-center justify-center text-[#B10000] font-black text-xs border-2 border-white -ml-1 first:ml-0">
                           {m.charAt(0)}
                         </div>
                       ))}
                       {teamMembers.length > 4 && (
-                        <div className="w-7 h-7 rounded-full bg-[#e0e3e5] flex items-center justify-center text-[#434655] font-bold text-[10px] border-2 border-white -ml-1">
+                        <div className="w-7 h-7 bg-[#e0e3e5] flex items-center justify-center text-[#434655] font-bold text-[10px] border-2 border-white -ml-1">
                           +{teamMembers.length - 4}
                         </div>
                       )}
@@ -511,15 +503,15 @@ export default function CustomerDetailPage() {
           </div>
 
           {/* 최근 활동 내역 */}
-          <div className="bg-white rounded-xl border border-[#c3c6d7]/30 p-5 shadow-sm">
+          <div className="bg-white border border-[#c3c6d7]/30 p-5 shadow-sm">
             <h3 className="text-sm font-bold text-[#191c1e] mb-4 flex items-center gap-2">
-              <span className="w-1 h-4 bg-[#0053db] rounded-full" />
+              <span className="w-1 h-4 bg-[#0053db]" />
               최근 활동 내역
             </h3>
             <div className="space-y-3">
               {activityLog.map((log, i) => (
                 <div key={i} className="flex items-start gap-2.5">
-                  <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${i === 0 ? 'bg-[#B10000]' : 'bg-[#c3c6d7]'}`} />
+                  <div className={`w-2 h-2 mt-1.5 flex-shrink-0 ${i === 0 ? 'bg-[#B10000]' : 'bg-[#c3c6d7]'}`} />
                   <div>
                     <p className="text-sm font-semibold text-[#191c1e]">{log.text}</p>
                     <p className="text-[10px] text-[#434655] mt-0.5">
