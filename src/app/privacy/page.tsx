@@ -6,7 +6,7 @@ export default function PrivacyPage() {
   return (
     <div className="max-w-2xl mx-auto px-6 py-12 text-sm text-gray-700 leading-relaxed">
       <h1 className="text-2xl font-bold text-gray-900 mb-2">개인정보 처리방침</h1>
-      <p className="text-gray-400 text-xs mb-8">시행일: 2026년 3월 31일 | 최종 수정일: 2026년 3월 31일</p>
+      <p className="text-gray-400 text-xs mb-8">시행일: 2026년 3월 31일 | 최종 수정일: 2026년 4월 10일</p>
 
       <p className="mb-6">
         에너지잡고(이하 &ldquo;회사&rdquo;)는 이용자의 개인정보를 중요시하며, 「개인정보 보호법」 및 관련
@@ -22,7 +22,7 @@ export default function PrivacyPage() {
           조건(필수/선택)을 명확히 구분합니다.
         </p>
 
-        <h3 className="text-sm font-bold text-gray-800 mb-2 mt-4">가. 회원가입 시 (카카오 로그인)</h3>
+        <h3 className="text-sm font-bold text-gray-800 mb-2 mt-4">가. 회원가입 시 (이메일 회원가입)</h3>
         <div className="overflow-x-auto mb-4">
           <table className="w-full border border-gray-300 text-xs">
             <thead>
@@ -35,9 +35,34 @@ export default function PrivacyPage() {
             <tbody>
               <tr>
                 <td className="border border-gray-300 px-3 py-2">이름</td>
-                <td className="border border-gray-300 px-3 py-2">시공 요청 시 고객 식별 및 예약 자동 입력</td>
+                <td className="border border-gray-300 px-3 py-2">회원 식별 및 시공 요청 시 고객 확인</td>
                 <td className="border border-gray-300 px-3 py-2 text-center">필수</td>
               </tr>
+              <tr>
+                <td className="border border-gray-300 px-3 py-2">이메일</td>
+                <td className="border border-gray-300 px-3 py-2">로그인 계정, 계정 복구, 중요 안내 발송</td>
+                <td className="border border-gray-300 px-3 py-2 text-center">필수</td>
+              </tr>
+              <tr>
+                <td className="border border-gray-300 px-3 py-2">비밀번호</td>
+                <td className="border border-gray-300 px-3 py-2">계정 보안 및 본인 인증</td>
+                <td className="border border-gray-300 px-3 py-2 text-center">필수</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 className="text-sm font-bold text-gray-800 mb-2 mt-4">나. 회원가입 시 (카카오 로그인)</h3>
+        <div className="overflow-x-auto mb-4">
+          <table className="w-full border border-gray-300 text-xs">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 px-3 py-2 text-left">수집 항목</th>
+                <th className="border border-gray-300 px-3 py-2 text-left">수집 목적</th>
+                <th className="border border-gray-300 px-3 py-2 text-center">필수/선택</th>
+              </tr>
+            </thead>
+            <tbody>
               <tr>
                 <td className="border border-gray-300 px-3 py-2">카카오 계정 닉네임</td>
                 <td className="border border-gray-300 px-3 py-2">회원 식별 및 서비스 내 표시</td>
@@ -67,11 +92,11 @@ export default function PrivacyPage() {
           </table>
         </div>
         <p className="text-xs text-gray-500 mb-4">
-          * 카카오 로그인 시 카카오(주)가 제공하는 이름 및 전화번호를 수집하여 시공 요청 시
+          * 카카오 로그인 시 카카오(주)가 제공하는 전화번호(필수)를 수집하여 시공 요청 시
           자동 입력에 활용합니다. 이용자는 자동 입력된 정보를 직접 수정할 수 있습니다.
         </p>
 
-        <h3 className="text-sm font-bold text-gray-800 mb-2 mt-4">나. 시공 견적 요청 시 (이용자 직접 입력)</h3>
+        <h3 className="text-sm font-bold text-gray-800 mb-2 mt-4">다. 시공 견적 요청 시 (이용자 직접 입력)</h3>
         <div className="overflow-x-auto mb-4">
           <table className="w-full border border-gray-300 text-xs">
             <thead>
@@ -115,7 +140,7 @@ export default function PrivacyPage() {
           직접 입력하는 정보입니다.
         </p>
 
-        <h3 className="text-sm font-bold text-gray-800 mb-2 mt-4">다. 서비스 이용 과정에서 자동 수집</h3>
+        <h3 className="text-sm font-bold text-gray-800 mb-2 mt-4">라. 서비스 이용 과정에서 자동 수집</h3>
         <div className="overflow-x-auto">
           <table className="w-full border border-gray-300 text-xs">
             <thead>
