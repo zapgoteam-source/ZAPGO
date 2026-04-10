@@ -92,8 +92,9 @@ export default function PrivacyPage() {
           </table>
         </div>
         <p className="text-xs text-gray-500 mb-4">
-          * 카카오 로그인 시 카카오(주)가 제공하는 전화번호(필수)를 수집하여 시공 요청 시
-          자동 입력에 활용합니다. 이용자는 자동 입력된 정보를 직접 수정할 수 있습니다.
+          * 위 항목은 이용자가 카카오 로그인에 동의할 때 카카오(주)로부터 회사가 제공받는
+          정보입니다. 전화번호는 필수 동의 항목이며, 프로필 이미지·이메일은 선택 동의
+          항목입니다. 이용자는 카카오 앱에서 제공 동의를 철회할 수 있습니다.
         </p>
 
         <h3 className="text-sm font-bold text-gray-800 mb-2 mt-4">다. 시공 견적 요청 시 (이용자 직접 입력)</h3>
@@ -223,7 +224,7 @@ export default function PrivacyPage() {
         </p>
       </section>
 
-      {/* 5. 처리 위탁 - 카카오 명시 강화 */}
+      {/* 5. 처리 위탁 */}
       <section className="mb-8">
         <h2 className="text-base font-bold text-gray-900 mb-3">5. 개인정보 처리 위탁</h2>
         <p className="mb-3">
@@ -239,13 +240,6 @@ export default function PrivacyPage() {
             </thead>
             <tbody>
               <tr>
-                <td className="border border-gray-300 px-3 py-2">카카오(주)</td>
-                <td className="border border-gray-300 px-3 py-2">
-                  카카오싱크를 통한 소셜 로그인 서비스 제공 (카카오 계정 인증, 이름·닉네임·전화번호·프로필
-                  이미지·이메일 정보 전달)
-                </td>
-              </tr>
-              <tr>
                 <td className="border border-gray-300 px-3 py-2">Supabase Inc.</td>
                 <td className="border border-gray-300 px-3 py-2">
                   클라우드 데이터베이스 운영 및 사용자 인증 서비스 제공
@@ -257,6 +251,11 @@ export default function PrivacyPage() {
         <p className="text-xs text-gray-500 mt-2">
           위탁 계약 시 개인정보 보호 관련 법규 준수, 비밀 유지, 제3자 제공 금지, 사고 시
           책임 부담, 위탁 기간 종료 후 개인정보 반환·파기 의무 등을 규정하고 있습니다.
+        </p>
+        <p className="text-xs text-gray-500 mt-1">
+          * 카카오(주)는 수탁 업체가 아니라 카카오 로그인을 통해 이용자 정보를 회사에
+          제공하는 제공자입니다. 카카오(주)의 개인정보 처리에 관한 사항은 카카오
+          개인정보처리방침(kakao.com)을 참고하시기 바랍니다.
         </p>
       </section>
 
