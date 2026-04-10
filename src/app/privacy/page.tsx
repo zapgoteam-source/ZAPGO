@@ -71,7 +71,7 @@ export default function PrivacyPage() {
               <tr>
                 <td className="border border-gray-300 px-3 py-2">카카오 계정 전화번호</td>
                 <td className="border border-gray-300 px-3 py-2">시공 일정 조율, 상담 연락 및 자동 입력</td>
-                <td className="border border-gray-300 px-3 py-2 text-center">필수</td>
+                <td className="border border-gray-300 px-3 py-2 text-center">선택</td>
               </tr>
               <tr>
                 <td className="border border-gray-300 px-3 py-2">카카오 고유 식별자(ID)</td>
