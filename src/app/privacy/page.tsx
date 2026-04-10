@@ -66,7 +66,7 @@ export default function PrivacyPage() {
               <tr>
                 <td className="border border-gray-300 px-3 py-2">카카오 계정 닉네임</td>
                 <td className="border border-gray-300 px-3 py-2">회원 식별 및 서비스 내 표시</td>
-                <td className="border border-gray-300 px-3 py-2 text-center">필수</td>
+                <td className="border border-gray-300 px-3 py-2 text-center">기본 제공</td>
               </tr>
               <tr>
                 <td className="border border-gray-300 px-3 py-2">카카오 계정 전화번호</td>
@@ -76,7 +76,7 @@ export default function PrivacyPage() {
               <tr>
                 <td className="border border-gray-300 px-3 py-2">카카오 고유 식별자(ID)</td>
                 <td className="border border-gray-300 px-3 py-2">회원 고유 식별 및 중복 가입 방지</td>
-                <td className="border border-gray-300 px-3 py-2 text-center">필수</td>
+                <td className="border border-gray-300 px-3 py-2 text-center">기본 제공</td>
               </tr>
             </tbody>
           </table>
