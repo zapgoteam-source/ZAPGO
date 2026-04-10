@@ -74,16 +74,6 @@ export default function PrivacyPage() {
                 <td className="border border-gray-300 px-3 py-2 text-center">필수</td>
               </tr>
               <tr>
-                <td className="border border-gray-300 px-3 py-2">카카오 계정 프로필 이미지</td>
-                <td className="border border-gray-300 px-3 py-2">서비스 내 프로필 표시</td>
-                <td className="border border-gray-300 px-3 py-2 text-center">선택</td>
-              </tr>
-              <tr>
-                <td className="border border-gray-300 px-3 py-2">카카오 계정 이메일</td>
-                <td className="border border-gray-300 px-3 py-2">계정 복구, 중요 안내 발송</td>
-                <td className="border border-gray-300 px-3 py-2 text-center">선택</td>
-              </tr>
-              <tr>
                 <td className="border border-gray-300 px-3 py-2">카카오 고유 식별자(ID)</td>
                 <td className="border border-gray-300 px-3 py-2">회원 고유 식별 및 중복 가입 방지</td>
                 <td className="border border-gray-300 px-3 py-2 text-center">필수</td>
@@ -93,8 +83,7 @@ export default function PrivacyPage() {
         </div>
         <p className="text-xs text-gray-500 mb-4">
           * 위 항목은 이용자가 카카오 로그인에 동의할 때 카카오(주)로부터 회사가 제공받는
-          정보입니다. 전화번호는 필수 동의 항목이며, 프로필 이미지·이메일은 선택 동의
-          항목입니다. 이용자는 카카오 앱에서 제공 동의를 철회할 수 있습니다.
+          정보입니다. 이용자는 카카오 앱에서 제공 동의를 철회할 수 있습니다.
         </p>
 
         <h3 className="text-sm font-bold text-gray-800 mb-2 mt-4">다. 시공 견적 요청 시 (이용자 직접 입력)</h3>
