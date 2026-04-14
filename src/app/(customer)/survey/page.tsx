@@ -3,48 +3,50 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEstimateStore } from '@/store/estimateStore';
-import { SurveyAnswers, SurveyLevel } from '@/types';
+import { SurveyAnswers } from '@/types';
 
-const SURVEY_QUESTIONS = [
-  { key: 'heating_cost' as const, label: '냉난방비', icon: '🌡️', desc: '냉난방비가 많이 나오시나요?' },
-  { key: 'draft' as const, label: '외풍유입', icon: '💨', desc: '창문 주변으로 외풍이 들어오시나요?' },
-  { key: 'dust' as const, label: '먼지날림', icon: '🌫️', desc: '창틀 주변에 먼지가 많이 쌓이나요?' },
-  { key: 'bug' as const, label: '벌레유입', icon: '🐛', desc: '창문으로 벌레가 들어오시나요?' },
-  { key: 'noise' as const, label: '소음유입', icon: '🔊', desc: '외부 소음이 많이 들리시나요?' },
-  { key: 'odor' as const, label: '악취유입', icon: '🌀', desc: '외부 냄새가 들어오시나요?' },
-];
-
-const LEVEL_OPTIONS: { value: SurveyLevel; label: string; color: string }[] = [
-  { value: 0, label: '전혀없음', color: 'bg-gray-100 text-gray-600 border-gray-200' },
-  { value: 1, label: '약간있음', color: 'bg-blue-50 text-blue-600 border-blue-200' },
-  { value: 2, label: '심함', color: 'bg-orange-50 text-orange-600 border-orange-200' },
-  { value: 3, label: '매우심함', color: 'bg-red-50 text-red-600 border-red-200' },
+const SURVEY_QUESTIONS: { key: keyof SurveyAnswers; label: string; icon: string }[] = [
+  { key: 'heating_cost', label: '냉난방비', icon: '🌡️' },
+  { key: 'draft',        label: '외풍유입', icon: '💨' },
+  { key: 'dust',         label: '먼지날림', icon: '🌫️' },
+  { key: 'bug',          label: '벌레유입', icon: '🐛' },
+  { key: 'noise',        label: '소음유입', icon: '🔊' },
+  { key: 'odor',         label: '악취유입', icon: '🌀' },
 ];
 
 export default function SurveyPage() {
   const router = useRouter();
   const { setSurvey, recommendations } = useEstimateStore();
 
-  const [answers, setAnswers] = useState<SurveyAnswers>({
-    heating_cost: null,
-    draft: null,
-    dust: null,
-    bug: null,
-    noise: null,
-    odor: null,
-  });
+  const [selected, setSelected] = useState<Set<keyof SurveyAnswers>>(new Set());
 
-  const allAnswered = Object.values(answers).every((v) => v !== null);
+  const toggle = (key: keyof SurveyAnswers) => {
+    const next = new Set(selected);
+    if (next.has(key)) {
+      next.delete(key);
+    } else {
+      next.add(key);
+    }
+    setSelected(next);
 
-  const handleSelect = (key: keyof SurveyAnswers, value: SurveyLevel) => {
-    const updated = { ...answers, [key]: value };
-    setAnswers(updated);
-    // 실시간으로 store에 반영 (추천 계산용)
-    setSurvey(updated);
+    // store 실시간 반영 (선택 → 3, 미선택 → 0)
+    setSurvey(buildAnswers(next));
   };
 
+  const buildAnswers = (sel: Set<keyof SurveyAnswers>): SurveyAnswers => ({
+    heating_cost: sel.has('heating_cost') ? 3 : 0,
+    draft:        sel.has('draft')        ? 3 : 0,
+    dust:         sel.has('dust')         ? 3 : 0,
+    bug:          sel.has('bug')          ? 3 : 0,
+    noise:        sel.has('noise')        ? 3 : 0,
+    odor:         sel.has('odor')         ? 3 : 0,
+  });
+
+  const canNext = selected.size > 0;
+
   const handleNext = () => {
-    if (!allAnswered) return;
+    if (!canNext) return;
+    const answers = buildAnswers(selected);
     setSurvey(answers);
     router.push('/house-info');
   };
@@ -53,43 +55,42 @@ export default function SurveyPage() {
     <div className="flex flex-col min-h-screen">
       {/* 헤더 */}
       <div className="px-5 pt-6 pb-4">
-        <p className="text-xs text-gray-400 mb-1">STEP 1 / 4</p>
-        <h1 className="text-xl font-bold text-gray-900">문제 진단 설문</h1>
-        <p className="text-sm text-gray-500 mt-1">현재 창문 상태를 알려주세요</p>
+        <p className="text-xs text-gray-400 mb-1">STEP 1 / 3</p>
+        <h1 className="text-xl font-bold text-gray-900">현재 느끼고 계신 불편 사항을</h1>
+        <h1 className="text-xl font-bold text-gray-900">모두 선택해 주세요</h1>
+        <p className="text-sm text-gray-500 mt-1">해당하는 항목을 모두 눌러주세요</p>
       </div>
 
-      {/* 설문 항목 */}
-      <div className="flex-1 px-5 space-y-5 pb-4">
-        {SURVEY_QUESTIONS.map((q) => (
-          <div key={q.key} className="bg-gray-50 p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xl">{q.icon}</span>
-              <div>
-                <p className="font-semibold text-gray-900 text-sm">{q.label}</p>
-                <p className="text-xs text-gray-500">{q.desc}</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-4 gap-2">
-              {LEVEL_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => handleSelect(q.key, opt.value)}
-                  className={`py-2 px-1 border text-xs font-medium transition-all ${
-                    answers[q.key] === opt.value
-                      ? 'ring-2 ring-offset-1 ring-gray-900 ' + opt.color
-                      : opt.color + ' opacity-70'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
+      {/* 선택 카드 */}
+      <div className="flex-1 px-5 pb-4">
+        <div className="grid grid-cols-2 gap-3">
+          {SURVEY_QUESTIONS.map((q) => {
+            const isSelected = selected.has(q.key);
+            return (
+              <button
+                key={q.key}
+                onClick={() => toggle(q.key)}
+                className={`relative flex flex-col items-center justify-center gap-2 py-6 border-2 transition-all ${
+                  isSelected
+                    ? 'border-gray-900 bg-gray-900 text-white'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-gray-400'
+                }`}
+              >
+                {isSelected && (
+                  <span className="absolute top-2 right-2 text-xs font-bold text-white bg-gray-700 rounded-full w-5 h-5 flex items-center justify-center">
+                    ✓
+                  </span>
+                )}
+                <span className="text-3xl">{q.icon}</span>
+                <span className="text-sm font-semibold">{q.label}</span>
+              </button>
+            );
+          })}
+        </div>
 
         {/* 추천 표시 */}
-        {allAnswered && recommendations.length > 0 && (
-          <div className="bg-yellow-50 border border-yellow-200 p-4">
+        {selected.size > 0 && recommendations.length > 0 && (
+          <div className="bg-yellow-50 border border-yellow-200 p-4 mt-5">
             <p className="text-sm font-bold text-yellow-800 mb-2">💡 추천 시공</p>
             <ul className="space-y-2">
               {recommendations.map((rec, i) => (
@@ -113,14 +114,14 @@ export default function SurveyPage() {
       <div className="px-5 pb-6 pt-3 space-y-3 border-t border-gray-100 bg-white">
         <button
           onClick={handleNext}
-          disabled={!allAnswered}
+          disabled={!canNext}
           className="w-full py-4 bg-gray-900 text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors"
         >
           다음
         </button>
         <div className="flex gap-2">
           <a
-            href="tel:0000000000"
+            href="tel:16009195"
             className="flex-1 py-3 border border-gray-200 text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
           >
             📞 상담원 연결

@@ -3,58 +3,59 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEstimateStore } from '@/store/estimateStore';
-import { MaterialType } from '@/types';
 
-const MATERIAL_OPTIONS: { value: MaterialType; label: string; desc: string; pros: string[] }[] = [
-  {
-    value: 'FABRIC',
-    label: '패브릭씰러',
-    desc: '고성능 단열 자재',
-    pros: ['단열 효과 탁월', '소음 차단', '외풍 완전 차단'],
-  },
-  {
-    value: 'MOHAIR',
-    label: '일반모헤어',
-    desc: '표준 창틀 보수 자재',
-    pros: ['경제적인 가격', '간단한 시공', '기본 단열 효과'],
-  },
-];
+const PREMIUM_PROTECTION_PRICE = 80000;
+const PEST_SCREEN_UNIT_PRICE = 23000;
 
 export default function HouseInfoPage() {
   const router = useRouter();
-  const { housingAreaPyeong, materialType, setHousingArea, setMaterialType } = useEstimateStore();
+  const {
+    housingAreaPyeong,
+    windowSashCount,
+    premiumProtection,
+    pestSolution,
+    pestScreenCount,
+    setHousingArea,
+    setWindowSashCount,
+    setPremiumProtection,
+    setPestSolution,
+    setPestScreenCount,
+  } = useEstimateStore();
 
   const [pyeong, setPyeong] = useState<string>(
     housingAreaPyeong !== null ? String(housingAreaPyeong) : ''
   );
-  const [selectedMaterial, setSelectedMaterial] = useState<MaterialType>(materialType);
+  const [sashCount, setSashCount] = useState<string>(
+    windowSashCount !== null ? String(windowSashCount) : ''
+  );
 
   const pyeongNum = parseFloat(pyeong);
-  const isValid = !isNaN(pyeongNum) && pyeongNum > 0;
+  const sashNum = parseInt(sashCount, 10);
+  const isPyeongValid = !isNaN(pyeongNum) && pyeongNum > 0;
+  const isSashValid = !isNaN(sashNum) && sashNum > 0;
+  const isValid = isPyeongValid && isSashValid;
 
   const handleNext = () => {
     if (!isValid) return;
     setHousingArea(pyeongNum);
-    setMaterialType(selectedMaterial);
-    router.push('/windows');
+    setWindowSashCount(sashNum);
+    router.push('/estimate');
   };
 
   return (
     <div className="flex flex-col min-h-screen">
       {/* 헤더 */}
       <div className="px-5 pt-6 pb-4">
-        <button
-          onClick={() => router.back()}
-          className="text-gray-400 text-sm mb-3 flex items-center gap-1"
-        >
+        <button onClick={() => router.back()} className="text-gray-400 text-sm mb-3 flex items-center gap-1">
           ← 뒤로
         </button>
-        <p className="text-xs text-gray-400 mb-1">STEP 2 / 4</p>
+        <p className="text-xs text-gray-400 mb-1">STEP 2 / 3</p>
         <h1 className="text-xl font-bold text-gray-900">주택 정보 입력</h1>
-        <p className="text-sm text-gray-500 mt-1">평형과 시공 자재를 선택해주세요</p>
+        <p className="text-sm text-gray-500 mt-1">평형과 창짝 정보를 입력해주세요</p>
       </div>
 
-      <div className="flex-1 px-5 space-y-6">
+      <div className="flex-1 px-5 space-y-7 pb-4">
+
         {/* 평형 입력 */}
         <div>
           <label className="block text-sm font-semibold text-gray-800 mb-2">
@@ -70,74 +71,129 @@ export default function HouseInfoPage() {
               max="200"
               className="w-full py-4 px-4 pr-12 border-2 border-gray-200 text-base focus:outline-none focus:border-gray-900 transition-colors"
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
-              평
-            </span>
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">평</span>
           </div>
-          {pyeong && !isValid && (
+          {pyeong && !isPyeongValid && (
             <p className="text-xs text-red-500 mt-1">올바른 평형을 입력해주세요 (1평 이상)</p>
           )}
-          {isValid && pyeongNum >= 60 && (
+          {isPyeongValid && pyeongNum >= 60 && (
             <div className="mt-2 bg-orange-50 p-2">
               <p className="text-xs text-orange-600">60평 이상은 작업 인원 5명이 기본 배정됩니다</p>
             </div>
           )}
         </div>
 
-        {/* 자재 선택 */}
+        {/* 창짝 수 입력 */}
         <div>
-          <label className="block text-sm font-semibold text-gray-800 mb-2">
-            시공 자재 선택 <span className="text-red-400">*</span>
-          </label>
-          <div className="space-y-3">
-            {MATERIAL_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => setSelectedMaterial(opt.value)}
-                className={`w-full text-left p-4 border-2 transition-all ${
-                  selectedMaterial === opt.value
-                    ? 'border-gray-900 bg-gray-900 text-white'
-                    : 'border-gray-200 bg-white text-gray-800 hover:border-gray-300'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-semibold text-sm">{opt.label}</span>
-                  {selectedMaterial === opt.value && (
-                    <span className="text-xs bg-white text-gray-900 px-2 py-0.5 font-medium">
-                      선택됨
-                    </span>
-                  )}
-                </div>
-                <p
-                  className={`text-xs mb-2 ${
-                    selectedMaterial === opt.value ? 'text-gray-300' : 'text-gray-500'
-                  }`}
-                >
-                  {opt.desc}
-                </p>
-                <ul className="space-y-0.5">
-                  {opt.pros.map((pro, i) => (
-                    <li
-                      key={i}
-                      className={`text-xs flex items-center gap-1 ${
-                        selectedMaterial === opt.value ? 'text-gray-300' : 'text-gray-500'
-                      }`}
-                    >
-                      <span>✓</span> {pro}
-                    </li>
-                  ))}
-                </ul>
-              </button>
-            ))}
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-semibold text-gray-800">
+              창짝 수 입력 <span className="text-red-400">*</span>
+            </label>
+            {/* 추후 영상 링크 제공 예정 */}
+            <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1">
+              창짝이란? 영상 준비 중
+            </span>
           </div>
+          <div className="relative">
+            <input
+              type="number"
+              value={sashCount}
+              onChange={(e) => setSashCount(e.target.value)}
+              placeholder="예: 10"
+              min="1"
+              className="w-full py-4 px-4 pr-12 border-2 border-gray-200 text-base focus:outline-none focus:border-gray-900 transition-colors"
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">짝</span>
+          </div>
+          {sashCount && !isSashValid && (
+            <p className="text-xs text-red-500 mt-1">올바른 창짝 수를 입력해주세요 (1 이상)</p>
+          )}
+          <p className="text-xs text-gray-400 mt-1.5">창문 하나에 여닫이 패널 개수를 모두 더한 총 개수입니다</p>
         </div>
 
-        <div className="bg-blue-50 p-3">
-          <p className="text-xs text-blue-700">
-            💡 패브릭씰러와 일반모헤어는 한 현장에서 혼합 사용하지 않습니다.
-            <br />
-            창별로 탈거 4면 시공과 측면 시공은 혼합 가능합니다.
-          </p>
+        {/* 추가 옵션 */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-800 mb-3">추가 옵션</label>
+          <div className="space-y-3">
+
+            {/* 프리미엄 보양 */}
+            <button
+              type="button"
+              onClick={() => setPremiumProtection(!premiumProtection)}
+              className={`w-full text-left p-4 border-2 transition-all ${
+                premiumProtection
+                  ? 'border-[#b10000] bg-white text-gray-900'
+                  : 'border-gray-200 bg-white text-gray-800 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-sm">프리미엄 보양</p>
+                  <p className="text-xs mt-0.5 text-gray-500">
+                    고급 보양재로 시공 중 오염·스크래치 완벽 방지
+                  </p>
+                </div>
+                <div className="text-right shrink-0 ml-3">
+                  <p className={`text-sm font-bold ${premiumProtection ? 'text-[#b10000]' : 'text-gray-700'}`}>
+                    +{PREMIUM_PROTECTION_PRICE.toLocaleString()}원
+                  </p>
+                  <p className="text-xs mt-0.5 text-gray-400">1회</p>
+                </div>
+              </div>
+            </button>
+
+            {/* 방충솔루션 */}
+            <div className={`border-2 transition-all ${pestSolution ? 'border-[#b10000]' : 'border-gray-200'}`}>
+              <button
+                type="button"
+                onClick={() => setPestSolution(!pestSolution)}
+                className="w-full text-left p-4 bg-white text-gray-800 hover:bg-gray-50 transition-all"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-sm">방충솔루션</p>
+                    <p className="text-xs mt-0.5 text-gray-500">
+                      방충망 틈새 차단으로 벌레 유입 원천 방지
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0 ml-3">
+                    <p className={`text-sm font-bold ${pestSolution ? 'text-[#b10000]' : 'text-gray-700'}`}>
+                      +{PEST_SCREEN_UNIT_PRICE.toLocaleString()}원
+                    </p>
+                    <p className="text-xs mt-0.5 text-gray-400">방충망 1개당</p>
+                  </div>
+                </div>
+              </button>
+
+              {/* 방충망 수량 입력 (방충솔루션 선택 시 노출) */}
+              {pestSolution && (
+                <div className="px-4 pb-4 bg-gray-50 border-t border-gray-200">
+                  <p className="text-xs text-gray-500 mb-2 pt-3">방충망 수량을 입력해주세요</p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setPestScreenCount(Math.max(1, pestScreenCount - 1))}
+                      className="w-10 h-10 border border-gray-300 text-gray-700 text-xl flex items-center justify-center hover:bg-gray-200 transition-colors"
+                    >
+                      −
+                    </button>
+                    <span className="flex-1 text-center text-gray-900 font-bold text-lg">
+                      {pestScreenCount}개
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPestScreenCount(pestScreenCount + 1)}
+                      className="w-10 h-10 border border-gray-300 text-gray-700 text-xl flex items-center justify-center hover:bg-gray-200 transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -152,7 +208,7 @@ export default function HouseInfoPage() {
         </button>
         <div className="flex gap-2">
           <a
-            href="tel:0000000000"
+            href="tel:16009195"
             className="flex-1 py-3 border border-gray-200 text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
           >
             📞 상담원 연결

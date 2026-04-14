@@ -258,6 +258,16 @@ img[src*="2555936eae5a1"] {
   user-drag: none;
 }
 
+/* 금액 변경 애니메이션 */
+@keyframes price-change {
+  0%   { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-price-change {
+  animation: price-change 0.25s ease-out forwards;
+}
+
 /* Custom scrollbar styling for dropdown */
 .scrollbar-thin {
   scrollbar-width: thin;

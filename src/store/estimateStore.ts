@@ -72,6 +72,11 @@ interface EstimateStore {
   surveyAnswers: SurveyAnswers;
   housingAreaPyeong: number | null;
   materialType: MaterialType;
+  windowSashCount: number | null;
+  premiumProtection: boolean;
+  pestSolution: boolean;
+  pestScreenCount: number;
+  selectedPlan: 'main' | 'alt1' | 'alt2';
   windows: WindowInput[];
   recommendations: Recommendation[];
   _savedAt?: number; // persist 만료 체크용 (직접 사용 금지)
@@ -80,6 +85,11 @@ interface EstimateStore {
   setSurvey: (answers: SurveyAnswers) => void;
   setHousingArea: (pyeong: number) => void;
   setMaterialType: (type: MaterialType) => void;
+  setWindowSashCount: (count: number) => void;
+  setPremiumProtection: (value: boolean) => void;
+  setPestSolution: (value: boolean) => void;
+  setPestScreenCount: (count: number) => void;
+  setSelectedPlan: (plan: 'main' | 'alt1' | 'alt2') => void;
   addWindow: (window: WindowInput) => void;
   updateWindow: (id: string, updates: Partial<WindowInput>) => void;
   removeWindow: (id: string) => void;
@@ -113,6 +123,11 @@ export const useEstimateStore = create<EstimateStore>()(
       surveyAnswers: initialSurveyAnswers,
       housingAreaPyeong: null,
       materialType: 'FABRIC',
+      windowSashCount: null,
+      premiumProtection: false,
+      pestSolution: false,
+      pestScreenCount: 1,
+      selectedPlan: 'main',
       windows: [],
       recommendations: [],
 
@@ -127,6 +142,26 @@ export const useEstimateStore = create<EstimateStore>()(
 
       setMaterialType: (type) => {
         set({ materialType: type });
+      },
+
+      setWindowSashCount: (count) => {
+        set({ windowSashCount: count });
+      },
+
+      setPremiumProtection: (value) => {
+        set({ premiumProtection: value });
+      },
+
+      setPestSolution: (value) => {
+        set({ pestSolution: value, ...(value ? {} : { pestScreenCount: 1 }) });
+      },
+
+      setPestScreenCount: (count) => {
+        set({ pestScreenCount: count });
+      },
+
+      setSelectedPlan: (plan) => {
+        set({ selectedPlan: plan });
       },
 
       addWindow: (window) => {
@@ -167,6 +202,11 @@ export const useEstimateStore = create<EstimateStore>()(
           surveyAnswers: initialSurveyAnswers,
           housingAreaPyeong: null,
           materialType: 'FABRIC',
+          windowSashCount: null,
+          premiumProtection: false,
+          pestSolution: false,
+          pestScreenCount: 1,
+          selectedPlan: 'main',
           windows: [],
           recommendations: [],
         });
@@ -210,6 +250,11 @@ export const useEstimateStore = create<EstimateStore>()(
         surveyAnswers: s.surveyAnswers,
         housingAreaPyeong: s.housingAreaPyeong,
         materialType: s.materialType,
+        windowSashCount: s.windowSashCount,
+        premiumProtection: s.premiumProtection,
+        pestSolution: s.pestSolution,
+        pestScreenCount: s.pestScreenCount,
+        selectedPlan: s.selectedPlan,
         windows: s.windows,
         recommendations: s.recommendations,
         _savedAt: Date.now(),
