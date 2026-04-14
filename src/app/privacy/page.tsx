@@ -6,7 +6,7 @@ export default function PrivacyPage() {
   return (
     <div className="max-w-2xl mx-auto px-6 py-12 text-sm text-gray-700 leading-relaxed">
       <h1 className="text-2xl font-bold text-gray-900 mb-2">개인정보 처리방침</h1>
-      <p className="text-gray-400 text-xs mb-8">시행일: 2026년 3월 31일 | 최종 수정일: 2026년 4월 10일</p>
+      <p className="text-gray-400 text-xs mb-8">시행일: 2026년 3월 31일 | 최종 수정일: 2026년 4월 12일</p>
 
       <p className="mb-6">
         에너지잡고(이하 &ldquo;회사&rdquo;)는 이용자의 개인정보를 중요시하며, 「개인정보 보호법」 및 관련
@@ -22,7 +22,7 @@ export default function PrivacyPage() {
           조건(필수/선택)을 명확히 구분합니다.
         </p>
 
-        <h3 className="text-sm font-bold text-gray-800 mb-2 mt-4">가. 회원가입 시 (이메일 회원가입)</h3>
+        <h3 className="text-sm font-bold text-gray-800 mb-2 mt-4">가. 회원가입 시 (아이디 회원가입)</h3>
         <div className="overflow-x-auto mb-4">
           <table className="w-full border border-gray-300 text-xs">
             <thead>
@@ -39,8 +39,13 @@ export default function PrivacyPage() {
                 <td className="border border-gray-300 px-3 py-2 text-center">필수</td>
               </tr>
               <tr>
-                <td className="border border-gray-300 px-3 py-2">이메일</td>
-                <td className="border border-gray-300 px-3 py-2">로그인 계정, 계정 복구, 중요 안내 발송</td>
+                <td className="border border-gray-300 px-3 py-2">연락처(전화번호)</td>
+                <td className="border border-gray-300 px-3 py-2">견적 안내 및 서비스 연락</td>
+                <td className="border border-gray-300 px-3 py-2 text-center">필수</td>
+              </tr>
+              <tr>
+                <td className="border border-gray-300 px-3 py-2">아이디</td>
+                <td className="border border-gray-300 px-3 py-2">로그인 계정 식별</td>
                 <td className="border border-gray-300 px-3 py-2 text-center">필수</td>
               </tr>
               <tr>
@@ -86,7 +91,7 @@ export default function PrivacyPage() {
           정보입니다. 이용자는 카카오 앱에서 제공 동의를 철회할 수 있습니다.
         </p>
 
-        <h3 className="text-sm font-bold text-gray-800 mb-2 mt-4">다. 시공 견적 요청 시 (이용자 직접 입력)</h3>
+        <h3 className="text-sm font-bold text-gray-800 mb-2 mt-4">다. 방문 견적 요청 시 (이용자 직접 입력)</h3>
         <div className="overflow-x-auto mb-4">
           <table className="w-full border border-gray-300 text-xs">
             <thead>
@@ -98,36 +103,30 @@ export default function PrivacyPage() {
             </thead>
             <tbody>
               <tr>
-                <td className="border border-gray-300 px-3 py-2">이름</td>
-                <td className="border border-gray-300 px-3 py-2">시공 예약 및 고객 식별</td>
+                <td className="border border-gray-300 px-3 py-2">연락처(전화번호)</td>
+                <td className="border border-gray-300 px-3 py-2">방문 일정 조율 및 상담 연락</td>
                 <td className="border border-gray-300 px-3 py-2 text-center">필수</td>
               </tr>
               <tr>
-                <td className="border border-gray-300 px-3 py-2">전화번호</td>
-                <td className="border border-gray-300 px-3 py-2">시공 일정 조율 및 상담 연락</td>
+                <td className="border border-gray-300 px-3 py-2">주소(상세주소 포함)</td>
+                <td className="border border-gray-300 px-3 py-2">방문 견적 장소 확인</td>
                 <td className="border border-gray-300 px-3 py-2 text-center">필수</td>
               </tr>
               <tr>
-                <td className="border border-gray-300 px-3 py-2">주소</td>
-                <td className="border border-gray-300 px-3 py-2">시공 장소 확인 및 방문 견적</td>
-                <td className="border border-gray-300 px-3 py-2 text-center">선택</td>
+                <td className="border border-gray-300 px-3 py-2">해결 희망 문제 유형</td>
+                <td className="border border-gray-300 px-3 py-2">맞춤 견적 및 시공 방법 안내</td>
+                <td className="border border-gray-300 px-3 py-2 text-center">필수</td>
               </tr>
               <tr>
-                <td className="border border-gray-300 px-3 py-2">희망 시공일</td>
-                <td className="border border-gray-300 px-3 py-2">시공 일정 조율</td>
-                <td className="border border-gray-300 px-3 py-2 text-center">선택</td>
-              </tr>
-              <tr>
-                <td className="border border-gray-300 px-3 py-2">추가 요청사항</td>
-                <td className="border border-gray-300 px-3 py-2">고객 요청 반영</td>
+                <td className="border border-gray-300 px-3 py-2">추가 전달 내용</td>
+                <td className="border border-gray-300 px-3 py-2">고객 요청사항 반영</td>
                 <td className="border border-gray-300 px-3 py-2 text-center">선택</td>
               </tr>
             </tbody>
           </table>
         </div>
         <p className="text-xs text-gray-500 mb-4">
-          * 시공 견적 요청 시 수집하는 이름, 전화번호, 주소는 카카오 로그인과 별도로 이용자가
-          직접 입력하는 정보입니다.
+          * 방문 견적 요청 시 수집하는 정보는 비회원도 제출할 수 있으며, 상담 완료 후 1년까지 보유 후 파기합니다.
         </p>
 
         <h3 className="text-sm font-bold text-gray-800 mb-2 mt-4">라. 서비스 이용 과정에서 자동 수집</h3>
