@@ -119,7 +119,7 @@ export default function SubmitPage() {
     .join(', ');
 
   const handleSubmit = async () => {
-    if (!name || !phone) { setError('이름과 연락처는 필수 입력 항목입니다'); return; }
+    if (!name || !phone || !address) { setError('이름, 연락처, 주소는 필수 입력 항목입니다'); return; }
     if (!housingAreaPyeong || !windowSashCount || !mainTotal) { setError('견적 정보가 없습니다. 다시 시작해주세요'); return; }
 
     setSubmitting(true);
@@ -261,7 +261,7 @@ export default function SubmitPage() {
           />
         </FormField>
 
-        <FormField label="주소">
+        <FormField label="주소" required>
           <input
             type="text"
             value={address}
@@ -300,7 +300,7 @@ export default function SubmitPage() {
       <div className="px-5 pb-6 pt-3 space-y-3 border-t border-gray-100 bg-white">
         <button
           onClick={handleSubmit}
-          disabled={submitting || !name || !phone}
+          disabled={submitting || !name || !phone || !address}
           className="w-full py-4 bg-gray-900 text-white font-semibold text-base disabled:opacity-40 hover:bg-gray-800 transition-colors"
         >
           {submitting ? '제출 중...' : '시공 요청 제출'}
