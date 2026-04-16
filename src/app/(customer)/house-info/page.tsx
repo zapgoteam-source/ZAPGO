@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEstimateStore } from '@/store/estimateStore';
 import { useAuth } from '@/contexts/AuthContext';
+import PageTransition from '@/components/PageTransition';
 
 const PREMIUM_PROTECTION_PRICE = 80000;
 const PEST_SCREEN_UNIT_PRICE = 23000;
@@ -46,6 +47,7 @@ export default function HouseInfoPage() {
   };
 
   return (
+    <PageTransition>
     <div className="flex flex-col min-h-screen">
       {/* 헤더 */}
       <div className="px-5 pt-6 pb-4">
@@ -256,5 +258,6 @@ export default function HouseInfoPage() {
         </div>
       )}
     </div>
+    </PageTransition>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { signInWithKakao } from '@/lib/supabase';
+import PageTransition from '@/components/PageTransition';
 
 export default function LoginGatePage() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function LoginGatePage() {
   };
 
   return (
+    <PageTransition>
     <div className="relative flex flex-col min-h-screen items-center justify-center overflow-hidden bg-gray-900">
       {/* 배경 유튜브 영상 — Shorts(9:16) 세로 영상을 화면에 꽉 채움 */}
       <div className="absolute inset-0 overflow-hidden">
@@ -57,5 +59,6 @@ export default function LoginGatePage() {
         </button>
       </div>
     </div>
+    </PageTransition>
   );
 }

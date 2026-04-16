@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEstimateStore } from '@/store/estimateStore';
+import PageTransition from '@/components/PageTransition';
 
 function useCountUp(target: number, duration = 400) {
   const [display, setDisplay] = useState(target);
@@ -110,6 +111,7 @@ export default function EstimatePage() {
 
   if (!housingAreaPyeong || !windowSashCount) {
     return (
+      <PageTransition>
       <div className="flex flex-col min-h-screen items-center justify-center px-5 gap-4">
         <p className="text-gray-500 text-sm">주택 정보를 먼저 입력해주세요</p>
         <button
@@ -119,10 +121,12 @@ export default function EstimatePage() {
           정보 입력하러 가기
         </button>
       </div>
+      </PageTransition>
     );
   }
 
   return (
+    <PageTransition>
     <div className="flex flex-col min-h-screen">
       {/* 헤더 */}
       <div className="px-5 pt-6 pb-4">
@@ -223,5 +227,6 @@ export default function EstimatePage() {
         </div>
       </div>
     </div>
+    </PageTransition>
   );
 }

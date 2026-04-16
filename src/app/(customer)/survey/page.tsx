@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEstimateStore } from '@/store/estimateStore';
 import { SurveyAnswers } from '@/types';
+import PageTransition from '@/components/PageTransition';
 
 const SURVEY_QUESTIONS: { key: keyof SurveyAnswers; label: string; icon: string }[] = [
   { key: 'dust',         label: '먼지날림', icon: '🌫️' },
@@ -61,6 +62,7 @@ export default function SurveyPage() {
   };
 
   return (
+    <PageTransition>
     <div className="flex flex-col min-h-screen">
       {/* 헤더 */}
       <div className="px-5 pt-6 pb-4">
@@ -169,5 +171,6 @@ export default function SurveyPage() {
         </div>
       )}
     </div>
+    </PageTransition>
   );
 }

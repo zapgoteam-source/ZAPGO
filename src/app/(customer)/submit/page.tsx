@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEstimateStore } from '@/store/estimateStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import PageTransition from '@/components/PageTransition';
 
 // 견적 계산 (estimate 페이지와 동일한 로직)
 const LABOR_PER_WORKER = 250_000;
@@ -193,6 +194,7 @@ export default function SubmitPage() {
 
   if (submitted) {
     return (
+      <PageTransition>
       <div className="flex flex-col min-h-screen items-center justify-center px-5 text-center">
         <div className="w-16 h-16 bg-green-100 flex items-center justify-center mx-auto mb-4">
           <span className="text-3xl">✓</span>
@@ -216,10 +218,12 @@ export default function SubmitPage() {
           </a>
         </div>
       </div>
+      </PageTransition>
     );
   }
 
   return (
+    <PageTransition>
     <div className="flex flex-col min-h-screen">
       <div className="px-5 pt-6 pb-4">
         <button onClick={() => router.back()} className="text-gray-400 text-sm mb-3">← 뒤로</button>
@@ -315,6 +319,7 @@ export default function SubmitPage() {
         </div>
       </div>
     </div>
+    </PageTransition>
   );
 }
 
