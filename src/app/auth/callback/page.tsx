@@ -9,20 +9,35 @@ function CallbackHandler() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const code = searchParams.get('code');
     const next = searchParams.get('next') || '/';
 
-    const handleCallback = async () => {
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error) {
-          console.error('[auth/callback] 세션 교환 실패:', error);
-        }
+    // detectSessionInUrl: true 가 자동으로 code 교환 처리
+    // SIGNED_IN 이벤트를 기다렸다가 redirect
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+        subscription.unsubscribe();
+        router.replace(next);
       }
-      router.replace(next);
-    };
+    });
 
-    handleCallback();
+    // 이미 로그인된 경우 바로 redirect
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        subscription.unsubscribe();
+        router.replace(next);
+      }
+    });
+
+    // 5초 후 fallback redirect
+    const timeout = setTimeout(() => {
+      subscription.unsubscribe();
+      router.replace(next);
+    }, 5000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, [router, searchParams]);
 
   return (
