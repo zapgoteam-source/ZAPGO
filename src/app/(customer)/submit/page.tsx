@@ -87,8 +87,10 @@ export default function SubmitPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    console.log('[Auth user]', user);
     if (!user) return;
     const meta = user.user_metadata;
+    console.log('[Kakao meta]', JSON.stringify(meta, null, 2));
     if (!meta) return;
     setName((prev) => prev || meta.name || meta.full_name || '');
     setPhone((prev) => prev || formatKakaoPhone(meta.phone_number || meta.phone || ''));
