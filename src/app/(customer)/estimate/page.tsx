@@ -37,26 +37,24 @@ function useCountUp(target: number, duration = 400) {
   return display;
 }
 
-const UNIT = {
-  fabric_four: { medium: 30_000, large: 40_000, xlarge: 50_000 },
-  mohair_four: { medium: 15_000, large: 20_000, xlarge: 25_000 },
-  fabric_side: { medium: 15_000, large: 20_000, xlarge: 25_000 },
-} as const;
+const LABOR_PER_WORKER = 250_000;
+const FABRIC_FOUR_UNIT = 30_000;
+const MOHAIR_FOUR_UNIT = 15_000;
+const SIDE_ONLY_UNIT = 15_000;
+const VAT_RATE = 1.1;
 
-type SizeKey = 'medium' | 'large' | 'xlarge';
 type PlanKey = 'main' | 'alt1' | 'alt2';
 
-function getSizeKey(pyeong: number): SizeKey {
-  if (pyeong < 23) return 'medium';
-  if (pyeong < 38) return 'large';
-  return 'xlarge';
-}
-
 function getWorkerCount(pyeong: number): number {
-  if (pyeong >= 60) return 5;
+  if (pyeong >= 71) return 6;
+  if (pyeong >= 51) return 5;
   if (pyeong >= 38) return 4;
   if (pyeong >= 23) return 3;
   return 2;
+}
+
+function withVAT(amount: number): number {
+  return Math.round(amount * VAT_RATE);
 }
 
 function formatKRW(amount: number): string {
@@ -82,6 +80,34 @@ export default function EstimatePage() {
     setSelectedPlan(key);
   };
 
+  const workerCount = housingAreaPyeong ? getWorkerCount(housingAreaPyeong) : 0;
+  const laborCost = LABOR_PER_WORKER * workerCount;
+  const optionCost =
+    (premiumProtection ? 80_000 : 0) +
+    (pestSolution ? pestScreenCount * 23_000 : 0);
+  const sash = windowSashCount ?? 0;
+
+  const plans: Record<PlanKey, { label: string; total: number; workerCount: number }> = {
+    main: {
+      label: '창짝 패브릭씰러 시공 (창문 탈거)',
+      total: withVAT(laborCost + sash * FABRIC_FOUR_UNIT + optionCost),
+      workerCount,
+    },
+    alt1: {
+      label: '일반 모헤어 4면',
+      total: withVAT(laborCost + sash * MOHAIR_FOUR_UNIT + optionCost),
+      workerCount,
+    },
+    alt2: {
+      label: '창짝 측면만 패브릭씰러 시공 (창문 미탈거)',
+      total: withVAT(LABOR_PER_WORKER * 1 + sash * SIDE_ONLY_UNIT + optionCost),
+      workerCount: 1,
+    },
+  };
+
+  const current = plans[selected];
+  const animatedTotal = useCountUp(current.total);
+
   if (!housingAreaPyeong || !windowSashCount) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center px-5 gap-4">
@@ -95,34 +121,6 @@ export default function EstimatePage() {
       </div>
     );
   }
-
-  const sizeKey = getSizeKey(housingAreaPyeong);
-  const workerCount = getWorkerCount(housingAreaPyeong);
-  const laborCost = 300_000 * workerCount;
-  const optionCost =
-    (premiumProtection ? 80_000 : 0) +
-    (pestSolution ? pestScreenCount * 23_000 : 0);
-
-  const plans: Record<PlanKey, { label: string; total: number; workerCount: number }> = {
-    main: {
-      label: '패브릭씰러 탈거 4면',
-      total: laborCost + windowSashCount * UNIT.fabric_four[sizeKey] + optionCost,
-      workerCount,
-    },
-    alt1: {
-      label: '일반 모헤어 4면',
-      total: laborCost + windowSashCount * UNIT.mohair_four[sizeKey] + optionCost,
-      workerCount,
-    },
-    alt2: {
-      label: '패브릭씰러 측면만',
-      total: 300_000 + windowSashCount * UNIT.fabric_side[sizeKey] + optionCost,
-      workerCount: 1,
-    },
-  };
-
-  const current = plans[selected];
-  const animatedTotal = useCountUp(current.total);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -139,7 +137,7 @@ export default function EstimatePage() {
 
         {/* 총 예상금액 */}
         <div className="bg-gray-900 p-5">
-          <p className="text-gray-400 text-sm mb-1">총 예상 금액 (부가세 별도)</p>
+          <p className="text-gray-400 text-sm mb-1">총 예상 금액 (VAT포함)</p>
           <p className="text-4xl font-bold text-white tabular-nums">
             {animatedTotal.toLocaleString('ko-KR')}원
           </p>
@@ -156,7 +154,6 @@ export default function EstimatePage() {
           )}
         </div>
 
-
         {/* 대안 1 */}
         <button
           onClick={() => handleSelect(selected === 'alt1' ? 'main' : 'alt1')}
@@ -169,11 +166,11 @@ export default function EstimatePage() {
             {selected === 'alt1' && <span className="ml-2 text-[#b10000]">선택됨 ✓</span>}
           </p>
           <p className="text-sm text-gray-700">
-            일반 모헤어 시공으로 변경하시면{' '}
+            자재를 일반 모헤어로 변경하면{' '}
             <span className="font-bold text-[#b10000] text-base">{formatKRW(plans.alt1.total)}</span>
-            {' '}에 가능합니다.
+            {' '}에 해드릴 수 있습니다.
           </p>
-          <p className="text-xs text-gray-400 mt-1">단열 효과는 다소 낮지만 경제적인 선택입니다.</p>
+          <p className="text-xs text-gray-400 mt-1">시간이 지나면 털이 날리겠지만 경제적인 선택입니다.</p>
         </button>
 
         {/* 대안 2 */}
@@ -188,16 +185,17 @@ export default function EstimatePage() {
             {selected === 'alt2' && <span className="ml-2 text-[#b10000]">선택됨 ✓</span>}
           </p>
           <p className="text-sm text-gray-700">
-            측면만 교체하시면{' '}
+            탈거 없이 창짝의 측면만 하면{' '}
             <span className="font-bold text-[#b10000] text-base">{formatKRW(plans.alt2.total)}</span>
-            {' '}에 하실 수 있습니다.
+            {' '}에 교체하실 수 있습니다.
           </p>
-          <p className="text-xs text-gray-400 mt-1">창틀 측면 부분만 시공하는 간편 방식입니다.</p>
+          <p className="text-xs text-gray-400 mt-1">창문 측면 털날림은 완전히 해결됩니다.</p>
         </button>
 
         <p className="text-xs text-gray-400 text-center leading-relaxed">
-          패브릭씰러 탈거 4면 시공 기준 참고용 예상 금액입니다.<br />
-          실측 후 창문 상태·현장 상황에 따라 변동될 수 있습니다.
+          위 금액은 입력된 기초 정보에 따른 예상 견적입니다.<br />
+          실제 시공 환경, 창틀 모헤어 유무, 창문 상태에 따라<br />
+          최종 견적은 일부 조정될 수 있습니다.
         </p>
       </div>
 

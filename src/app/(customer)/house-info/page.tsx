@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEstimateStore } from '@/store/estimateStore';
+import { useAuth } from '@/contexts/AuthContext';
 
 const PREMIUM_PROTECTION_PRICE = 80000;
 const PEST_SCREEN_UNIT_PRICE = 23000;
 
 export default function HouseInfoPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const {
     housingAreaPyeong,
     windowSashCount,
@@ -28,6 +30,7 @@ export default function HouseInfoPage() {
   const [sashCount, setSashCount] = useState<string>(
     windowSashCount !== null ? String(windowSashCount) : ''
   );
+  const [showVideoModal, setShowVideoModal] = useState(false);
 
   const pyeongNum = parseFloat(pyeong);
   const sashNum = parseInt(sashCount, 10);
@@ -39,7 +42,7 @@ export default function HouseInfoPage() {
     if (!isValid) return;
     setHousingArea(pyeongNum);
     setWindowSashCount(sashNum);
-    router.push('/estimate');
+    router.push(user ? '/estimate' : '/login-gate');
   };
 
   return (
@@ -89,10 +92,13 @@ export default function HouseInfoPage() {
             <label className="text-sm font-semibold text-gray-800">
               창짝 수 입력 <span className="text-red-400">*</span>
             </label>
-            {/* 추후 영상 링크 제공 예정 */}
-            <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1">
-              창짝이란? 영상 준비 중
-            </span>
+            <button
+              type="button"
+              onClick={() => setShowVideoModal(true)}
+              className="text-xs text-blue-600 bg-blue-50 px-2 py-1 hover:bg-blue-100 transition-colors"
+            >
+              창짝이란? ▶
+            </button>
           </div>
           <div className="relative">
             <input
@@ -108,7 +114,7 @@ export default function HouseInfoPage() {
           {sashCount && !isSashValid && (
             <p className="text-xs text-red-500 mt-1">올바른 창짝 수를 입력해주세요 (1 이상)</p>
           )}
-          <p className="text-xs text-gray-400 mt-1.5">창문 하나에 여닫이 패널 개수를 모두 더한 총 개수입니다</p>
+          <p className="text-xs text-gray-400 mt-1.5">유리창 한 판 한 판의 총 수량을 적어주세요</p>
         </div>
 
         {/* 추가 옵션 */}
@@ -130,14 +136,13 @@ export default function HouseInfoPage() {
                 <div>
                   <p className="font-semibold text-sm">프리미엄 보양</p>
                   <p className="text-xs mt-0.5 text-gray-500">
-                    고급 보양재로 시공 중 오염·스크래치 완벽 방지
+                    보양 구역 내에서만 작업하여 먼지유출을 빈틈없이 차단하는 시공 방식
                   </p>
                 </div>
                 <div className="text-right shrink-0 ml-3">
                   <p className={`text-sm font-bold ${premiumProtection ? 'text-[#b10000]' : 'text-gray-700'}`}>
                     +{PREMIUM_PROTECTION_PRICE.toLocaleString()}원
                   </p>
-                  <p className="text-xs mt-0.5 text-gray-400">1회</p>
                 </div>
               </div>
             </button>
@@ -221,6 +226,35 @@ export default function HouseInfoPage() {
           </a>
         </div>
       </div>
+
+      {/* 창짝 영상 모달 */}
+      {showVideoModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+          onClick={() => setShowVideoModal(false)}
+        >
+          <div
+            className="relative w-full max-w-md mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowVideoModal(false)}
+              className="absolute -top-10 right-0 text-white text-sm font-medium"
+            >
+              닫기 ✕
+            </button>
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                className="absolute inset-0 w-full h-full"
+                src="https://www.youtube.com/embed/mxnY3c9pPrc?autoplay=1"
+                title="창짝이란?"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

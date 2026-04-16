@@ -9,6 +9,11 @@ const PLAN_LABEL: Record<string, string> = {
   alt2: '패브릭씰러 측면만',
 };
 
+function formatKRW(amount: number | null | undefined): string {
+  if (amount == null) return '—';
+  return amount.toLocaleString('ko-KR') + '원';
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -24,12 +29,22 @@ export async function POST(request: NextRequest) {
       premiumProtection,
       pestSolution,
       pestScreenCount,
+      issues,
+      mainTotal,
+      alt1Total,
+      alt2Total,
     } = body;
 
     const options = [
       premiumProtection && '프리미엄 보양',
       pestSolution && `방충솔루션 (${pestScreenCount}개)`,
     ].filter(Boolean).join(', ');
+
+    const row = (bg: boolean, label: string, value: string) => `
+      <tr${bg ? ' style="background: #f9f9f9;"' : ''}>
+        <td style="padding: 10px 12px; font-weight: bold; width: 140px; color: #555;">${label}</td>
+        <td style="padding: 10px 12px;">${value}</td>
+      </tr>`;
 
     const { error } = await resend.emails.send({
       from: 'onboarding@resend.dev',
@@ -42,42 +57,19 @@ export async function POST(request: NextRequest) {
           </h2>
 
           <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
-            <tr style="background: #f9f9f9;">
-              <td style="padding: 10px 12px; font-weight: bold; width: 120px; color: #555;">이름</td>
-              <td style="padding: 10px 12px;">${name}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px 12px; font-weight: bold; color: #555;">연락처</td>
-              <td style="padding: 10px 12px;">${phone}</td>
-            </tr>
-            <tr style="background: #f9f9f9;">
-              <td style="padding: 10px 12px; font-weight: bold; color: #555;">주소</td>
-              <td style="padding: 10px 12px;">${address || '미입력'}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px 12px; font-weight: bold; color: #555;">희망 시공일</td>
-              <td style="padding: 10px 12px;">${preferredDate || '미정'}</td>
-            </tr>
-            <tr style="background: #f9f9f9;">
-              <td style="padding: 10px 12px; font-weight: bold; color: #555;">평형</td>
-              <td style="padding: 10px 12px;">${housingAreaPyeong}평</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px 12px; font-weight: bold; color: #555;">창짝 수</td>
-              <td style="padding: 10px 12px;">${windowSashCount}짝</td>
-            </tr>
-            <tr style="background: #f9f9f9;">
-              <td style="padding: 10px 12px; font-weight: bold; color: #555;">시공 방식</td>
-              <td style="padding: 10px 12px;">${PLAN_LABEL[selectedPlan] ?? selectedPlan}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px 12px; font-weight: bold; color: #555;">추가 옵션</td>
-              <td style="padding: 10px 12px;">${options || '없음'}</td>
-            </tr>
-            <tr style="background: #f9f9f9;">
-              <td style="padding: 10px 12px; font-weight: bold; color: #555;">추가 요청</td>
-              <td style="padding: 10px 12px;">${extraRequest || '없음'}</td>
-            </tr>
+            ${row(true,  '이름',           name)}
+            ${row(false, '연락처',         phone)}
+            ${row(true,  '주소',           address || '미입력')}
+            ${row(false, '희망 시공일',    preferredDate || '미정')}
+            ${row(true,  '겪고있는 문제',  issues || '미입력')}
+            ${row(false, '평형',           `${housingAreaPyeong}평`)}
+            ${row(true,  '창짝 수',        `${windowSashCount}짝`)}
+            ${row(false, '선택 시공방식',  `${PLAN_LABEL[selectedPlan] ?? selectedPlan} · ${formatKRW(selectedPlan === 'alt1' ? alt1Total : selectedPlan === 'alt2' ? alt2Total : mainTotal)}`)}
+            ${row(true,  '추가 옵션',      options || '없음')}
+            ${row(false, '패씰 견적 (VAT포함)',       formatKRW(mainTotal))}
+            ${row(true,  '일반모헤어 견적 (VAT포함)', formatKRW(alt1Total))}
+            ${row(false, '측면시공 견적 (VAT포함)',   formatKRW(alt2Total))}
+            ${row(true,  '추가 요청',      extraRequest || '없음')}
           </table>
 
           <p style="margin-top: 24px; color: #888; font-size: 12px;">

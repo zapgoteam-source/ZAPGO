@@ -29,10 +29,12 @@ function computeRecommendations(survey: SurveyAnswers): Recommendation[] {
   const dustHigh = survey.dust !== null && survey.dust >= highThreshold;
   const bugPresent = survey.bug !== null && survey.bug >= 1;
 
-  if (heatingHigh || draftHigh || noiseHigh || odorHigh) {
+  const needsFourSide = heatingHigh || draftHigh || noiseHigh || odorHigh;
+
+  if (needsFourSide) {
     recs.push({
       type: 'fabric_four_side',
-      label: '패브릭씰러 탈거 4면 시공',
+      label: '창짝 패브릭씰러 시공 (창문 탈거)',
       reason: [
         heatingHigh && '냉난방비',
         draftHigh && '외풍',
@@ -44,10 +46,10 @@ function computeRecommendations(survey: SurveyAnswers): Recommendation[] {
     });
   }
 
-  if (dustHigh) {
+  if (dustHigh && !needsFourSide) {
     recs.push({
       type: 'side_only',
-      label: '측면 시공',
+      label: '창짝 측면만 패브릭씰러 시공 (창문 미탈거)',
       reason: '먼지날림 차단에 효과적입니다',
     });
   }

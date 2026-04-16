@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEstimateStore } from '@/store/estimateStore';
 import { SurveyAnswers } from '@/types';
 
 const SURVEY_QUESTIONS: { key: keyof SurveyAnswers; label: string; icon: string }[] = [
-  { key: 'heating_cost', label: '냉난방비', icon: '🌡️' },
-  { key: 'draft',        label: '외풍유입', icon: '💨' },
   { key: 'dust',         label: '먼지날림', icon: '🌫️' },
+  { key: 'draft',        label: '외풍유입', icon: '💨' },
   { key: 'bug',          label: '벌레유입', icon: '🐛' },
+  { key: 'heating_cost', label: '냉난방비', icon: '🌡️' },
   { key: 'noise',        label: '소음유입', icon: '🔊' },
   { key: 'odor',         label: '악취유입', icon: '🌀' },
 ];
@@ -19,6 +19,15 @@ export default function SurveyPage() {
   const { setSurvey, recommendations } = useEstimateStore();
 
   const [selected, setSelected] = useState<Set<keyof SurveyAnswers>>(new Set());
+  const [showIntroVideo, setShowIntroVideo] = useState(false);
+
+  useEffect(() => {
+    setShowIntroVideo(true);
+  }, []);
+
+  const closeIntroVideo = () => {
+    setShowIntroVideo(false);
+  };
 
   const toggle = (key: keyof SurveyAnswers) => {
     const next = new Set(selected);
@@ -58,7 +67,6 @@ export default function SurveyPage() {
         <p className="text-xs text-gray-400 mb-1">STEP 1 / 3</p>
         <h1 className="text-xl font-bold text-gray-900">현재 느끼고 계신 불편 사항을</h1>
         <h1 className="text-xl font-bold text-gray-900">모두 선택해 주세요</h1>
-        <p className="text-sm text-gray-500 mt-1">해당하는 항목을 모두 눌러주세요</p>
       </div>
 
       {/* 선택 카드 */}
@@ -134,6 +142,32 @@ export default function SurveyPage() {
           </a>
         </div>
       </div>
+
+      {/* 인트로 시공 영상 팝업 */}
+      {showIntroVideo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+          <div
+            className="relative w-full max-w-md mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closeIntroVideo}
+              className="absolute -top-10 right-0 text-white text-sm font-medium"
+            >
+              닫기 ✕
+            </button>
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                className="absolute inset-0 w-full h-full"
+                src="https://www.youtube.com/embed/_tq8gXHrhe4?autoplay=1&mute=0"
+                title="ZAPGO 시공 영상"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -109,16 +109,16 @@ function getMaxPanelSize(panels: PanelClassification[]): SizeCategory {
 /**
  * 인건비 계산
  * 규칙:
- * - 60평 이상 → 5명
  * - 전체가 측면 시공만 → 1명
- * - 최대 창이 medium → 2명, large → 3명, xlarge → 4명
+ * - 1~22평: 2명 / 23~37평: 3명 / 38~50평: 4명 / 51~70평: 5명 / 71평~: 6명
+ * - 인건비: 25만원 × 작업인원 수
  */
 export function calcLaborCost(
   windows: WindowInput[],
   housingAreaPyeong: number
 ): number {
   const workerCount = calcWorkerCount(windows, housingAreaPyeong);
-  return 300_000 * workerCount;
+  return 250_000 * workerCount;
 }
 
 export function calcWorkerCount(
@@ -127,25 +127,14 @@ export function calcWorkerCount(
 ): number {
   if (windows.length === 0) return 0;
 
-  if (housingAreaPyeong >= 60) return 5;
-
   const allSideOnly = windows.every((w) => w.service_type === 'SIDE_ONLY');
   if (allSideOnly) return 1;
 
-  let maxSize: SizeCategory = 'small';
-  const order: SizeCategory[] = ['small', 'medium', 'large', 'xlarge'];
-
-  for (const w of windows) {
-    const panels = classifyWindowPanels(w, housingAreaPyeong);
-    const size = getMaxPanelSize(panels);
-    if (order.indexOf(size) > order.indexOf(maxSize)) {
-      maxSize = size;
-    }
-  }
-
-  if (maxSize === 'xlarge') return 4;
-  if (maxSize === 'large') return 3;
-  return 2; // medium or small
+  if (housingAreaPyeong >= 71) return 6;
+  if (housingAreaPyeong >= 51) return 5;
+  if (housingAreaPyeong >= 38) return 4;
+  if (housingAreaPyeong >= 23) return 3;
+  return 2;
 }
 
 // ============================================================

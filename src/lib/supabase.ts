@@ -40,17 +40,21 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
  * Supabase 대시보드에서 Kakao OAuth 설정 필요:
  * Authentication > Providers > Kakao 활성화
  */
-export async function signInWithKakao() {
-  const redirectTo =
+export async function signInWithKakao(next?: string) {
+  const base =
     typeof window !== 'undefined'
       ? `${window.location.origin}/auth/callback`
       : undefined;
+
+  const redirectTo = base
+    ? next ? `${base}?next=${encodeURIComponent(next)}` : base
+    : undefined;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'kakao',
     options: {
       redirectTo,
-      scopes: 'profile_nickname profile_image account_email phone_number name',
+      scopes: 'profile_nickname profile_image',
     },
   });
 

@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('고객 추가 오류:', error);
       return NextResponse.json(
-        { error: '고객을 추가할 수 없습니다.' },
+        { error: '고객을 추가할 수 없습니다.', detail: error.message, code: error.code },
         { status: 500 }
       );
     }
