@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEstimateStore } from '@/store/estimateStore';
-import { useAuth } from '@/contexts/AuthContext';
 import PageTransition from '@/components/PageTransition';
 
 const PREMIUM_PROTECTION_PRICE = 80000;
@@ -11,7 +10,6 @@ const PEST_SCREEN_UNIT_PRICE = 23000;
 
 export default function HouseInfoPage() {
   const router = useRouter();
-  const { user } = useAuth();
   const {
     housingAreaPyeong,
     windowSashCount,
@@ -43,7 +41,7 @@ export default function HouseInfoPage() {
     if (!isValid) return;
     setHousingArea(pyeongNum);
     setWindowSashCount(sashNum);
-    router.push(user ? '/estimate' : '/login-gate');
+    router.push('/estimate');
   };
 
   return (
