@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEstimateStore } from '@/store/estimateStore';
-import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import PageTransition from '@/components/PageTransition';
 
@@ -54,18 +53,8 @@ function formatKRW(amount: number): string {
   return amount.toLocaleString('ko-KR') + '원';
 }
 
-function formatKakaoPhone(phone: string): string {
-  if (!phone) return '';
-  let cleaned = phone.replace(/\s/g, '').replace(/^\+82/, '0');
-  if (/^0\d{10}$/.test(cleaned)) {
-    cleaned = cleaned.replace(/^(\d{3})(\d{4})(\d{4})$/, '$1-$2-$3');
-  }
-  return cleaned;
-}
-
 export default function SubmitPage() {
   const router = useRouter();
-  const { user } = useAuth();
   const {
     housingAreaPyeong,
     windowSashCount,
@@ -85,16 +74,6 @@ export default function SubmitPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    console.log('[Auth user]', user);
-    if (!user) return;
-    const meta = user.user_metadata;
-    console.log('[Kakao meta]', JSON.stringify(meta, null, 2));
-    if (!meta) return;
-    setName((prev) => prev || meta.name || meta.full_name || '');
-    setPhone((prev) => prev || formatKakaoPhone(meta.phone_number || meta.phone || ''));
-  }, [user]);
 
   // 세 가지 견적 금액 (VAT 포함)
   const mainTotal =
@@ -209,7 +188,7 @@ export default function SubmitPage() {
           </p>
         )}
         <button
-          onClick={() => router.push('/login')}
+          onClick={() => router.push('/selfest')}
           className="w-full max-w-xs py-4 bg-gray-900 text-white font-semibold"
         >
           홈으로

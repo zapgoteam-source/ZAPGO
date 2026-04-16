@@ -12,32 +12,24 @@ export default function RootPage() {
     // auth 세션 + 프로필 양쪽 모두 확인될 때까지 대기
     if (loading || !profileReady) return;
 
-    if (!user) {
-      router.replace('/login');
-      return;
+    // 로그인된 관리자/작업자/대리점은 각자 대시보드로
+    if (user && userProfile) {
+      switch (role) {
+        case 'ADMIN':
+          router.replace('/admin/dashboard');
+          return;
+        case 'WORKER':
+          router.replace('/worker/list');
+          return;
+        case 'AGENCY':
+          router.replace('/agency/dashboard');
+          return;
+      }
     }
 
-    if (!userProfile) {
-      router.replace('/register');
-      return;
-    }
-
-    switch (role) {
-      case 'ADMIN':
-        router.replace('/admin/dashboard');
-        break;
-      case 'WORKER':
-        router.replace('/worker/list');
-        break;
-      case 'AGENCY':
-        router.replace('/agency/dashboard');
-        break;
-      case 'CUSTOMER':
-      default:
-        router.replace('/selfest');
-        break;
-    }
-  }, [user, loading, profileReady, role, router]);
+    // 그 외(비로그인 고객 포함)는 바로 셀프견적
+    router.replace('/selfest');
+  }, [user, userProfile, loading, profileReady, role, router]);
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
