@@ -54,6 +54,7 @@ export async function signInWithKakao(next?: string) {
     provider: 'kakao',
     options: {
       redirectTo,
+      scopes: 'name phone_number',
     },
   });
 
