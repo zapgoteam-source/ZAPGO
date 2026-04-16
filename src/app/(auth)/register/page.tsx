@@ -26,7 +26,7 @@ export default function RegisterPage() {
         case 'ADMIN': router.replace('/admin/dashboard'); break;
         case 'WORKER': router.replace('/worker/list'); break;
         case 'AGENCY': router.replace('/agency/dashboard'); break;
-        default: router.replace('/selftest'); break;
+        default: router.replace('/selfest'); break;
       }
     }
     // 카카오에서 받은 값으로 초기화
@@ -77,7 +77,7 @@ export default function RegisterPage() {
       if (upsertError) throw upsertError;
 
       await refreshUserProfile();
-      router.replace('/selftest');
+      router.replace('/selfest');
     } catch (err) {
       console.error('[Register] 프로필 생성 오류:', err);
       setError('가입 처리 중 오류가 발생했습니다. 다시 시도해 주세요.');
