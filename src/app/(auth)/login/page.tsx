@@ -29,7 +29,7 @@ export default function LoginPage() {
       case 'ADMIN': router.replace('/admin/dashboard'); break;
       case 'WORKER': router.replace('/worker/list'); break;
       case 'AGENCY': router.replace('/agency/dashboard'); break;
-      default: router.replace('/survey');
+      default: router.replace('/selftest');
     }
   }, [user, loading, profileReady, role, userProfile, router]);
 

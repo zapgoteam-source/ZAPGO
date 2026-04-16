@@ -34,7 +34,7 @@ export default function RootPage() {
         break;
       case 'CUSTOMER':
       default:
-        router.replace('/survey');
+        router.replace('/selftest');
         break;
     }
   }, [user, loading, profileReady, role, router]);
