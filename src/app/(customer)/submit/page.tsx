@@ -5,12 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useEstimateStore } from '@/store/estimateStore';
 import { supabase } from '@/lib/supabase';
 import PageTransition from '@/components/PageTransition';
+import ConsultCTABar from '@/components/ConsultCTABar';
 
 // 견적 계산 (estimate 페이지와 동일한 로직)
 const LABOR_PER_WORKER = 250_000;
 const FABRIC_FOUR_UNIT = 30_000;
-const MOHAIR_FOUR_UNIT = 15_000;
 const SIDE_ONLY_UNIT = 15_000;
+const MOHAIR_PER_PYEONG = 35_000;
 const VAT_RATE = 1.1;
 
 function getWorkerCount(pyeong: number): number {
@@ -33,11 +34,15 @@ function calcEstimate(
   pestSolution: boolean,
   pestScreenCount: number
 ): number {
+  const optionCost = (premiumProtection ? 80_000 : 0) + (pestSolution ? pestScreenCount * 23_000 : 0);
+
+  // 일반 모헤어는 평형 기준 간편 계산 (VAT 미포함)
+  if (plan === 'alt1') return pyeong * MOHAIR_PER_PYEONG + optionCost;
+
   const workerCount = plan === 'alt2' ? 1 : getWorkerCount(pyeong);
   const laborCost = LABOR_PER_WORKER * workerCount;
-  const optionCost = (premiumProtection ? 80_000 : 0) + (pestSolution ? pestScreenCount * 23_000 : 0);
-  const unitMap = { main: FABRIC_FOUR_UNIT, alt1: MOHAIR_FOUR_UNIT, alt2: SIDE_ONLY_UNIT };
-  return withVAT(laborCost + sashCount * unitMap[plan] + optionCost);
+  const unitPrice = plan === 'alt2' ? SIDE_ONLY_UNIT : FABRIC_FOUR_UNIT;
+  return withVAT(laborCost + sashCount * unitPrice + optionCost);
 }
 
 const SURVEY_LABELS: Record<string, string> = {
@@ -63,6 +68,7 @@ export default function SubmitPage() {
     pestScreenCount,
     selectedPlan,
     surveyAnswers,
+    refCode,
     reset,
   } = useEstimateStore();
 
@@ -113,6 +119,7 @@ export default function SubmitPage() {
         mainTotal,
         alt1Total,
         alt2Total,
+        refCode,
       };
 
       // 1. 이메일 발송 (최우선 — DB 실패와 무관하게 수신)
@@ -146,11 +153,12 @@ export default function SubmitPage() {
               extraRequest,
               `시공방식: ${selectedPlan}`,
               `평형: ${housingAreaPyeong}평`,
-              `창짝: ${windowSashCount}짝`,
+              `창짝: ${windowSashCount}개`,
               premiumProtection ? '프리미엄보양' : '',
               pestSolution ? `방충솔루션 ${pestScreenCount}개` : '',
             ].filter(Boolean).join(' / '),
             desired_quote_date: preferredDate || null,
+            ref_code: refCode || null,
             tenant_id: null,
             created_by: null,
           }),
@@ -284,20 +292,7 @@ export default function SubmitPage() {
         >
           {submitting ? '제출 중...' : '시공 요청 제출'}
         </button>
-        <div className="flex gap-2">
-          <a
-            href="tel:16009195"
-            className="flex-1 py-3 border border-gray-200 text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
-          >
-            📞 상담원 연결
-          </a>
-          <a
-            href="/visit-request"
-            className="flex-1 py-3 border border-gray-200 text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
-          >
-            방문 견적 요청
-          </a>
-        </div>
+        <ConsultCTABar />
       </div>
     </div>
     </PageTransition>

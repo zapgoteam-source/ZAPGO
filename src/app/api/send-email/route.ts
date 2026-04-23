@@ -4,9 +4,9 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const PLAN_LABEL: Record<string, string> = {
-  main: '패브릭씰러 탈거 4면',
-  alt1: '일반 모헤어 4면',
-  alt2: '패브릭씰러 측면만',
+  main: '패브릭씰러 시공 (창문 탈거)',
+  alt1: '일반 모헤어 시공 (평형 기준 간편 견적)',
+  alt2: '측면 시공 (창문 미탈거)',
 };
 
 function formatKRW(amount: number | null | undefined): string {
@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
       mainTotal,
       alt1Total,
       alt2Total,
+      refCode,
     } = body;
 
     const options = [
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
     const { error } = await resend.emails.send({
       from: 'onboarding@resend.dev',
       to: 'zapgoteam@gmail.com',
-      subject: `[에너지잡고] 시공 요청 — ${name} (${phone})`,
+      subject: `[에너지잡고] 시공 요청 — ${name} (${phone})${refCode ? ` [${refCode}]` : ''}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
           <h2 style="color: #111; border-bottom: 2px solid #b10000; padding-bottom: 8px;">
@@ -63,13 +64,14 @@ export async function POST(request: NextRequest) {
             ${row(false, '희망 시공일',    preferredDate || '미정')}
             ${row(true,  '겪고있는 문제',  issues || '미입력')}
             ${row(false, '평형',           `${housingAreaPyeong}평`)}
-            ${row(true,  '창짝 수',        `${windowSashCount}짝`)}
+            ${row(true,  '창짝 개수',      `${windowSashCount}개`)}
             ${row(false, '선택 시공방식',  `${PLAN_LABEL[selectedPlan] ?? selectedPlan} · ${formatKRW(selectedPlan === 'alt1' ? alt1Total : selectedPlan === 'alt2' ? alt2Total : mainTotal)}`)}
             ${row(true,  '추가 옵션',      options || '없음')}
             ${row(false, '패씰 견적 (VAT포함)',       formatKRW(mainTotal))}
-            ${row(true,  '일반모헤어 견적 (VAT포함)', formatKRW(alt1Total))}
+            ${row(true,  '일반모헤어 견적 (간편/VAT 미포함)', formatKRW(alt1Total))}
             ${row(false, '측면시공 견적 (VAT포함)',   formatKRW(alt2Total))}
             ${row(true,  '추가 요청',      extraRequest || '없음')}
+            ${row(false, '대리점 코드',    refCode || '직접 유입')}
           </table>
 
           <p style="margin-top: 24px; color: #888; font-size: 12px;">

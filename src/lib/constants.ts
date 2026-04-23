@@ -30,6 +30,15 @@ export const UNASSIGNED_TENANT = {
 export const DEFAULT_USER_ROLE = 'UNASSIGNED' as const;
 
 /**
+ * 고객 접점 채널
+ */
+export const CONTACT_CHANNELS = {
+  PHONE: '16009195',
+  KAKAO_CHANNEL: 'https://pf.kakao.com/_PjwDxj/chat',
+  VISIT_REQUEST_PATH: '/visit-request',
+} as const;
+
+/**
  * 애플리케이션 설정
  */
 export const APP_CONFIG = {

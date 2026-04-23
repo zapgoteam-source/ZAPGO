@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const ISSUES = [
   { id: '난방비', label: '난방비' },
@@ -14,7 +14,17 @@ const ISSUES = [
 ];
 
 export default function VisitRequestPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}>
+      <VisitRequestPageInner />
+    </Suspense>
+  );
+}
+
+function VisitRequestPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get('ref');
 
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
@@ -50,7 +60,16 @@ export default function VisitRequestPage() {
     setError('');
 
     try {
-      const res = await fetch('/api/customers', {
+      // 1. 이메일 알림 (최우선)
+      const emailRes = await fetch('/api/send-email/visit-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, address: address.trim(), issues: allIssues, notes: notes.trim() || null, refCode }),
+      });
+      if (!emailRes.ok) throw new Error('이메일 발송 실패');
+
+      // 2. DB 저장 (실패해도 접수 성공으로 처리)
+      fetch('/api/customers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -61,12 +80,12 @@ export default function VisitRequestPage() {
           issues: allIssues,
           notes: notes.trim() || null,
           desired_quote_date: null,
+          ref_code: refCode || null,
           tenant_id: null,
           created_by: null,
         }),
-      });
+      }).catch(() => {});
 
-      if (!res.ok) throw new Error('서버 오류');
       setSubmitted(true);
     } catch {
       setError('요청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
@@ -84,7 +103,7 @@ export default function VisitRequestPage() {
           담당자가 확인 후 연락드리겠습니다.<br />빠른 시일 내에 연락드릴게요.
         </p>
         <button
-          onClick={() => router.push('/login')}
+          onClick={() => router.push('/selfest')}
           className="w-full py-4 bg-gray-900 text-white font-semibold text-base"
         >
           홈으로 돌아가기

@@ -101,6 +101,7 @@ export async function POST(request: NextRequest) {
       issues: body.issues || [],
       notes: body.notes,
       desired_quote_date: body.desired_quote_date || null,
+      ref_code: body.ref_code || null,
       tenant_id: body.tenant_id,
       created_by: body.created_by,
     };

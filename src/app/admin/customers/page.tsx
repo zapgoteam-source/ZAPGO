@@ -136,10 +136,10 @@ export default function AdminCustomersPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[#f2f4f6]">
-                {['등록일', '상태', '이름', '연락처', '주소', '상담자', '시공일정', '최종시공금액', '입금일자'].map((h, i) => (
+                {['등록일', '상태', '이름', '연락처', '주소', '대리점', '상담자', '시공일정', '최종시공금액', '입금일자'].map((h, i) => (
                   <th
                     key={h}
-                    className={`px-6 py-4 text-[10px] font-bold tracking-[0.05em] text-[#434655] uppercase whitespace-nowrap${i === 7 ? ' text-right' : ''}`}
+                    className={`px-6 py-4 text-[10px] font-bold tracking-[0.05em] text-[#434655] uppercase whitespace-nowrap${i === 8 ? ' text-right' : ''}`}
                   >
                     {h}
                   </th>
@@ -149,7 +149,7 @@ export default function AdminCustomersPage() {
             <tbody className="divide-y divide-[#c3c6d7]/10">
               {dataLoading ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center">
+                  <td colSpan={10} className="px-6 py-12 text-center">
                     <div className="flex justify-center">
                       <div className="animate-spin h-6 w-6 border-b-2 border-[#B10000]" />
                     </div>
@@ -157,7 +157,7 @@ export default function AdminCustomersPage() {
                 </tr>
               ) : customers.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center text-[#434655] text-sm">
+                  <td colSpan={10} className="px-6 py-12 text-center text-[#434655] text-sm">
                     고객 데이터가 없습니다
                   </td>
                 </tr>
@@ -183,6 +183,11 @@ export default function AdminCustomersPage() {
                       </td>
                       <td className="px-6 py-5 text-sm text-[#434655] whitespace-nowrap">{c.phone}</td>
                       <td className="px-6 py-5 text-sm text-[#434655] truncate max-w-[180px]">{c.address || '-'}</td>
+                      <td className="px-6 py-5 text-sm text-[#434655] whitespace-nowrap">
+                        {(c as any).ref_code ? (
+                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-bold">{(c as any).ref_code}</span>
+                        ) : '-'}
+                      </td>
                       <td className="px-6 py-5 text-sm text-[#434655]">-</td>
                       <td className="px-6 py-5 text-sm text-[#434655] whitespace-nowrap">{fmtDate(c.scheduled_date)}</td>
                       <td className="px-6 py-5 text-sm font-bold text-right text-[#191c1e] whitespace-nowrap" style={{ fontFamily: 'Manrope, sans-serif' }}>

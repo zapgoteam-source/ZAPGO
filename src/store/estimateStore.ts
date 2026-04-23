@@ -81,6 +81,7 @@ interface EstimateStore {
   selectedPlan: 'main' | 'alt1' | 'alt2';
   windows: WindowInput[];
   recommendations: Recommendation[];
+  refCode: string | null;
   _savedAt?: number; // persist 만료 체크용 (직접 사용 금지)
 
   // 액션
@@ -92,6 +93,7 @@ interface EstimateStore {
   setPestSolution: (value: boolean) => void;
   setPestScreenCount: (count: number) => void;
   setSelectedPlan: (plan: 'main' | 'alt1' | 'alt2') => void;
+  setRefCode: (code: string | null) => void;
   addWindow: (window: WindowInput) => void;
   updateWindow: (id: string, updates: Partial<WindowInput>) => void;
   removeWindow: (id: string) => void;
@@ -132,6 +134,7 @@ export const useEstimateStore = create<EstimateStore>()(
       selectedPlan: 'main',
       windows: [],
       recommendations: [],
+      refCode: null,
 
       setSurvey: (answers) => {
         const recs = computeRecommendations(answers);
@@ -164,6 +167,10 @@ export const useEstimateStore = create<EstimateStore>()(
 
       setSelectedPlan: (plan) => {
         set({ selectedPlan: plan });
+      },
+
+      setRefCode: (code) => {
+        set({ refCode: code });
       },
 
       addWindow: (window) => {
@@ -211,6 +218,7 @@ export const useEstimateStore = create<EstimateStore>()(
           selectedPlan: 'main',
           windows: [],
           recommendations: [],
+          refCode: null,
         });
       },
 
@@ -259,6 +267,7 @@ export const useEstimateStore = create<EstimateStore>()(
         selectedPlan: s.selectedPlan,
         windows: s.windows,
         recommendations: s.recommendations,
+        refCode: s.refCode,
         _savedAt: Date.now(),
       }),
     }

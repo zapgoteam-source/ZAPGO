@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEstimateStore } from '@/store/estimateStore';
 import { SurveyAnswers } from '@/types';
 import PageTransition from '@/components/PageTransition';
+import ConsultCTABar from '@/components/ConsultCTABar';
 
 const SURVEY_QUESTIONS: { key: keyof SurveyAnswers; label: string; icon: string }[] = [
   { key: 'dust',         label: '먼지날림', icon: '🌫️' },
@@ -16,15 +17,26 @@ const SURVEY_QUESTIONS: { key: keyof SurveyAnswers; label: string; icon: string 
 ];
 
 export default function SurveyPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}>
+      <SurveyPageInner />
+    </Suspense>
+  );
+}
+
+function SurveyPageInner() {
   const router = useRouter();
-  const { setSurvey, recommendations } = useEstimateStore();
+  const searchParams = useSearchParams();
+  const { setSurvey, recommendations, setRefCode } = useEstimateStore();
 
   const [selected, setSelected] = useState<Set<keyof SurveyAnswers>>(new Set());
   const [showIntroVideo, setShowIntroVideo] = useState(false);
 
   useEffect(() => {
     setShowIntroVideo(true);
-  }, []);
+    const ref = searchParams.get('ref');
+    if (ref) setRefCode(ref);
+  }, [searchParams, setRefCode]);
 
   const closeIntroVideo = () => {
     setShowIntroVideo(false);
@@ -129,20 +141,7 @@ export default function SurveyPage() {
         >
           다음
         </button>
-        <div className="flex gap-2">
-          <a
-            href="tel:16009195"
-            className="flex-1 py-3 border border-gray-200 text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
-          >
-            📞 상담원 연결
-          </a>
-          <a
-            href="/visit-request"
-            className="flex-1 py-3 border border-gray-200 text-sm font-medium text-gray-600 text-center hover:bg-gray-50"
-          >
-            방문 견적 요청
-          </a>
-        </div>
+        <ConsultCTABar />
       </div>
 
       {/* 인트로 시공 영상 팝업 */}
