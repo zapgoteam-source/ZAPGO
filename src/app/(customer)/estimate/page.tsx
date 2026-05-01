@@ -49,9 +49,9 @@ const VAT_RATE = 1.1;
 type PlanKey = 'main' | 'alt1' | 'alt2';
 
 const PLAN_BUTTONS: { key: PlanKey; label: string; subLabel: string }[] = [
-  { key: 'main', label: '패브릭씰러 시공', subLabel: '창문 탈거 / 4면 시공' },
-  { key: 'alt1', label: '일반 모헤어 시공', subLabel: '평형 기준 간편 견적' },
-  { key: 'alt2', label: '측면 시공', subLabel: '창문 미탈거 / 측면만' },
+  { key: 'main', label: '패브릭씰러 시공', subLabel: '창문 탈거 / 패브릭씰러 / 4면 시공' },
+  { key: 'alt1', label: '일반 모헤어 시공', subLabel: '창문 탈거 / 일반 모헤어 / 4면 시공' },
+  { key: 'alt2', label: '측면 시공', subLabel: '창문 미탈거 / 패브릭씰러 / 측면만 시공' },
 ];
 
 function getWorkerCount(pyeong: number): number {
@@ -87,6 +87,8 @@ function EstimatePageInner() {
     setPestSolution,
     setPestScreenCount,
     setSelectedPlan,
+    setHousingArea,
+    setWindowSashCount,
   } = useEstimateStore();
 
   // 결과 페이지 진입 시에는 항상 미선택 상태로 시작
@@ -120,12 +122,16 @@ function EstimatePageInner() {
       } else {
         setPestSolution(false);
       }
+      const pyeong = searchParams.get('pyeong');
+      const sash = searchParams.get('sash');
+      if (pyeong) setHousingArea(parseFloat(pyeong));
+      if (sash) setWindowSashCount(parseInt(sash, 10));
     } else {
       // 일반 진입: 추가옵션은 미선택 상태로 시작
       setPremiumProtection(false);
       setPestSolution(false);
     }
-  }, [searchParams, setSelectedPlan, setPremiumProtection, setPestSolution, setPestScreenCount]);
+  }, [searchParams, setSelectedPlan, setPremiumProtection, setPestSolution, setPestScreenCount, setHousingArea, setWindowSashCount]);
 
   const handleSelectPlan = (key: PlanKey) => {
     setSelected(key);
@@ -202,16 +208,19 @@ function EstimatePageInner() {
     <div className="flex flex-col min-h-screen">
       {/* 헤더 */}
       <div className="px-5 pt-6 pb-4">
-        <button
-          onClick={() => {
-            intentionalNav.current = true;
-            // 가드용 더미 히스토리 + /estimate 엔트리를 함께 건너뛰어 이전 페이지로 복귀
-            window.history.go(-2);
-          }}
-          className="text-gray-400 text-sm mb-3 flex items-center gap-1"
-        >
-          ← 뒤로
-        </button>
+        <div className="flex items-start justify-between mb-3">
+          <button
+            onClick={() => {
+              intentionalNav.current = true;
+              // 가드용 더미 히스토리 + /estimate 엔트리를 함께 건너뛰어 이전 페이지로 복귀
+              window.history.go(-2);
+            }}
+            className="text-gray-400 text-sm flex items-center gap-1"
+          >
+            ← 뒤로
+          </button>
+          <img src="/LOGO_BK.webp" alt="에너지잡고" className="w-10 h-10 object-contain flex-shrink-0" />
+        </div>
         <p className="text-xs text-gray-400 mb-1">STEP 3 / 3</p>
         <h1 className="text-xl font-bold text-gray-900">예상 견적</h1>
       </div>
@@ -219,7 +228,7 @@ function EstimatePageInner() {
       <div className="flex-1 px-5 space-y-5 pb-6">
 
         {/* 총 예상금액 영역 */}
-        <div className="bg-gray-900 p-5 min-h-[140px] flex flex-col justify-center">
+        <div className={`p-5 min-h-[140px] flex flex-col justify-center ${selected ? 'bg-gray-900' : 'bg-[#b10000]'}`}>
           {selected ? (
             <>
               <p className="text-gray-400 text-sm mb-1">
@@ -241,7 +250,7 @@ function EstimatePageInner() {
               )}
             </>
           ) : (
-            <p className="text-gray-200 text-base leading-relaxed">
+            <p className="text-white text-base leading-relaxed font-bold">
               시공 방식을 선택하시면<br />예상 견적을 확인하실 수 있어요
             </p>
           )}
@@ -277,15 +286,6 @@ function EstimatePageInner() {
             })}
           </div>
 
-          {/* 일반 모헤어 안내 */}
-          {selected === 'alt1' && (
-            <div className="mt-3 bg-gray-50 p-3">
-              <p className="text-xs text-gray-600 leading-relaxed">
-                일반 모헤어 시공은 평형 기준의 간편 예상 금액으로 계산됩니다.<br />
-                실제 창문 수와 현장 상태에 따라 일부 조정될 수 있습니다.
-              </p>
-            </div>
-          )}
         </div>
 
         {/* 추가 옵션 */}
@@ -381,11 +381,11 @@ function EstimatePageInner() {
         <button
           onClick={goToSubmit}
           disabled={!selected}
-          className="w-full py-4 bg-gray-900 text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors"
+          className="w-full py-4 bg-[#b10000] text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#8b0000] transition-colors animate-cta-pulse"
         >
-          이 조건으로 시공 요청하기
+          이 조건으로 상담 신청하기
         </button>
-        <ConsultCTABar />
+        <ConsultCTABar page3Colors />
       </div>
 
       {/* 이탈 방지 팝업 */}
@@ -414,14 +414,14 @@ function ExitPopup({ onRequest, onLater }: { onRequest: () => void; onLater: () 
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5">
       <div className="w-full max-w-sm bg-white p-6">
         <p className="text-lg font-bold text-gray-900 text-center mb-6">
-          시공을 요청하시겠어요?
+          상담을 신청하시겠어요?
         </p>
         <div className="space-y-2">
           <button
             onClick={onRequest}
-            className="w-full py-3.5 bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 transition-colors"
+            className="w-full py-3.5 bg-[#b10000] text-white font-semibold text-sm hover:bg-[#8b0000] transition-colors"
           >
-            시공 요청하기
+            상담 신청하기
           </button>
           <button
             onClick={onLater}
@@ -479,7 +479,7 @@ function SmsLinkModal({ onClose }: { onClose: () => void }) {
       if (!res.ok) throw new Error('발송 실패');
       setDone(true);
     } catch {
-      setError('발송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      setError('문자 발송에 실패했습니다. 다시 시도해 주세요.');
     } finally {
       setSubmitting(false);
     }
@@ -492,7 +492,7 @@ function SmsLinkModal({ onClose }: { onClose: () => void }) {
           <>
             <p className="text-lg font-bold text-gray-900 text-center mb-2">발송 완료</p>
             <p className="text-sm text-gray-500 text-center mb-6">
-              입력하신 번호로 결과 다시보기 링크를<br />문자로 발송해드렸습니다.
+              문자 발송이 완료되었습니다.
             </p>
             <button
               onClick={onClose}

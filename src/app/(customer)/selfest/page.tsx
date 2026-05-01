@@ -77,10 +77,13 @@ function SurveyPageInner() {
     <PageTransition>
     <div className="flex flex-col min-h-screen">
       {/* 헤더 */}
-      <div className="px-5 pt-6 pb-4">
-        <p className="text-xs text-gray-400 mb-1">STEP 1 / 3</p>
-        <h1 className="text-xl font-bold text-gray-900">현재 느끼고 계신 불편 사항을</h1>
-        <h1 className="text-xl font-bold text-gray-900">모두 선택해 주세요</h1>
+      <div className="px-5 pt-6 pb-4 flex items-start justify-between">
+        <div>
+          <p className="text-xs text-gray-400 mb-1">STEP 1 / 3</p>
+          <h1 className="text-xl font-bold text-gray-900">현재 느끼고 계신 불편 사항을</h1>
+          <h1 className="text-xl font-bold text-gray-900">모두 선택해 주세요</h1>
+        </div>
+        <img src="/LOGO_BK.webp" alt="에너지잡고" className="w-10 h-10 object-contain flex-shrink-0" />
       </div>
 
       {/* 선택 카드 */}
@@ -94,12 +97,12 @@ function SurveyPageInner() {
                 onClick={() => toggle(q.key)}
                 className={`relative flex flex-col items-center justify-center gap-2 py-6 border-2 transition-all ${
                   isSelected
-                    ? 'border-gray-900 bg-gray-900 text-white'
+                    ? 'border-[#b10000] bg-[#b10000] text-white'
                     : 'border-gray-200 bg-white text-gray-700 hover:border-gray-400'
                 }`}
               >
                 {isSelected && (
-                  <span className="absolute top-2 right-2 text-xs font-bold text-white bg-gray-700 rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute top-2 right-2 text-xs font-bold text-white bg-[#8b0000] rounded-full w-5 h-5 flex items-center justify-center">
                     ✓
                   </span>
                 )}
@@ -137,7 +140,7 @@ function SurveyPageInner() {
         <button
           onClick={handleNext}
           disabled={!canNext}
-          className="w-full py-4 bg-gray-900 text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors"
+          className="w-full py-4 bg-[#b10000] text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#8b0000] transition-colors"
         >
           다음
         </button>

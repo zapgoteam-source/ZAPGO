@@ -41,9 +41,12 @@ export default function HouseInfoPage() {
     <div className="flex flex-col min-h-screen">
       {/* 헤더 */}
       <div className="px-5 pt-6 pb-4">
-        <button onClick={() => router.back()} className="text-gray-400 text-sm mb-3 flex items-center gap-1">
-          ← 뒤로
-        </button>
+        <div className="flex items-start justify-between mb-3">
+          <button onClick={() => router.back()} className="text-gray-400 text-sm flex items-center gap-1">
+            ← 뒤로
+          </button>
+          <img src="/LOGO_BK.webp" alt="에너지잡고" className="w-10 h-10 object-contain flex-shrink-0" />
+        </div>
         <p className="text-xs text-gray-400 mb-1">STEP 2 / 3</p>
         <h1 className="text-xl font-bold text-gray-900">주택 정보 입력</h1>
         <p className="text-sm text-gray-500 mt-1">평형과 창짝 정보를 입력해주세요</p>
@@ -115,7 +118,7 @@ export default function HouseInfoPage() {
         <button
           onClick={handleNext}
           disabled={!isValid}
-          className="w-full py-4 bg-gray-900 text-white font-semibold text-base disabled:opacity-40 hover:bg-gray-800 transition-colors"
+          className="w-full py-4 bg-[#b10000] text-white font-semibold text-base disabled:opacity-40 hover:bg-[#8b0000] transition-colors"
         >
           예상 견적 보기
         </button>

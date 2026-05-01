@@ -188,7 +188,7 @@ export default function SubmitPage() {
         <div className="w-16 h-16 bg-green-100 flex items-center justify-center mx-auto mb-4">
           <span className="text-3xl">✓</span>
         </div>
-        <h1 className="text-xl font-bold text-gray-900 mb-2">시공 요청 완료!</h1>
+        <h1 className="text-xl font-bold text-gray-900 mb-2">상담 신청 완료!</h1>
         <p className="text-sm text-gray-500 mb-2">접수되었습니다. 담당자가 연락드릴 예정입니다.</p>
         {selectedTotal && (
           <p className="text-base font-semibold text-gray-800 mb-6">
@@ -216,8 +216,8 @@ export default function SubmitPage() {
     <div className="flex flex-col min-h-screen">
       <div className="px-5 pt-6 pb-4">
         <button onClick={() => router.back()} className="text-gray-400 text-sm mb-3">← 뒤로</button>
-        <h1 className="text-xl font-bold text-gray-900">시공 요청</h1>
-        <p className="text-sm text-gray-500 mt-1">고객 정보를 입력해주세요</p>
+        <h1 className="text-xl font-bold text-gray-900">상담 신청</h1>
+        <p className="text-sm text-gray-500 mt-1">아래 정보를 제출해 주세요</p>
       </div>
 
       <div className="flex-1 px-5 space-y-4">
@@ -288,9 +288,9 @@ export default function SubmitPage() {
         <button
           onClick={handleSubmit}
           disabled={submitting || !name || !phone || !address}
-          className="w-full py-4 bg-gray-900 text-white font-semibold text-base disabled:opacity-40 hover:bg-gray-800 transition-colors"
+          className="w-full py-4 bg-[#b10000] text-white font-semibold text-base disabled:opacity-40 hover:bg-[#8b0000] transition-colors"
         >
-          {submitting ? '제출 중...' : '시공 요청 제출'}
+          {submitting ? '제출 중...' : '상담 신청 제출하기'}
         </button>
         <ConsultCTABar />
       </div>
