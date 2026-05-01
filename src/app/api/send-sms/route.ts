@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { SolapiMessageService } from 'solapi';
+import crypto from 'crypto';
 
-const messageService = new SolapiMessageService(
-  process.env.SOLAPI_API_KEY!,
-  process.env.SOLAPI_API_SECRET!
-);
-
-const SENDER = process.env.SOLAPI_SENDER!;
+function makeSolapiAuthHeader(apiKey: string, apiSecret: string): string {
+  const date = new Date().toISOString();
+  const salt = crypto.randomBytes(16).toString('hex');
+  const signature = crypto
+    .createHmac('sha256', apiSecret)
+    .update(date + salt)
+    .digest('hex');
+  return `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${signature}`;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,11 +25,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '올바르지 않은 전화번호' }, { status: 400 });
     }
 
-    await messageService.send({
-      to: digits,
-      from: SENDER,
-      text: `[에너지잡고] 셀프견적 결과 다시보기\n${link}`,
+    const apiKey = process.env.SOLAPI_API_KEY!;
+    const apiSecret = process.env.SOLAPI_API_SECRET!;
+    const sender = process.env.SOLAPI_SENDER!;
+
+    const smsRes = await fetch('https://api.solapi.com/messages/v4/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: makeSolapiAuthHeader(apiKey, apiSecret),
+      },
+      body: JSON.stringify({
+        message: {
+          to: digits,
+          from: sender,
+          text: `[에너지잡고] 셀프견적 결과 다시보기\n${link}`,
+        },
+      }),
     });
+
+    if (!smsRes.ok) {
+      const errBody = await smsRes.json();
+      console.error('솔라피 SMS 발송 실패:', errBody);
+      return NextResponse.json({ error: 'SMS 발송 실패' }, { status: 500 });
+    }
 
     // 고객 테이블에 리드로 저장
     try {
@@ -53,6 +75,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('SMS 발송 오류:', err);
-    return NextResponse.json({ error: 'SMS 발송 실패' }, { status: 500 });
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
   }
 }
