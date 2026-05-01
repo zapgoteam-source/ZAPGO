@@ -122,7 +122,7 @@ export default function HouseInfoPage() {
         >
           예상 견적 보기
         </button>
-        <ConsultCTABar />
+        <ConsultCTABar page3Colors />
       </div>
 
       {/* 창짝 영상 모달 */}

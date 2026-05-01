@@ -99,7 +99,9 @@ function EstimatePageInner() {
   });
   const [showExitPopup, setShowExitPopup] = useState(false);
   const [showSmsModal, setShowSmsModal] = useState(false);
+  const [exitViaBack, setExitViaBack] = useState(false);
   const intentionalNav = useRef(false);
+  const hasSelectionRef = useRef(false);
 
   // 결과 페이지 첫 진입 시 추가옵션은 미선택 상태로 초기화
   // 단 SMS 다시보기 링크(pest/premium 쿼리)로 들어온 경우에만 해당 값 복원
@@ -155,6 +157,11 @@ function EstimatePageInner() {
   const currentTotal = selected ? totals[selected] : 0;
   const animatedTotal = useCountUp(currentTotal);
 
+  // 선택 상태를 ref에 동기화 (popstate 클로저에서 최신값 참조용)
+  useEffect(() => {
+    hasSelectionRef.current = !!(selected || premiumProtection || pestSolution);
+  }, [selected, premiumProtection, pestSolution]);
+
   // ──────────────────────────────
   // 이탈 방지 팝업 (뒤로가기 1회 인터셉트)
   // ──────────────────────────────
@@ -167,17 +174,17 @@ function EstimatePageInner() {
     if (!housingAreaPyeong || !windowSashCount) return;
 
     let popupShown = false;
-    // 현재 페이지 위에 가상 state push → 뒤로가기 1회 가로채기
-    // Strict Mode 이중 실행 방지: 이미 가드가 있으면 중복 push 스킵
     if (window.history.state?.estimateGuard !== true) {
       window.history.pushState({ estimateGuard: true }, '');
     }
 
     const onPopState = () => {
       if (popupShown || intentionalNav.current) return;
+      // 아무것도 선택 안 했으면 팝업 없이 그냥 이탈 허용
+      if (!hasSelectionRef.current) return;
       popupShown = true;
-      // 다시 state push 해서 페이지에 머무르게 함
       window.history.pushState({ estimateGuard: true }, '');
+      setExitViaBack(false);
       setShowExitPopup(true);
     };
 
@@ -211,9 +218,13 @@ function EstimatePageInner() {
         <div className="flex items-start justify-between mb-3">
           <button
             onClick={() => {
-              intentionalNav.current = true;
-              // 가드용 더미 히스토리 + /estimate 엔트리를 함께 건너뛰어 이전 페이지로 복귀
-              window.history.go(-2);
+              if (selected || premiumProtection || pestSolution) {
+                setExitViaBack(true);
+                setShowExitPopup(true);
+              } else {
+                intentionalNav.current = true;
+                window.history.go(-2);
+              }
             }}
             className="text-gray-400 text-sm flex items-center gap-1"
           >
@@ -399,6 +410,11 @@ function EstimatePageInner() {
             setShowExitPopup(false);
             setShowSmsModal(true);
           }}
+          onBack={exitViaBack ? () => {
+            intentionalNav.current = true;
+            setShowExitPopup(false);
+            window.history.go(-2);
+          } : undefined}
         />
       )}
 
@@ -409,7 +425,15 @@ function EstimatePageInner() {
   );
 }
 
-function ExitPopup({ onRequest, onLater }: { onRequest: () => void; onLater: () => void }) {
+function ExitPopup({
+  onRequest,
+  onLater,
+  onBack,
+}: {
+  onRequest: () => void;
+  onLater: () => void;
+  onBack?: () => void;
+}) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5">
       <div className="w-full max-w-sm bg-white p-6">
@@ -429,6 +453,14 @@ function ExitPopup({ onRequest, onLater }: { onRequest: () => void; onLater: () 
           >
             나중에 볼게요
           </button>
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="w-full py-2.5 text-gray-400 text-sm hover:text-gray-600 transition-colors"
+            >
+              이전 단계로 돌아가기
+            </button>
+          )}
         </div>
       </div>
     </div>

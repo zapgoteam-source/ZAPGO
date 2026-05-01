@@ -144,7 +144,7 @@ function SurveyPageInner() {
         >
           다음
         </button>
-        <ConsultCTABar />
+        <ConsultCTABar page3Colors />
       </div>
 
       {/* 인트로 시공 영상 팝업 */}

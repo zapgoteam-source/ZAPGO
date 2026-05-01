@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEstimateStore } from '@/store/estimateStore';
 import { supabase } from '@/lib/supabase';
@@ -80,6 +80,27 @@ export default function SubmitPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [showExitPopup, setShowExitPopup] = useState(false);
+  const [showSmsModal, setShowSmsModal] = useState(false);
+  const intentionalNav = useRef(false);
+
+  // 이탈 방지 팝업 (뒤로가기 1회 인터셉트)
+  useEffect(() => {
+    let popupShown = false;
+    if (window.history.state?.submitGuard !== true) {
+      window.history.pushState({ submitGuard: true }, '');
+    }
+
+    const onPopState = () => {
+      if (popupShown || intentionalNav.current) return;
+      popupShown = true;
+      window.history.pushState({ submitGuard: true }, '');
+      setShowExitPopup(true);
+    };
+
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
 
   // 세 가지 견적 금액 (VAT 포함)
   const mainTotal =
@@ -215,7 +236,12 @@ export default function SubmitPage() {
     <PageTransition>
     <div className="flex flex-col min-h-screen">
       <div className="px-5 pt-6 pb-4">
-        <button onClick={() => router.back()} className="text-gray-400 text-sm mb-3">← 뒤로</button>
+        <button
+          onClick={() => { intentionalNav.current = true; router.back(); }}
+          className="text-gray-400 text-sm mb-3"
+        >
+          ← 뒤로
+        </button>
         <h1 className="text-xl font-bold text-gray-900">상담 신청</h1>
         <p className="text-sm text-gray-500 mt-1">아래 정보를 제출해 주세요</p>
       </div>
@@ -292,8 +318,22 @@ export default function SubmitPage() {
         >
           {submitting ? '제출 중...' : '상담 신청 제출하기'}
         </button>
-        <ConsultCTABar />
+        <ConsultCTABar page3Colors />
       </div>
+
+      {/* 이탈 방지 팝업 */}
+      {showExitPopup && (
+        <ExitPopup
+          onStay={() => setShowExitPopup(false)}
+          onLater={() => {
+            setShowExitPopup(false);
+            setShowSmsModal(true);
+          }}
+        />
+      )}
+
+      {/* SMS 링크 발송 모달 */}
+      {showSmsModal && <SmsLinkModal onClose={() => setShowSmsModal(false)} />}
     </div>
     </PageTransition>
   );
@@ -306,6 +346,142 @@ function FormField({ label, required, children }: { label: string; required?: bo
         {label} {required && <span className="text-red-400">*</span>}
       </label>
       {children}
+    </div>
+  );
+}
+
+function ExitPopup({ onStay, onLater }: { onStay: () => void; onLater: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5">
+      <div className="w-full max-w-sm bg-white p-6">
+        <p className="text-lg font-bold text-gray-900 text-center mb-6">
+          상담을 신청하시겠어요?
+        </p>
+        <div className="space-y-2">
+          <button
+            onClick={onStay}
+            className="w-full py-3.5 bg-[#b10000] text-white font-semibold text-sm hover:bg-[#8b0000] transition-colors"
+          >
+            상담 신청하기
+          </button>
+          <button
+            onClick={onLater}
+            className="w-full py-3.5 border border-gray-300 text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
+          >
+            나중에 볼게요
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SmsLinkModal({ onClose }: { onClose: () => void }) {
+  const [phone, setPhone] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState('');
+
+  const {
+    selectedPlan,
+    premiumProtection,
+    pestSolution,
+    pestScreenCount,
+    housingAreaPyeong,
+    windowSashCount,
+  } = useEstimateStore();
+
+  const digits = phone.replace(/\D/g, '');
+  const isValid = digits.length >= 10;
+
+  const handleSubmit = async () => {
+    if (!isValid || submitting) return;
+    setSubmitting(true);
+    setError('');
+
+    try {
+      const params = new URLSearchParams();
+      if (selectedPlan) params.set('plan', selectedPlan);
+      if (premiumProtection) params.set('premium', '1');
+      if (pestSolution) params.set('pest', String(pestScreenCount));
+      if (housingAreaPyeong) params.set('pyeong', String(housingAreaPyeong));
+      if (windowSashCount) params.set('sash', String(windowSashCount));
+      const resultLink =
+        typeof window !== 'undefined'
+          ? `${window.location.origin}/estimate?${params.toString()}`
+          : '';
+
+      const res = await fetch('/api/send-sms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, link: resultLink }),
+      });
+
+      if (!res.ok) throw new Error('발송 실패');
+      setDone(true);
+    } catch {
+      setError('문자 발송에 실패했습니다. 다시 시도해 주세요.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5">
+      <div className="w-full max-w-sm bg-white p-6">
+        {done ? (
+          <>
+            <p className="text-lg font-bold text-gray-900 text-center mb-2">발송 완료</p>
+            <p className="text-sm text-gray-500 text-center mb-6">
+              문자 발송이 완료되었습니다.
+            </p>
+            <button
+              onClick={onClose}
+              className="w-full py-3.5 bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 transition-colors"
+            >
+              닫기
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="text-base font-bold text-gray-900 mb-2">결과 다시보기 링크 받기</p>
+            <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+              연락처를 남겨주시면 결과를 다시 볼 수 있는<br />링크를 문자로 보내드릴게요
+            </p>
+            <input
+              type="tel"
+              inputMode="numeric"
+              value={phone}
+              onChange={(e) => {
+                const d = e.target.value.replace(/\D/g, '').slice(0, 11);
+                const formatted =
+                  d.length < 4 ? d :
+                  d.length < 8 ? `${d.slice(0, 3)}-${d.slice(3)}` :
+                  `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
+                setPhone(formatted);
+              }}
+              placeholder="010-0000-0000"
+              className="w-full py-3 px-4 border-2 border-gray-200 text-sm focus:outline-none focus:border-gray-900 mb-3"
+            />
+            {error && <p className="text-xs text-red-500 mb-2">{error}</p>}
+            <div className="space-y-2">
+              <button
+                onClick={handleSubmit}
+                disabled={!isValid || submitting}
+                className="w-full py-3.5 bg-gray-900 text-white font-semibold text-sm disabled:opacity-40 hover:bg-gray-800 transition-colors"
+              >
+                {submitting ? '발송 중...' : '링크 받기'}
+              </button>
+              <button
+                onClick={onClose}
+                className="w-full py-3 text-gray-500 text-sm"
+              >
+                닫기
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
