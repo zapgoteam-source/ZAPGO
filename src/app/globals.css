@@ -45,6 +45,14 @@ input, select, button, textarea {
   overflow: visible !important;
 }
 
+/* Self-estimate prototype: softer corners for consumer-facing UI */
+.selfest-v2 button,
+.selfest-v2 input,
+.selfest-v2 textarea,
+.selfest-v2 div[class*="border"] {
+  border-radius: 10px !important;
+}
+
 
 /* Fix for icon containers to prevent clipping */
 .relative {

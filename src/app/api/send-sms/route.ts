@@ -14,7 +14,12 @@ function makeSolapiAuthHeader(apiKey: string, apiSecret: string): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { phone, link } = body as { phone?: string; link?: string };
+    const { phone, link, refCode, skipLeadSave } = body as {
+      phone?: string;
+      link?: string;
+      refCode?: string;
+      skipLeadSave?: boolean;
+    };
 
     if (!phone || !link) {
       return NextResponse.json({ error: '필수 항목 누락' }, { status: 400 });
@@ -51,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 고객 테이블에 리드로 저장
-    try {
+    if (!skipLeadSave) try {
       const base = request.nextUrl.origin;
       await fetch(`${base}/api/customers`, {
         method: 'POST',
@@ -64,6 +69,7 @@ export async function POST(request: NextRequest) {
           issues: [],
           notes: `결과 다시보기 링크 요청 / ${link}`,
           desired_quote_date: null,
+          ref_code: refCode || null,
           tenant_id: null,
           created_by: null,
         }),
