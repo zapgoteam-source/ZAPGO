@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     const apiKey = process.env.SOLAPI_API_KEY!;
     const apiSecret = process.env.SOLAPI_API_SECRET!;
-    const sender = process.env.SOLAPI_SENDER!;
+    const sender = process.env.SOLAPI_SENDER || '16009195';
 
     const smsRes = await fetch('https://api.solapi.com/messages/v4/send', {
       method: 'POST',
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         message: {
           to: digits,
           from: sender,
-          text: `[에너지잡고] 셀프견적 결과 다시보기\n${link}`,
+          text: `[에너지잡고] 맞춤 예상 견적 보기\n${link}`,
         },
       }),
     });
