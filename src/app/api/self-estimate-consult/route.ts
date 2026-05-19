@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { decrypt, encrypt } from '@/lib/encryption';
+import {
+  calculateSelfEstimateTotals,
+  formatKoreanDateTime,
+  formatKRW,
+  PLAN_LABELS,
+  PROTECTION_LABELS,
+  type PlanKey,
+  type ProtectionKey,
+} from '@/lib/selfEstimate';
 
 function getAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -33,7 +42,7 @@ export async function POST(request: NextRequest) {
     const now = new Date().toISOString();
     const { data: session, error: sessionError } = await supabase
       .from('self_estimate_sessions')
-      .select('customer_id, payload_encrypted')
+      .select('customer_id, payload_encrypted, created_at')
       .eq('token_hash', hashToken(token))
       .gt('expires_at', now)
       .maybeSingle();
@@ -45,11 +54,24 @@ export async function POST(request: NextRequest) {
     const rawPayload = decrypt(session.payload_encrypted);
     const payload = rawPayload ? JSON.parse(rawPayload) : null;
     const selectedAddress = payload?.selectedAddress || '';
+    const fullAddress = `${selectedAddress} ${detailAddress}`.trim();
+    const plan = selectedPlan as PlanKey;
+    const protection = protectionOption as ProtectionKey;
+    const totals = calculateSelfEstimateTotals({
+      pyeong: Number(payload?.pyeong) || 0,
+      sash: Number(payload?.sash) || 0,
+      protectionOption: protection,
+      includeRailMohair: Boolean(includeRailMohair),
+      pestSolution: Boolean(pestSolution),
+      pestScreenCount: Number(pestScreenCount) || 1,
+    });
+
     const summary = [
-      `시공 방식: ${selectedPlan}`,
-      `보양: ${protectionOption}`,
-      `창틀 모헤어: ${includeRailMohair ? '추가' : '미추가'}`,
+      `시공 방식: ${PLAN_LABELS[plan] || selectedPlan}`,
+      `보양: ${PROTECTION_LABELS[protection] || protectionOption}`,
+      `창틀 모헤어: ${includeRailMohair ? '교체' : '미교체'}`,
       `방충솔루션: ${pestSolution ? `추가(${pestScreenCount}개)` : '미추가'}`,
+      `선택 견적: ${formatKRW(totals[plan])}`,
       memo ? `메모: ${memo}` : null,
     ]
       .filter(Boolean)
@@ -58,7 +80,7 @@ export async function POST(request: NextRequest) {
     const { error: updateError } = await supabase
       .from('customers')
       .update({
-        address: encrypt(`${selectedAddress} ${detailAddress}`.trim()),
+        address: encrypt(fullAddress),
         extra_request: summary,
         consult_memo: memo || null,
         status: 'NEW',
@@ -70,15 +92,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '상담 신청 저장에 실패했습니다.' }, { status: 500 });
     }
 
+    await supabase
+      .from('self_estimate_sessions')
+      .update({ consult_requested_at: now })
+      .eq('token_hash', hashToken(token));
+
     const notifyResponse = await fetch(`${request.nextUrl.origin}/api/send-email/visit-request`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        type: 'consult',
+        buttonClickedAt: session.created_at,
+        submittedAt: now,
         phone: payload?.phone || '',
-        address: `${selectedAddress} ${detailAddress}`.trim(),
+        address: fullAddress,
         issues: payload?.issues || [],
-        notes: summary,
+        pyeong: payload?.pyeong,
+        sash: payload?.sash,
+        selectedPlan: PLAN_LABELS[plan] || selectedPlan,
+        protectionOption: PROTECTION_LABELS[protection] || protectionOption,
+        includeRailMohair: includeRailMohair ? '교체' : '미교체',
+        pestSolution: pestSolution ? `추가(${pestScreenCount}개)` : '미추가',
+        selectedEstimate: formatKRW(totals[plan]),
+        notes: memo || '',
         refCode: 'zapgoself',
+        receivedAtLabel: formatKoreanDateTime(now),
       }),
     });
 

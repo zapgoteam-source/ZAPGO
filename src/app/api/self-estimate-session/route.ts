@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { decrypt, encrypt } from '@/lib/encryption';
+import { calculateSelfEstimateTotals } from '@/lib/selfEstimate';
 
 const SESSION_TTL_DAYS = 7;
 
@@ -11,6 +12,7 @@ type SelfEstimatePayload = {
   sash: number;
   phone: string;
   selectedAddress: string;
+  baseQuotes?: { fabric: number; mohair: number; side: number };
 };
 
 function getAdminClient() {
@@ -46,7 +48,9 @@ function isValidPayload(value: unknown): value is SelfEstimatePayload {
     typeof payload.sash === 'number' &&
     Number.isFinite(payload.sash) &&
     typeof payload.phone === 'string' &&
-    typeof payload.selectedAddress === 'string'
+    typeof payload.selectedAddress === 'string' &&
+    (payload.baseQuotes === undefined ||
+      (typeof payload.baseQuotes === 'object' && payload.baseQuotes !== null))
   );
 }
 
@@ -58,12 +62,17 @@ export async function POST(request: NextRequest) {
     }
 
     const token = makeToken();
-    const payloadEncrypted = encrypt(JSON.stringify(body));
+    const baseQuotes =
+      body.baseQuotes || calculateSelfEstimateTotals({ pyeong: body.pyeong, sash: body.sash });
+    const sessionPayload = { ...body, baseQuotes };
+    const payloadEncrypted = encrypt(JSON.stringify(sessionPayload));
     if (!payloadEncrypted) {
       return NextResponse.json({ error: '세션 저장에 실패했습니다.' }, { status: 500 });
     }
 
-    const expiresAt = new Date(Date.now() + SESSION_TTL_DAYS * 24 * 60 * 60 * 1000).toISOString();
+    const createdAt = new Date();
+    const expiresAt = new Date(createdAt.getTime() + SESSION_TTL_DAYS * 24 * 60 * 60 * 1000).toISOString();
+    const followupDueAt = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000).toISOString();
     const supabase = getAdminClient();
     const { data: customer, error: customerError } = await supabase
       .from('customers')
@@ -92,6 +101,7 @@ export async function POST(request: NextRequest) {
       customer_id: customer.id,
       payload_encrypted: payloadEncrypted,
       expires_at: expiresAt,
+      followup_due_at: followupDueAt,
     });
 
     if (error) {

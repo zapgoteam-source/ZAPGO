@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/self-estimate-followup",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

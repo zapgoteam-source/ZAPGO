@@ -2,10 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
-
-type IssueKey = 'dust' | 'draft' | 'bug' | 'heating' | 'noise' | 'odor';
-type PlanKey = 'fabric' | 'mohair' | 'side';
-type ProtectionKey = 'none' | 'premium';
+import { calculateSelfEstimateTotals, formatKRW, type IssueKey, type PlanKey, type ProtectionKey } from '@/lib/selfEstimate';
 type AddressResult = {
   roadAddr: string;
   roadAddrPart1: string;
@@ -52,29 +49,6 @@ const FAQS = [
       '창문손잡이 교체, 샤시롤러 교체, 외부유리창 청소도 가능합니다. 상담 신청할 때 원하시는 작업을 남겨주시면 가능한 범위와 비용을 먼저 안내드리고, 확인 후 진행하실 수 있도록 도와드리겠습니다.',
   },
 ];
-
-const LABOR_PER_WORKER = 250_000;
-const FABRIC_FOUR_UNIT = 30_000;
-const SIDE_ONLY_UNIT = 15_000;
-const MOHAIR_PER_PYEONG = 35_000;
-const PREMIUM_PROTECTION_PRICE = 80_000;
-const VAT_RATE = 1.1;
-
-function getWorkerCount(pyeong: number) {
-  if (pyeong >= 71) return 6;
-  if (pyeong >= 51) return 5;
-  if (pyeong >= 38) return 4;
-  if (pyeong >= 23) return 3;
-  return 2;
-}
-
-function withVat(amount: number) {
-  return Math.round(amount * VAT_RATE);
-}
-
-function formatKRW(amount: number) {
-  return `${amount.toLocaleString('ko-KR')}원`;
-}
 
 function getRecommendation(issues: Set<IssueKey>) {
   if (
@@ -170,14 +144,17 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
   const [showCountGuide, setShowCountGuide] = useState(false);
   const [showServiceGuide, setShowServiceGuide] = useState(false);
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
-  const [smsSent, setSmsSent] = useState(false);
-  const [smsSending, setSmsSending] = useState(false);
-  const [smsError, setSmsError] = useState('');
+  const [messageSent, setMessageSent] = useState(false);
+  const [messageSending, setMessageSending] = useState(false);
+  const [messageError, setMessageError] = useState('');
+  const [sentChannel, setSentChannel] = useState<'kakao' | 'sms' | 'unknown'>('unknown');
   const [restoreError, setRestoreError] = useState('');
   const [restoreToken, setRestoreToken] = useState(initialRestoreToken);
   const [isRestoring, setIsRestoring] = useState(Boolean(initialRestoreToken));
-  const [pendingScrollTarget, setPendingScrollTarget] = useState<'protection' | 'rail' | 'pest' | 'consult' | null>(null);
+  const [pendingScrollTarget, setPendingScrollTarget] = useState<'protection' | 'rail' | 'pest' | 'estimate' | 'consult' | null>(null);
   const [isConsultVisible, setIsConsultVisible] = useState(false);
+  const [isInlineEstimateVisible, setIsInlineEstimateVisible] = useState(false);
+  const [hasReachedEstimateSection, setHasReachedEstimateSection] = useState(false);
   const [consultSubmitting, setConsultSubmitting] = useState(false);
   const [consultSubmitted, setConsultSubmitted] = useState(false);
   const [consultError, setConsultError] = useState('');
@@ -185,6 +162,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
   const protectionRef = useRef<HTMLDivElement | null>(null);
   const railRef = useRef<HTMLDivElement | null>(null);
   const pestRef = useRef<HTMLDivElement | null>(null);
+  const estimateRef = useRef<HTMLDivElement | null>(null);
   const consultRef = useRef<HTMLDivElement | null>(null);
 
   const pyeongNum = Number(pyeong) || 0;
@@ -192,24 +170,27 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
   const recommendation = useMemo(() => getRecommendation(issues), [issues]);
   const recommendedPlanKeys = useMemo(() => getRecommendedPlanKeys(issues), [issues]);
 
-  const totals = useMemo(() => {
-    const labor = getWorkerCount(pyeongNum) * LABOR_PER_WORKER;
-    const protectionCost = protectionOption === 'premium' ? PREMIUM_PROTECTION_PRICE : 0;
-    const pestCost = pestSolution ? pestScreenCount * 23_000 : 0;
-    const multiplier = includeRailMohair ? 1.4 : 1;
-    const fabricBase = withVat((labor + sashNum * FABRIC_FOUR_UNIT) * multiplier);
-    const mohairBase = Math.round(pyeongNum * MOHAIR_PER_PYEONG * multiplier);
-    const sideBase = withVat((LABOR_PER_WORKER + sashNum * SIDE_ONLY_UNIT) * multiplier);
-    return {
-      fabric: fabricBase + protectionCost + pestCost,
-      mohair: mohairBase + protectionCost + pestCost,
-      side: sideBase + protectionCost + pestCost,
-    };
-  }, [pyeongNum, sashNum, protectionOption, pestSolution, pestScreenCount, includeRailMohair]);
+  const totals = useMemo(
+    () =>
+      calculateSelfEstimateTotals({
+        pyeong: pyeongNum,
+        sash: sashNum,
+        protectionOption,
+        pestSolution,
+        pestScreenCount,
+        includeRailMohair,
+      }),
+    [pyeongNum, sashNum, protectionOption, pestSolution, pestScreenCount, includeRailMohair],
+  );
 
-  const selectedTotal = selectedPlan && protectionOption ? totals[selectedPlan] : 0;
-  const teaserMin = Math.max(Math.floor(totals.mohair / 10000) * 10000, 100000);
-  const teaserMax = Math.ceil(totals.fabric * 1.08 / 10000) * 10000;
+  const baseTotals = useMemo(
+    () => calculateSelfEstimateTotals({ pyeong: pyeongNum, sash: sashNum }),
+    [pyeongNum, sashNum],
+  );
+
+  const selectedTotal = selectedPlan ? totals[selectedPlan] : 0;
+  const teaserMin = Math.max(Math.floor(baseTotals.mohair / 10000) * 10000, 100000);
+  const teaserMax = Math.ceil(baseTotals.fabric * 1.08 / 10000) * 10000;
   const animatedSelectedTotal = useCountUp(selectedTotal ?? 0);
   const canContinueStep1 = issues.size > 0 && pyeongNum > 0 && sashNum > 0;
   const canContinueStep2 =
@@ -269,6 +250,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
       protection: protectionRef,
       rail: railRef,
       pest: pestRef,
+      estimate: estimateRef,
       consult: consultRef,
     };
     const target = targetMap[pendingScrollTarget].current;
@@ -287,6 +269,10 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
   }, [pendingScrollTarget, selectedPlan, protectionOption, includeRailMohair, pestSolution]);
 
   useEffect(() => {
+    setHasReachedEstimateSection(false);
+  }, [selectedPlan, protectionOption, includeRailMohair, pestSolution, pestScreenCount]);
+
+  useEffect(() => {
     const target = consultRef.current;
     if (!target) {
       setIsConsultVisible(false);
@@ -301,11 +287,29 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
     return () => observer.disconnect();
   }, [selectedPlan, protectionOption]);
 
-  const sendEstimateLink = async () => {
-    if (!canContinueStep2 || smsSending) return;
+  useEffect(() => {
+    const target = estimateRef.current;
+    if (!target) {
+      setIsInlineEstimateVisible(false);
+      return;
+    }
 
-    setSmsSending(true);
-    setSmsError('');
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInlineEstimateVisible(entry.isIntersecting);
+        if (entry.isIntersecting) setHasReachedEstimateSection(true);
+      },
+      { threshold: 0.16 },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [selectedPlan, protectionOption]);
+
+  const sendEstimateLink = async () => {
+    if (!canContinueStep2 || messageSending) return;
+
+    setMessageSending(true);
+    setMessageError('');
 
     try {
       const sessionResponse = await fetch('/api/self-estimate-session', {
@@ -317,6 +321,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
           sash: sashNum,
           phone,
           selectedAddress,
+          baseQuotes: baseTotals,
         }),
       });
       const sessionPayload = await sessionResponse.json();
@@ -330,7 +335,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
           : '';
       setRestoreToken(sessionPayload.token);
 
-      const response = await fetch('/api/send-sms', {
+      const response = await fetch('/api/send-estimate-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -343,14 +348,15 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
 
       const payload = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(payload?.error || '문자 발송에 실패했습니다.');
+        throw new Error(payload?.error || '견적 링크 발송에 실패했습니다.');
       }
 
-      setSmsSent(true);
+      setSentChannel(payload?.channel || 'unknown');
+      setMessageSent(true);
     } catch (error) {
-      setSmsError(error instanceof Error ? error.message : '문자 발송에 실패했습니다.');
+      setMessageError(error instanceof Error ? error.message : '견적 링크 발송에 실패했습니다.');
     } finally {
-      setSmsSending(false);
+      setMessageSending(false);
     }
   };
 
@@ -420,7 +426,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
           )}
         </header>
 
-        <main className={`px-6 pt-6 ${step === 3 && !isConsultVisible ? 'pb-36' : 'pb-8'}`}>
+        <main className={`px-6 pt-6 ${step === 3 && !isConsultVisible && !isInlineEstimateVisible && !hasReachedEstimateSection ? 'pb-36' : 'pb-8'}`}>
           {isRestoring && (
             <section className="flex min-h-[55vh] flex-col items-center justify-center text-center">
               <p className="text-xs font-semibold tracking-[0.18em] text-[#b10000]">맞춤 예상 견적</p>
@@ -517,7 +523,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
             </section>
           )}
 
-          {!isRestoring && step === 2 && !smsSent && (
+          {!isRestoring && step === 2 && !messageSent && (
             <section className="space-y-6">
               <button onClick={() => setStep(1)} className="text-sm text-[#6a6a6a]">
                 ← 뒤로
@@ -566,7 +572,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                 <input
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="견적 문자를 받을 휴대폰 번호"
+                  placeholder="견적 링크를 받을 휴대폰 번호"
                   className="w-full rounded-[14px] border border-[#dddddd] bg-white px-4 py-4 outline-none"
                 />
                 <button
@@ -597,13 +603,13 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
               </div>
 
               <button
-                disabled={!canContinueStep2 || smsSending}
+                disabled={!canContinueStep2 || messageSending}
                 onClick={sendEstimateLink}
                 className="w-full bg-[#b10000] py-4 text-base font-medium text-white disabled:opacity-40"
               >
-                {smsSending ? '문자 보내는 중...' : '맞춤 견적 링크 받기'}
+                {messageSending ? '견적 링크 보내는 중...' : '맞춤 견적 링크 받기'}
               </button>
-              {smsError && <p className="text-sm text-[#b10000]">{smsError}</p>}
+              {messageError && <p className="text-sm text-[#b10000]">{messageError}</p>}
               <p className="text-center text-sm text-[#6a6a6a]">
                 궁금한 점이 있나요?{' '}
                 <a href="http://pf.kakao.com/_PjwDxj/chat" target="_blank" rel="noreferrer" className="font-semibold text-[#b10000]">💬 카톡문의</a> ·{' '}
@@ -612,37 +618,37 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
             </section>
           )}
 
-          {!isRestoring && step === 2 && smsSent && (
+          {!isRestoring && step === 2 && messageSent && (
             <section className="space-y-6">
-              <button onClick={() => setSmsSent(false)} className="text-sm text-[#6a6a6a]">
+              <button onClick={() => setMessageSent(false)} className="text-sm text-[#6a6a6a]">
                 ← 뒤로
               </button>
               <div className="rounded-[14px] border border-[#dddddd] bg-white p-5">
-                <p className="text-xs font-semibold tracking-[0.18em] text-[#b10000]">문자 발송 완료</p>
+                <p className="text-xs font-semibold tracking-[0.18em] text-[#b10000]">견적 링크 발송 완료</p>
                 <h1 className="mt-3 text-2xl font-bold leading-tight">
                   맞춤 견적 링크를
                   <br />
-                  문자로 보내드렸어요
+                  {sentChannel === 'kakao' ? '카카오톡으로 보내드렸어요' : '문자로 보내드렸어요'}
                 </h1>
                 <p className="mt-3 text-sm leading-6 text-[#6a6a6a]">
-                  문자로 받은 링크를 눌러, 직접 옵션을 조정해 보세요.
+                  받은 링크를 눌러, 직접 옵션을 조정해 보세요.
                 </p>
               </div>
               <button
                 onClick={sendEstimateLink}
-                disabled={smsSending}
+                disabled={messageSending}
                 className="w-full bg-[#b10000] py-4 text-base font-medium text-white disabled:opacity-40"
               >
-                {smsSending ? '문자 보내는 중...' : '문자 다시 보내기'}
+                {messageSending ? '견적 링크 보내는 중...' : '견적 링크 다시 보내기'}
               </button>
-              {smsError && <p className="text-sm text-[#b10000]">{smsError}</p>}
+              {messageError && <p className="text-sm text-[#b10000]">{messageError}</p>}
               <SupportActions />
             </section>
           )}
 
           {!isRestoring && step === 3 && (
             <section className="space-y-5">
-              <button onClick={() => { setStep(2); setSmsSent(true); }} className="text-sm text-[#6a6a6a]">
+              <button onClick={() => { setStep(2); setMessageSent(true); }} className="text-sm text-[#6a6a6a]">
                 ← 뒤로
               </button>
 
@@ -650,7 +656,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                 <p className="text-xs font-semibold tracking-[0.18em] text-[#b10000]">맞춤 예상 견적</p>
                 <h2 className="text-lg font-bold">원하는 방식으로 견적을 조정해보세요</h2>
                 <p className="text-sm leading-6 text-[#6a6a6a]">
-                  시공 방식과 옵션을 바꾸면 맨아래 예상 금액에 바로 반영됩니다.
+                  시공 방식과 옵션을 바꾸면 예상 금액에 바로 반영됩니다.
                 </p>
                 {PLANS.map((plan) => {
                   const active = selectedPlan === plan.key;
@@ -722,7 +728,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <button
-                    onClick={() => { setIncludeRailMohair(false); setPendingScrollTarget(issues.has('bug') ? 'pest' : 'consult'); }}
+                    onClick={() => { setIncludeRailMohair(false); setPendingScrollTarget(issues.has('bug') ? 'pest' : 'estimate'); }}
                     className={`border p-4 text-left ${
                       !includeRailMohair
                         ? 'border-[#b10000] bg-[#fff1ee]'
@@ -733,7 +739,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                     <p className="mt-1 text-sm text-[#6a6a6a]">유리창 모헤어만 교체</p>
                   </button>
                   <button
-                    onClick={() => { setIncludeRailMohair(true); setPendingScrollTarget(issues.has('bug') ? 'pest' : 'consult'); }}
+                    onClick={() => { setIncludeRailMohair(true); setPendingScrollTarget(issues.has('bug') ? 'pest' : 'estimate'); }}
                     className={`border p-4 text-left ${
                       includeRailMohair
                         ? 'border-[#b10000] bg-[#fff1ee]'
@@ -754,7 +760,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <button
-                      onClick={() => { setPestSolution(false); setPendingScrollTarget('consult'); }}
+                      onClick={() => { setPestSolution(false); setPendingScrollTarget('estimate'); }}
                       className={`border p-4 text-left ${
                         !pestSolution
                           ? 'border-[#b10000] bg-[#fff1ee]'
@@ -765,7 +771,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                       <p className="mt-1 text-sm text-[#6a6a6a]">기본 시공만</p>
                     </button>
                     <button
-                      onClick={() => { setPestSolution(true); setPendingScrollTarget('consult'); }}
+                      onClick={() => { setPestSolution(true); }}
                       className={`border p-4 text-left ${
                         pestSolution
                           ? 'border-[#b10000] bg-[#fff1ee]'
@@ -804,18 +810,18 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                 </div>
               )}
 
-              {selectedPlan && protectionOption && (
-              <div className="border border-[#ebebeb] bg-[#f7f7f7] p-4">
+              {selectedPlan && (
+              <div ref={estimateRef} className="scroll-mt-6 border border-[#ebebeb] bg-[#f7f7f7] p-4">
                 <p className="text-sm text-[#6a6a6a]">현재 선택 기준 예상 견적</p>
                 {selectedTotal > 0 ? (
                   <p className="mt-1 text-3xl font-bold">{formatKRW(animatedSelectedTotal)}</p>
                 ) : (
                   <p className="mt-1 text-lg font-bold text-[#6a6a6a]">
-                    시공 방식과 보양 옵션을 선택하면 예상 금액이 계산돼요
+                    시공 방식을 선택하면 예상 금액이 계산돼요
                   </p>
                 )}
                 <p className="mt-3 text-sm leading-6 text-[#6a6a6a]">
-                  창호 구조와 현장 상태에 따라 최종 금액은 달라질 수 있습니다. 또한 상담을 통해 시공대상이나 방법을 조율하여 원하시는 예산에 맞춰드릴 수 있습니다.
+                  보양 옵션을 선택하기 전에는 보양비가 빠진 기본 기준입니다. 창호 구조와 현장 상태에 따라 최종 금액은 달라질 수 있습니다. 상담을 통해 시공대상이나 방법을 조율하여 원하시는 예산에 맞춰드릴 수 있습니다.
                 </p>
               </div>
               )}
@@ -896,13 +902,13 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
         </main>
       </div>
 
-      {!isRestoring && step === 3 && !isConsultVisible && (
+      {!isRestoring && step === 3 && !isConsultVisible && !isInlineEstimateVisible && !hasReachedEstimateSection && (
         <div className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(env(safe-area-inset-bottom)+12px)]">
           <div className="mx-auto max-w-md rounded-[14px] border border-[#ebebeb] bg-white/95 p-4 shadow-[0_-8px_24px_rgba(0,0,0,0.12)] backdrop-blur">
             <p className="text-xs text-[#6a6a6a]">현재 선택 기준 예상 견적</p>
             <p className="mt-1 text-2xl font-bold text-[#222222]">{formatKRW(animatedSelectedTotal)}</p>
             {selectedTotal === 0 && (
-              <p className="mt-1 text-xs leading-5 text-[#8d8178]">시공 방식과 보양 옵션을 선택하면 견적이 계산돼요.</p>
+              <p className="mt-1 text-xs leading-5 text-[#8d8178]">시공 방식을 선택하면 기본 견적이 바로 계산돼요.</p>
             )}
           </div>
         </div>
