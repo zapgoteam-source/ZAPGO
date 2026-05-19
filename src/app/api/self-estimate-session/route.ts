@@ -12,6 +12,7 @@ type SelfEstimatePayload = {
   sash: number;
   phone: string;
   selectedAddress: string;
+  detailAddress?: string;
   baseQuotes?: { fabric: number; mohair: number; side: number };
 };
 
@@ -49,6 +50,7 @@ function isValidPayload(value: unknown): value is SelfEstimatePayload {
     Number.isFinite(payload.sash) &&
     typeof payload.phone === 'string' &&
     typeof payload.selectedAddress === 'string' &&
+    (payload.detailAddress === undefined || typeof payload.detailAddress === 'string') &&
     (payload.baseQuotes === undefined ||
       (typeof payload.baseQuotes === 'object' && payload.baseQuotes !== null))
   );
@@ -79,7 +81,7 @@ export async function POST(request: NextRequest) {
       .insert({
         name: encrypt('미입력'),
         phone: encrypt(body.phone),
-        address: encrypt(body.selectedAddress),
+        address: encrypt(`${body.selectedAddress} ${body.detailAddress ?? ''}`.trim()),
         status: 'NEW',
         problem_summary: body.issues.join(', '),
         extra_request: '맞춤 견적 링크 요청',

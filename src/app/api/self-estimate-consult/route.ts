@@ -31,10 +31,10 @@ function hashToken(token: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { token, detailAddress, memo, selectedPlan, protectionOption, includeRailMohair, pestSolution, pestScreenCount } =
+    const { token, selectedAddress: submittedAddress, detailAddress, memo, selectedPlan, protectionOption, includeRailMohair, pestSolution, pestScreenCount } =
       await request.json();
 
-    if (!token || !detailAddress || !selectedPlan || !protectionOption) {
+    if (!token || !selectedPlan || !protectionOption) {
       return NextResponse.json({ error: '필수 항목이 누락되었습니다.' }, { status: 400 });
     }
 
@@ -53,8 +53,11 @@ export async function POST(request: NextRequest) {
 
     const rawPayload = decrypt(session.payload_encrypted);
     const payload = rawPayload ? JSON.parse(rawPayload) : null;
-    const selectedAddress = payload?.selectedAddress || '';
-    const fullAddress = `${selectedAddress} ${detailAddress}`.trim();
+    const selectedAddress = String(submittedAddress || payload?.selectedAddress || '').trim();
+    if (!selectedAddress) {
+      return NextResponse.json({ error: '주소가 필요합니다.' }, { status: 400 });
+    }
+    const fullAddress = `${selectedAddress} ${detailAddress || ''}`.trim();
     const plan = selectedPlan as PlanKey;
     const protection = protectionOption as ProtectionKey;
     const totals = calculateSelfEstimateTotals({

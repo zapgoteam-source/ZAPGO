@@ -197,7 +197,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
     phone.replace(/\D/g, '').length >= 10 &&
     selectedAddress.trim().length > 0 &&
     privacyAgreed;
-  const canSubmitConsult = !!selectedPlan && !!protectionOption && detailAddress.trim().length > 0;
+  const canSubmitConsult = !!selectedPlan && !!protectionOption && selectedAddress.trim().length > 0;
 
   const toggleIssue = (key: IssueKey) => {
     const next = new Set(issues);
@@ -231,6 +231,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
         setSashCount(String(payload.data.sash));
         setPhone(payload.data.phone);
         setSelectedAddress(payload.data.selectedAddress);
+        setDetailAddress(payload.data.detailAddress ?? '');
         setPrivacyAgreed(true);
         setStep(3);
       } catch (error) {
@@ -321,6 +322,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
           sash: sashNum,
           phone,
           selectedAddress,
+          detailAddress: detailAddress.trim(),
           baseQuotes: baseTotals,
         }),
       });
@@ -372,6 +374,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           token: restoreToken,
+          selectedAddress: selectedAddress.trim(),
           detailAddress: detailAddress.trim(),
           memo: memo.trim(),
           selectedPlan,
@@ -582,8 +585,14 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                   도로명 주소 검색
                 </button>
                 {selectedAddress && (
-                  <div className="rounded-[14px] border border-[#dddddd] bg-[#f7f7f7] p-3 text-sm">
-                    선택한 주소: <span className="font-bold">{selectedAddress}</span>
+                  <div className="space-y-2 rounded-[14px] border border-[#dddddd] bg-[#f7f7f7] p-3 text-sm">
+                    <p>선택한 주소: <span className="font-bold">{selectedAddress}</span></p>
+                    <input
+                      value={detailAddress}
+                      onChange={(e) => setDetailAddress(e.target.value)}
+                      placeholder="상세주소 (선택) · 동·호수는 나중에 입력해도 괜찮아요"
+                      className="w-full rounded-[10px] border border-[#dddddd] bg-white px-3 py-3 text-sm outline-none"
+                    />
                   </div>
                 )}
                 <label className="flex items-start gap-2 text-sm leading-6 text-[#6a6a6a]">
@@ -596,7 +605,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                   <span>
                     견적 안내 및 상담을 위해 개인정보 수집·이용에 동의합니다
                     <span className="block text-xs text-[#8d8178]">
-                      수집 항목: 연락처, 도로명 주소 / 이용 목적: 견적 안내 및 상담 응대
+                      수집 항목: 연락처, 도로명 주소, 상세주소 / 이용 목적: 견적 안내 및 상담 응대
                     </span>
                   </span>
                 </label>
@@ -832,15 +841,30 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                 <div className="rounded-[14px] border border-[#dddddd] bg-[#f7f7f7] px-4 py-4 text-sm">
                   연락처 <span className="ml-2 font-bold">{phone || '입력됨'}</span>
                 </div>
-                <div className="rounded-[14px] border border-[#dddddd] bg-[#f7f7f7] px-4 py-4 text-sm">
-                  선택한 주소 <span className="ml-2 font-bold">{selectedAddress}</span>
+                <div className="space-y-3 rounded-[14px] border border-[#dddddd] bg-[#f7f7f7] p-4 text-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold text-[#6a6a6a]">상담받을 주소</p>
+                      <p className="mt-1 font-bold leading-6">{selectedAddress || '주소를 선택해주세요'}</p>
+                    </div>
+                    <button
+                      onClick={() => setShowAddressModal(true)}
+                      className="shrink-0 rounded-full border border-[#b10000] px-3 py-1.5 text-xs font-bold text-[#b10000]"
+                    >
+                      주소 변경
+                    </button>
+                  </div>
+                  <p className="text-xs leading-5 text-[#8d8178]">STEP2에서 입력한 주소를 불러왔어요. 필요하면 수정할 수 있습니다.</p>
                 </div>
-                <input
-                  value={detailAddress}
-                  onChange={(e) => setDetailAddress(e.target.value)}
-                  placeholder="동·호수 등 상세주소"
-                  className="w-full rounded-[14px] border border-[#dddddd] bg-white px-4 py-4 outline-none"
-                />
+                <label className="block">
+                  <span className="mb-1.5 block text-xs text-[#6a6a6a]">상세주소 (선택)</span>
+                  <input
+                    value={detailAddress}
+                    onChange={(e) => setDetailAddress(e.target.value)}
+                    placeholder="동·호수 등 상세주소"
+                    className="w-full rounded-[14px] border border-[#dddddd] bg-white px-4 py-4 outline-none"
+                  />
+                </label>
                 <textarea
                   value={memo}
                   onChange={(e) => setMemo(e.target.value)}

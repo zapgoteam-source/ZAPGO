@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
           type: 'followup',
           buttonClickedAt: session.created_at,
           phone: payload.phone || '',
-          address: payload.selectedAddress || '',
+          address: `${payload.selectedAddress || ''} ${payload.detailAddress || ''}`.trim(),
           issues: payload.issues || [],
           pyeong: payload.pyeong,
           sash: payload.sash,
