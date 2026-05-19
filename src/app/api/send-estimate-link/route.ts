@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { makeSolapiAuthHeader, SOLAPI_SEND_ENDPOINT } from '@/lib/solapi';
 
-const ALIMTALK_TEXT = `[에너지잡고]\n요청하신 맞춤 예상 견적이 준비되었습니다.\n\n아래 링크 또는 버튼을 눌러 시공 방식과 옵션을 선택하고\n예상 금액을 확인해 주세요.\n\n#{견적링크}`;
-
 function getSmsFallbackText(link: string) {
   return `[에너지잡고]\n요청하신 맞춤 예상 견적이 준비되었습니다.\n\n아래 링크를 눌러 시공 방식과 옵션을 선택하고 예상 금액을 확인해 주세요.\n${link}`;
 }
@@ -46,7 +44,7 @@ export async function POST(request: NextRequest) {
     const sender = process.env.SOLAPI_SENDER || '16009195';
     const pfId = process.env.SOLAPI_KAKAO_PF_ID;
     const templateId = process.env.SOLAPI_KAKAO_TEMPLATE_ID;
-    const buttonName = process.env.SOLAPI_KAKAO_BUTTON_NAME || '맞춤 견적 보기';
+    const caseVideoLink = process.env.ZAPGO_CASE_VIDEO_URL || 'https://youtu.be/_tq8gXHrhe4';
 
     const kakaoReady = Boolean(pfId && templateId);
     const message = kakaoReady
@@ -64,9 +62,15 @@ export async function POST(request: NextRequest) {
             buttons: [
               {
                 buttonType: 'WL',
-                buttonName,
+                buttonName: '📄 맞춤 견적 보기',
                 linkMo: link,
                 linkPc: link,
+              },
+              {
+                buttonType: 'WL',
+                buttonName: '📹 시공 과정 영상',
+                linkMo: caseVideoLink,
+                linkPc: caseVideoLink,
               },
             ],
           },
