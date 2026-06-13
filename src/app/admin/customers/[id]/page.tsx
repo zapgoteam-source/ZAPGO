@@ -72,6 +72,7 @@ export default function CustomerDetailPage() {
   const [form, setForm] = useState<Partial<Customer>>({});
   const [saving, setSaving] = useState(false);
   const [memo, setMemo] = useState('');
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     if (!loading && role !== 'ADMIN') router.replace('/login');
@@ -93,10 +94,38 @@ export default function CustomerDetailPage() {
   const handleSave = async () => {
     if (!customer) { setEditing(false); return; }
     setSaving(true);
+    setSaveError('');
     try {
-      await supabase.from('customers').update({ ...form, updated_at: new Date().toISOString() }).eq('id', customer.id);
-      setCustomer({ ...customer, ...form } as Customer);
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      const response = await fetch(`/api/customers/${customer.id}/workflow`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          standard_status: form.standard_status || form.status,
+          address: form.address,
+          consult_memo: form.consult_memo,
+          scheduled_date: form.scheduled_date,
+          final_construction_amount: form.final_construction_amount,
+          deposit_amount: form.deposit_amount,
+          deposit_received_date: form.deposit_received_date,
+          payment_status: form.payment_status,
+          payment_received_date: form.payment_received_date,
+          payer_name: form.payer_name,
+          team_leader_user_id: form.team_leader_user_id,
+          team_member_names: form.team_member_names,
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || '저장에 실패했습니다.');
+      setCustomer(payload.data as Customer);
+      setForm(payload.data as Customer);
       setEditing(false);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : '저장에 실패했습니다.');
     } finally {
       setSaving(false);
     }
@@ -136,8 +165,8 @@ export default function CustomerDetailPage() {
           </h1>
           {editing ? (
             <select
-              value={form.status || customer.status}
-              onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
+              value={form.standard_status || form.status || customer.standard_status || customer.status}
+              onChange={(e) => setForm((f) => ({ ...f, standard_status: e.target.value as Customer['standard_status'], status: e.target.value }))}
               className="px-3 py-1.5 text-xs font-bold border border-[#c3c6d7] bg-white"
             >
               {STATUSES.map((s) => (
@@ -150,6 +179,9 @@ export default function CustomerDetailPage() {
           <span className="text-[#434655] text-sm font-medium">{customer.phone}</span>
         </div>
         <div className="flex gap-2 flex-wrap">
+          {saveError && (
+            <p className="w-full text-sm font-semibold text-red-600">{saveError}</p>
+          )}
           {editing ? (
             <>
               <button onClick={() => setEditing(false)} className="px-4 py-2.5 border border-[#c3c6d7] text-sm font-semibold text-[#434655] hover:bg-[#f2f4f6] transition-colors">
@@ -261,14 +293,17 @@ export default function CustomerDetailPage() {
             {/* 메모 입력 */}
             <div className="relative mb-4">
               <textarea
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
+                value={editing ? String(form.consult_memo || '') : memo}
+                onChange={(e) => editing ? setForm((f) => ({ ...f, consult_memo: e.target.value })) : setMemo(e.target.value)}
                 placeholder="메모를 입력해 주세요..."
                 rows={3}
                 className="w-full bg-[#f2f4f6] border-none px-4 py-3 text-sm resize-none focus:ring-1 focus:ring-[#B10000]/40 outline-none"
               />
-              <button className="absolute bottom-3 right-3 px-4 py-1.5 bg-[#B10000] text-white text-xs font-bold hover:bg-[#8e0000] transition-colors">
-                기록하기
+              <button
+                onClick={() => setEditing(true)}
+                className="absolute bottom-3 right-3 px-4 py-1.5 bg-[#B10000] text-white text-xs font-bold hover:bg-[#8e0000] transition-colors"
+              >
+                {editing ? '저장 버튼으로 반영' : '메모 수정'}
               </button>
             </div>
 
@@ -405,21 +440,65 @@ export default function CustomerDetailPage() {
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="bg-white/10 p-3">
                 <p className="text-[10px] text-white/60 mb-1">예약금</p>
-                <p className="text-sm font-bold" style={{ fontFamily: 'Manrope, sans-serif' }}>
-                  {fmtKRW(customer.deposit_amount)}
-                </p>
+                {editing ? (
+                  <input
+                    type="number"
+                    value={form.deposit_amount || 0}
+                    onChange={(e) => setForm((f) => ({ ...f, deposit_amount: Number(e.target.value) }))}
+                    className="w-full px-2 py-1 bg-white/20 border border-white/30 text-white text-sm font-bold"
+                  />
+                ) : (
+                  <p className="text-sm font-bold" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                    {fmtKRW(customer.deposit_amount)}
+                  </p>
+                )}
               </div>
               <div className="bg-white/10 p-3">
                 <p className="text-[10px] text-white/60 mb-1">입금 상태</p>
-                <span className={`text-xs font-black px-2 py-0.5 ${isPaid ? 'bg-green-400 text-white' : 'bg-white/20 text-white'}`}>
-                  {isPaid ? '입금 완료' : '입금 대기'}
-                </span>
+                {editing ? (
+                  <select
+                    value={form.payment_status || customer.payment_status || (isPaid ? 'PAID' : 'UNPAID')}
+                    onChange={(e) => setForm((f) => ({ ...f, payment_status: e.target.value as Customer['payment_status'] }))}
+                    className="w-full px-2 py-1 bg-white/20 border border-white/30 text-white text-xs font-bold"
+                  >
+                    <option className="text-[#191c1e]" value="UNPAID">입금 대기</option>
+                    <option className="text-[#191c1e]" value="PARTIAL">부분 입금</option>
+                    <option className="text-[#191c1e]" value="PAID">입금 완료</option>
+                    <option className="text-[#191c1e]" value="OVERDUE">연체</option>
+                  </select>
+                ) : (
+                  <span className={`text-xs font-black px-2 py-0.5 ${isPaid ? 'bg-green-400 text-white' : 'bg-white/20 text-white'}`}>
+                    {isPaid ? '입금 완료' : '입금 대기'}
+                  </span>
+                )}
               </div>
             </div>
             <div className="border-t border-white/20 pt-3 space-y-1.5">
               <div className="flex justify-between text-xs">
                 <span className="text-white/60">입금 일자</span>
-                <span className="font-semibold">{fmtDate(customer.payment_received_date)}</span>
+                {editing ? (
+                  <input
+                    type="date"
+                    value={form.payment_received_date || ''}
+                    onChange={(e) => setForm((f) => ({ ...f, payment_received_date: e.target.value || null }))}
+                    className="w-36 px-2 py-1 bg-white/20 border border-white/30 text-white text-xs"
+                  />
+                ) : (
+                  <span className="font-semibold">{fmtDate(customer.payment_received_date)}</span>
+                )}
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-white/60">예약금 일자</span>
+                {editing ? (
+                  <input
+                    type="date"
+                    value={form.deposit_received_date || ''}
+                    onChange={(e) => setForm((f) => ({ ...f, deposit_received_date: e.target.value || null }))}
+                    className="w-36 px-2 py-1 bg-white/20 border border-white/30 text-white text-xs"
+                  />
+                ) : (
+                  <span className="font-semibold">{fmtDate(customer.deposit_received_date)}</span>
+                )}
               </div>
               <div className="flex justify-between text-xs">
                 <span className="text-white/60">잔금 예정</span>
@@ -440,7 +519,16 @@ export default function CustomerDetailPage() {
               {editing && <span className="text-xs text-[#B10000] font-semibold cursor-pointer">수정</span>}
             </div>
 
-            {customer.scheduled_date ? (
+            {editing ? (
+              <div className="bg-[#f2f4f6] px-4 py-3 mb-4">
+                <input
+                  type="date"
+                  value={form.scheduled_date || ''}
+                  onChange={(e) => setForm((f) => ({ ...f, scheduled_date: e.target.value || null }))}
+                  className="w-full border border-[#c3c6d7] px-2 py-1 text-sm"
+                />
+              </div>
+            ) : customer.scheduled_date ? (
               <div className="bg-[#fff5f5] border border-[#B10000]/20 px-4 py-3 mb-4">
                 <p className="text-[10px] font-bold text-[#B10000] uppercase tracking-wider mb-1">Schedule</p>
                 <p className="text-base font-extrabold text-[#B10000]">
@@ -454,20 +542,23 @@ export default function CustomerDetailPage() {
               </div>
             ) : (
               <div className="bg-[#f2f4f6] px-4 py-3 mb-4 text-sm text-[#434655]">
-                {editing ? (
-                  <input
-                    type="date"
-                    value={form.scheduled_date || ''}
-                    onChange={(e) => setForm((f) => ({ ...f, scheduled_date: e.target.value }))}
-                    className="w-full border border-[#c3c6d7] px-2 py-1 text-sm"
-                  />
-                ) : (
-                  '일정 미정'
-                )}
+                일정 미정
               </div>
             )}
 
-            {teamMembers.length > 0 && (
+            {editing && (
+              <div className="mb-4">
+                <p className="text-[10px] font-bold text-[#434655] uppercase tracking-wider mb-2">시공팀</p>
+                <input
+                  value={form.team_member_names || ''}
+                  onChange={(e) => setForm((f) => ({ ...f, team_member_names: e.target.value }))}
+                  placeholder="예: 김팀장, 박기사, 이기사"
+                  className="w-full border border-[#c3c6d7] px-3 py-2 text-sm"
+                />
+              </div>
+            )}
+
+            {teamMembers.length > 0 && !editing && (
               <div className="space-y-3">
                 <div>
                   <p className="text-[10px] font-bold text-[#434655] uppercase tracking-wider mb-2">시공 팀장</p>

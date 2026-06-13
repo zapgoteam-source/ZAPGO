@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { calculateSelfEstimateTotals, formatKRW, type IssueKey, type PlanKey, type ProtectionKey } from '@/lib/selfEstimate';
+import { calculatePestOnlyEstimate, calculateSelfEstimateTotals, formatKRW, type EstimateMode, type IssueKey, type PlanKey, type ProtectionKey } from '@/lib/selfEstimate';
 type AddressResult = {
   roadAddr: string;
   roadAddrPart1: string;
@@ -49,6 +49,30 @@ const FAQS = [
       '창문손잡이 교체, 샤시롤러 교체, 외부유리창 청소도 가능합니다. 상담 신청할 때 원하시는 작업을 남겨주시면 가능한 범위와 비용을 먼저 안내드리고, 확인 후 진행하실 수 있도록 도와드리겠습니다.',
   },
 ];
+
+
+const PEST_FAQS = [
+  {
+    question: '어떻게 벌레를 막아주는 건가요?',
+    answer: '에너지잡고의 전용 풍지판, 틈새막이 등을 사용하여 확인된 벌레유입통로를 차단해 드립니다.',
+  },
+  {
+    question: '방충솔루션 후에 벌레가 나오면 어떻게 하죠?',
+    answer:
+      '현장에서 벌레유입통로를 설명해 드리고 막힌 부분까지 확인시켜드릴 것입니다. 벌레는 생물이기 때문에 예상치 못한 곳으로 들어올 수 있고, 실내에서 밖으로 나가는 벌레가 창틀에서 죽는 경우도 있습니다. 방충솔루션으로 100% 차단된다고 말하기는 어렵지만 95% 이상의 창문 벌레 문제는 해결된다고 보시면 됩니다.',
+  },
+  {
+    question: '방충망 교체도 가능한가요?',
+    answer:
+      '원하신다면 방충망 교체도 가능합니다. 방충망은 종류와 크기에 따라 견적금액에 차이가 커서 상담할 때 물어보시면 자세히 안내해 드리겠습니다.',
+  },
+];
+
+function getEstimateMode(issues: Set<IssueKey>): EstimateMode | 'idle' {
+  if (issues.size === 0) return 'idle';
+  if (issues.size === 1 && issues.has('bug')) return 'pest_only';
+  return 'window_seal';
+}
 
 function getRecommendation(issues: Set<IssueKey>) {
   if (
@@ -121,7 +145,19 @@ function useCountUp(target: number, duration = 400) {
   return display;
 }
 
-export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { initialRestoreToken?: string }) {
+type SelfEstimateV2ClientProps = {
+  initialRestoreToken?: string;
+  initialDealerCode?: string;
+  initialReferralCode?: string;
+  initialAdCode?: string;
+};
+
+export default function SelfEstimateV2Client({
+  initialRestoreToken = '',
+  initialDealerCode = '',
+  initialReferralCode = '',
+  initialAdCode = '',
+}: SelfEstimateV2ClientProps) {
   const pathname = usePathname();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [issues, setIssues] = useState<Set<IssueKey>>(new Set());
@@ -135,7 +171,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
   const [addressLoading, setAddressLoading] = useState(false);
   const [addressError, setAddressError] = useState('');
   const [selectedPlan, setSelectedPlan] = useState<PlanKey | null>(null);
-  const [protectionOption, setProtectionOption] = useState<ProtectionKey | null>(null);
+  const [protectionOption, setProtectionOption] = useState<ProtectionKey>('none');
   const [includeRailMohair, setIncludeRailMohair] = useState(false);
   const [pestSolution, setPestSolution] = useState(false);
   const [pestScreenCount, setPestScreenCount] = useState(1);
@@ -151,7 +187,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
   const [restoreError, setRestoreError] = useState('');
   const [restoreToken, setRestoreToken] = useState(initialRestoreToken);
   const [isRestoring, setIsRestoring] = useState(Boolean(initialRestoreToken));
-  const [pendingScrollTarget, setPendingScrollTarget] = useState<'protection' | 'rail' | 'pest' | 'estimate' | 'consult' | null>(null);
+  const [pendingScrollTarget, setPendingScrollTarget] = useState<'rail' | 'pest' | 'estimate' | 'consult' | null>(null);
   const [isConsultVisible, setIsConsultVisible] = useState(false);
   const [isInlineEstimateVisible, setIsInlineEstimateVisible] = useState(false);
   const [hasReachedEstimateSection, setHasReachedEstimateSection] = useState(false);
@@ -159,7 +195,6 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
   const [consultSubmitted, setConsultSubmitted] = useState(false);
   const [consultError, setConsultError] = useState('');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
-  const protectionRef = useRef<HTMLDivElement | null>(null);
   const railRef = useRef<HTMLDivElement | null>(null);
   const pestRef = useRef<HTMLDivElement | null>(null);
   const estimateRef = useRef<HTMLDivElement | null>(null);
@@ -169,6 +204,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
   const sashNum = Number(sashCount) || 0;
   const recommendation = useMemo(() => getRecommendation(issues), [issues]);
   const recommendedPlanKeys = useMemo(() => getRecommendedPlanKeys(issues), [issues]);
+  const estimateMode = useMemo(() => getEstimateMode(issues), [issues]);
 
   const totals = useMemo(
     () =>
@@ -187,19 +223,31 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
     () => calculateSelfEstimateTotals({ pyeong: pyeongNum, sash: sashNum }),
     [pyeongNum, sashNum],
   );
+  const pestOnlyEstimate = useMemo(() => calculatePestOnlyEstimate(pestScreenCount), [pestScreenCount]);
 
   const selectedTotal = selectedPlan ? totals[selectedPlan] : 0;
   const teaserMin = Math.max(Math.floor(baseTotals.mohair / 10000) * 10000, 100000);
   const teaserMax = Math.ceil(baseTotals.fabric * 1.08 / 10000) * 10000;
   const animatedSelectedTotal = useCountUp(selectedTotal ?? 0);
-  const canContinueStep1 = issues.size > 0 && pyeongNum > 0 && sashNum > 0;
+  const canContinueStep1 =
+    estimateMode === 'pest_only'
+      ? pestScreenCount > 0
+      : estimateMode === 'window_seal'
+        ? pyeongNum > 0 && sashNum > 0
+        : false;
   const canContinueStep2 =
+    canContinueStep1 &&
     phone.replace(/\D/g, '').length >= 10 &&
     selectedAddress.trim().length > 0 &&
     privacyAgreed;
-  const canSubmitConsult = !!selectedPlan && !!protectionOption && selectedAddress.trim().length > 0;
+  const canSubmitConsult =
+    estimateMode === 'pest_only'
+      ? selectedAddress.trim().length > 0
+      : !!selectedPlan && selectedAddress.trim().length > 0;
 
   const toggleIssue = (key: IssueKey) => {
+    setMessageSent(false);
+    setMessageError('');
     const next = new Set(issues);
     if (next.has(key)) next.delete(key);
     else next.add(key);
@@ -227,8 +275,9 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
         );
 
         setIssues(restoredIssues);
-        setPyeong(String(payload.data.pyeong));
-        setSashCount(String(payload.data.sash));
+        setPyeong(String(payload.data.pyeong ?? '25'));
+        setSashCount(String(payload.data.sash ?? '10'));
+        setPestScreenCount(Number(payload.data.pestScreenCount) || 1);
         setPhone(payload.data.phone);
         setSelectedAddress(payload.data.selectedAddress);
         setDetailAddress(payload.data.detailAddress ?? '');
@@ -248,7 +297,6 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
     if (!pendingScrollTarget) return;
 
     const targetMap = {
-      protection: protectionRef,
       rail: railRef,
       pest: pestRef,
       estimate: estimateRef,
@@ -317,13 +365,19 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          estimateMode: estimateMode === 'pest_only' ? 'pest_only' : 'window_seal',
           issues: Array.from(issues),
-          pyeong: pyeongNum,
-          sash: sashNum,
+          pyeong: estimateMode === 'pest_only' ? null : pyeongNum,
+          sash: estimateMode === 'pest_only' ? null : sashNum,
+          pestScreenCount: estimateMode === 'pest_only' ? pestScreenCount : undefined,
           phone,
           selectedAddress,
           detailAddress: detailAddress.trim(),
-          baseQuotes: baseTotals,
+          baseQuotes: estimateMode === 'pest_only' ? undefined : baseTotals,
+          pestBaseQuote: estimateMode === 'pest_only' ? pestOnlyEstimate : undefined,
+          dealerCode: initialDealerCode.trim(),
+          referralCode: initialReferralCode.trim(),
+          adCode: initialAdCode.trim(),
         }),
       });
       const sessionPayload = await sessionResponse.json();
@@ -382,6 +436,9 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
           includeRailMohair,
           pestSolution,
           pestScreenCount,
+          dealerCode: initialDealerCode.trim(),
+          referralCode: initialReferralCode.trim(),
+          adCode: initialAdCode.trim(),
         }),
       });
       const payload = await response.json();
@@ -391,6 +448,21 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
       setConsultError(error instanceof Error ? error.message : '상담 신청에 실패했습니다.');
     } finally {
       setConsultSubmitting(false);
+    }
+  };
+
+  const goToFirstScreen = () => {
+    setStep(1);
+    setMessageSent(false);
+    setSelectedPlan(null);
+    setProtectionOption('none');
+    setIncludeRailMohair(false);
+    setPestSolution(false);
+    setConsultError('');
+    setConsultSubmitted(false);
+    setHasReachedEstimateSection(false);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -477,52 +549,170 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <h2 className="text-sm font-bold">견적 계산에 필요한 정보예요</h2>
-                <label className="block">
-                  <span className="mb-1.5 block text-xs text-[#6a6a6a]">평형</span>
-                  <div className="flex items-center rounded-[14px] border border-[#dddddd] bg-white">
-                    <input
-                      value={pyeong}
-                      onChange={(e) => setPyeong(e.target.value)}
-                      inputMode="numeric"
-                      className="w-full bg-transparent px-4 py-4 text-lg outline-none"
-                    />
-                    <span className="pr-4 text-sm text-[#6a6a6a]">평</span>
-                  </div>
-                </label>
-                <label className="block">
-                  <div className="mb-1.5 flex items-center justify-between">
-                    <span className="block text-xs text-[#6a6a6a]">유리창 개수</span>
-                    <button
-                      onClick={() => setShowCountGuide(true)}
-                      className="text-xs font-semibold text-[#b10000]"
-                    >
-                      유리창 개수 세는 법 보기
-                    </button>
-                  </div>
-                  <div className="flex items-center rounded-[14px] border border-[#dddddd] bg-white">
-                    <input
-                      value={sashCount}
-                      onChange={(e) => setSashCount(e.target.value)}
-                      inputMode="numeric"
-                      className="w-full bg-transparent px-4 py-4 text-lg outline-none"
-                    />
-                    <span className="pr-4 text-sm text-[#6a6a6a]">개</span>
-                  </div>
-                  <p className="mt-1.5 text-xs leading-5 text-[#6a6a6a]">
-                    유리창 한 판씩 세어서 총개수를 입력해 주세요
-                  </p>
-                </label>
-              </div>
+              {estimateMode === 'idle' && (
+                <div className="rounded-[18px] border border-dashed border-[#dddddd] bg-[#fafafa] p-5 text-sm leading-6 text-[#6a6a6a]">
+                  불편한 문제를 선택하면 견적 계산에 필요한 정보가 이어서 나타납니다.
+                </div>
+              )}
 
-              <button
-                disabled={!canContinueStep1}
-                onClick={() => setStep(2)}
-                className="w-full bg-[#b10000] py-4 text-base font-medium text-white disabled:opacity-40"
-              >
-                우리 집 예상 견적 보기
-              </button>
+              {estimateMode === 'pest_only' && (
+                <div className="space-y-4 rounded-[18px] border border-[#eeeeee] bg-[#fafafa] p-4">
+                  <h2 className="text-sm font-bold">견적 계산에 필요한 정보예요</h2>
+                  <div className="rounded-[14px] border border-[#dddddd] bg-white p-4">
+                    <div className="flex items-center justify-between">
+                      <p className="font-bold">방충망 수량</p>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setPestScreenCount((v) => Math.max(1, v - 1))}
+                          className="h-9 w-9 border border-[#dddddd] text-lg"
+                        >
+                          −
+                        </button>
+                        <span className="w-8 text-center text-lg font-bold">{pestScreenCount}</span>
+                        <button
+                          onClick={() => setPestScreenCount((v) => v + 1)}
+                          className="h-9 w-9 border border-[#dddddd] text-lg"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {estimateMode === 'window_seal' && (
+                <div className="space-y-3">
+                  <h2 className="text-sm font-bold">견적 계산에 필요한 정보예요</h2>
+                  <label className="block">
+                    <span className="mb-1.5 block text-xs text-[#6a6a6a]">평형</span>
+                    <div className="flex items-center rounded-[14px] border border-[#dddddd] bg-white">
+                      <input
+                        value={pyeong}
+                        onChange={(e) => setPyeong(e.target.value)}
+                        inputMode="numeric"
+                        className="w-full bg-transparent px-4 py-4 text-lg outline-none"
+                      />
+                      <span className="pr-4 text-sm text-[#6a6a6a]">평</span>
+                    </div>
+                  </label>
+                  <label className="block">
+                    <div className="mb-1.5 flex items-center justify-between">
+                      <span className="block text-xs text-[#6a6a6a]">유리창 개수</span>
+                      <button
+                        onClick={() => setShowCountGuide(true)}
+                        className="text-xs font-semibold text-[#b10000]"
+                      >
+                        유리창 개수 세는 법 보기
+                      </button>
+                    </div>
+                    <div className="flex items-center rounded-[14px] border border-[#dddddd] bg-white">
+                      <input
+                        value={sashCount}
+                        onChange={(e) => setSashCount(e.target.value)}
+                        inputMode="numeric"
+                        className="w-full bg-transparent px-4 py-4 text-lg outline-none"
+                      />
+                      <span className="pr-4 text-sm text-[#6a6a6a]">개</span>
+                    </div>
+                    <p className="mt-1.5 text-xs leading-5 text-[#6a6a6a]">
+                      유리창 한 판씩 세어서 총개수를 입력해 주세요
+                    </p>
+                  </label>
+                </div>
+              )}
+
+              {estimateMode === 'window_seal' && (
+                <a
+                  href="https://www.youtube.com/watch?v=_tq8gXHrhe4"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-[14px] border border-[#dddddd] bg-[#f7f7f7] px-4 py-3.5 text-sm font-semibold text-[#463c36] transition hover:border-[#b10000] hover:text-[#b10000]"
+                >
+                  <span aria-hidden>▶</span>
+                  실제 시공 사례 영상 보기
+                </a>
+              )}
+
+              {estimateMode !== 'idle' && !messageSent && (
+                <section className="space-y-3 rounded-[18px] border border-[#eeeeee] p-4">
+                  <div>
+                    <h2 className="text-lg font-bold leading-7">
+                      {estimateMode === 'pest_only' ? '방충솔루션 맞춤 견적 링크를 보내 드릴게요' : '출장비를 포함한 맞춤 견적 링크를 보내 드릴게요'}
+                    </h2>
+                    <p className="mt-2 text-sm leading-6 text-[#6a6a6a]">
+                      {estimateMode === 'pest_only'
+                        ? '방충망 수량을 조정하며 예상 금액을 확인할 수 있어요.'
+                        : '직접 시공 방식과 옵션을 바꿔가며 금액을 조정해 보세요.'}
+                    </p>
+                  </div>
+                  <input
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="견적 링크를 받을 휴대폰 번호"
+                    className="w-full rounded-[14px] border border-[#dddddd] bg-white px-4 py-4 outline-none"
+                  />
+                  <button
+                    onClick={() => setShowAddressModal(true)}
+                    className="w-full border border-[#b10000] px-4 py-4 text-left text-sm font-bold text-[#b10000]"
+                  >
+                    {selectedAddress ? selectedAddress : '도로명 주소 검색'}
+                  </button>
+                  {selectedAddress && (
+                    <div className="space-y-2 rounded-[14px] border border-[#dddddd] bg-[#f7f7f7] p-3 text-sm">
+                      <p>선택한 주소: <span className="font-bold">{selectedAddress}</span></p>
+                      <input
+                        value={detailAddress}
+                        onChange={(e) => setDetailAddress(e.target.value)}
+                        placeholder="상세주소 (선택) · 동·호수는 나중에 입력해도 괜찮아요"
+                        className="w-full rounded-[10px] border border-[#dddddd] bg-white px-3 py-3 text-sm outline-none"
+                      />
+                    </div>
+                  )}
+                  <label className="flex items-start gap-2 text-sm leading-6 text-[#6a6a6a]">
+                    <input
+                      type="checkbox"
+                      checked={privacyAgreed}
+                      onChange={(e) => setPrivacyAgreed(e.target.checked)}
+                      className="mt-1"
+                    />
+                    <span>
+                      견적 안내 및 상담을 위해 개인정보 수집·이용에 동의합니다
+                      <span className="block text-xs text-[#8d8178]">
+                        수집 항목: 연락처, 도로명 주소, 상세주소 / 이용 목적: 견적 링크 발송 및 상담 응대
+                      </span>
+                    </span>
+                  </label>
+                  <button
+                    disabled={!canContinueStep2 || messageSending}
+                    onClick={sendEstimateLink}
+                    className="w-full bg-[#b10000] py-4 text-base font-medium text-white disabled:opacity-40"
+                  >
+                    {messageSending ? '견적 링크 보내는 중...' : estimateMode === 'pest_only' ? '방충솔루션 맞춤 견적 링크 받기' : '맞춤 견적 링크 받기'}
+                  </button>
+                  {messageError && <p className="text-sm text-[#b10000]">{messageError}</p>}
+                </section>
+              )}
+
+              {estimateMode !== 'idle' && messageSent && (
+                <section className="space-y-4 rounded-[14px] border border-[#dddddd] bg-white p-5">
+                  <p className="text-xs font-semibold tracking-[0.18em] text-[#b10000]">견적 링크 발송 완료</p>
+                  <h2 className="text-2xl font-bold leading-tight">
+                    맞춤 견적 링크를<br />{sentChannel === 'kakao' ? '카카오톡으로 보내드렸어요' : '문자로 보내드렸어요'}
+                  </h2>
+                  <p className="text-sm leading-6 text-[#6a6a6a]">
+                    받은 링크를 눌러 예상 금액을 확인하고, 필요한 경우 상담을 신청해 주세요.
+                  </p>
+                  <button
+                    onClick={sendEstimateLink}
+                    disabled={messageSending}
+                    className="w-full bg-[#b10000] py-4 text-base font-medium text-white disabled:opacity-40"
+                  >
+                    {messageSending ? '견적 링크 보내는 중...' : '견적 링크 다시 보내기'}
+                  </button>
+                  <SupportActions />
+                </section>
+              )}
             </section>
           )}
 
@@ -539,18 +729,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                 </h1>
               </div>
 
-              <div className="space-y-4 rounded-[14px] border border-[#dddddd] bg-white p-4">
-                <div>
-                  <p className="text-xs text-[#6a6a6a]">추천합니다</p>
-                  <p className="mt-1 text-xl font-bold">{recommendation.label}</p>
-                  <p className="mt-1 text-sm text-[#6a6a6a]">{recommendation.reason}</p>
-                </div>
-                <div className="border-t border-[#ebebeb] pt-4">
-                  <p className="text-xs text-[#6a6a6a]">예상 금액대</p>
-                  <p className="mt-1 text-2xl font-bold text-[#b10000]">
-                    약 {formatKRW(teaserMin)} ~ {formatKRW(teaserMax)}
-                  </p>
-                </div>
+              {estimateMode === 'window_seal' && (
                 <a
                   href="https://www.youtube.com/watch?v=_tq8gXHrhe4"
                   target="_blank"
@@ -560,14 +739,16 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                   <span aria-hidden>▶</span>
                   실제 시공 사례 영상 보기
                 </a>
-              </div>
+              )}
 
               <div>
                 <h2 className="text-lg font-bold leading-7">
-                  출장비를 포함한 맞춤 견적 링크를 보내 드릴게요
+                  {estimateMode === 'pest_only' ? '방충솔루션 맞춤 견적 링크를 보내 드릴게요' : '출장비를 포함한 맞춤 견적 링크를 보내 드릴게요'}
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-[#6a6a6a]">
-                  직접 시공 방식과 옵션을 바꿔가며 금액을 조정해 보세요.
+                  {estimateMode === 'pest_only'
+                    ? '방충망 수량을 조정하며 예상 금액을 확인할 수 있어요.'
+                    : '직접 시공 방식과 옵션을 바꿔가며 금액을 조정해 보세요.'}
                 </p>
               </div>
 
@@ -616,7 +797,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                 onClick={sendEstimateLink}
                 className="w-full bg-[#b10000] py-4 text-base font-medium text-white disabled:opacity-40"
               >
-                {messageSending ? '견적 링크 보내는 중...' : '맞춤 견적 링크 받기'}
+                {messageSending ? '견적 링크 보내는 중...' : estimateMode === 'pest_only' ? '방충솔루션 맞춤 견적 링크 받기' : '맞춤 견적 링크 받기'}
               </button>
               {messageError && <p className="text-sm text-[#b10000]">{messageError}</p>}
               <p className="text-center text-sm text-[#6a6a6a]">
@@ -655,10 +836,105 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
             </section>
           )}
 
-          {!isRestoring && step === 3 && (
+          {!isRestoring && step === 3 && estimateMode === 'pest_only' && (
+            <section className="space-y-6">
+              <button onClick={goToFirstScreen} className="text-sm text-[#6a6a6a]">
+                ← 첫 화면으로
+              </button>
+
+              <section>
+                <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-[#b10000]">맞춤 예상 견적</p>
+                <h1 className="text-[28px] font-bold leading-tight">방충솔루션 예상 견적</h1>
+                <p className="mt-3 text-sm leading-6 text-[#6a6a6a]">
+                  입력하신 방충망 수량 기준으로 예상 금액을 계산했어요.
+                </p>
+              </section>
+
+              <section className="rounded-[20px] border border-[#f0d6d1] bg-[#fff8f6] p-5">
+                <p className="text-sm text-[#6a6a6a]">현재 선택 기준 예상 견적</p>
+                <p className="mt-2 text-4xl font-black text-[#b10000]">{formatKRW(pestOnlyEstimate.total)}</p>
+                <p className="mt-3 text-xs leading-5 text-[#8d8178]">
+                  창호 구조와 현장 상태에 따라 최종 금액은 달라질 수 있습니다.
+                </p>
+              </section>
+
+              <section className="space-y-3 rounded-[18px] border border-[#eeeeee] p-4">
+                <h2 className="text-lg font-bold">방충망 수량을 조정해보세요</h2>
+                <div className="flex items-center justify-between rounded-[14px] border border-[#dddddd] bg-white p-4">
+                  <button onClick={() => setPestScreenCount((v) => Math.max(1, v - 1))} className="h-10 w-10 border border-[#dddddd] text-xl">−</button>
+                  <p className="text-3xl font-bold">{pestScreenCount}</p>
+                  <button onClick={() => setPestScreenCount((v) => v + 1)} className="h-10 w-10 border border-[#dddddd] text-xl">+</button>
+                </div>
+              </section>
+
+              <section className="space-y-3 rounded-[18px] border border-[#eeeeee] bg-[#fafafa] p-4">
+                <h2 className="text-lg font-bold">견적 계산 내역</h2>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between"><span className="text-[#6a6a6a]">출장비</span><span className="font-bold">{formatKRW(pestOnlyEstimate.visitFee)}</span></div>
+                  <div className="flex justify-between"><span className="text-[#6a6a6a]">방충솔루션</span><span className="font-bold">{formatKRW(pestOnlyEstimate.unitPrice)} × {pestOnlyEstimate.screenCount}개</span></div>
+                  <div className="flex justify-between border-t border-[#dddddd] pt-3 text-base"><span className="font-bold">예상 견적</span><span className="font-black text-[#b10000]">{formatKRW(pestOnlyEstimate.total)}</span></div>
+                </div>
+              </section>
+
+              <section ref={consultRef} className="space-y-3 rounded-[18px] border border-[#eeeeee] p-4">
+                <h2 className="text-lg font-bold">이 조건으로 상담받기</h2>
+                <div className="rounded-[14px] bg-[#f7f7f7] p-3 text-sm">연락처 <span className="ml-2 font-bold">{phone || '입력됨'}</span></div>
+                <div className="space-y-3 rounded-[14px] bg-[#f7f7f7] p-3 text-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <p>주소 <span className="ml-2 font-bold">{`${selectedAddress} ${detailAddress}`.trim() || '주소를 선택해주세요'}</span></p>
+                    <button onClick={() => setShowAddressModal(true)} className="shrink-0 rounded-full border border-[#b10000] px-3 py-1.5 text-xs font-bold text-[#b10000]">주소 변경</button>
+                  </div>
+                </div>
+                <label className="block">
+                  <span className="mb-1.5 block text-xs text-[#6a6a6a]">상세주소 (선택)</span>
+                  <input
+                    value={detailAddress}
+                    onChange={(e) => setDetailAddress(e.target.value)}
+                    placeholder="동·호수 등 상세주소"
+                    className="w-full rounded-[14px] border border-[#dddddd] bg-white px-4 py-4 outline-none"
+                  />
+                </label>
+                <textarea
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                  placeholder="벌레가 주로 들어오는 위치나 요청사항을 남겨주세요."
+                  rows={4}
+                  className="w-full rounded-[14px] border border-[#dddddd] px-4 py-4 outline-none"
+                />
+                <button
+                  disabled={!canSubmitConsult || consultSubmitting || consultSubmitted}
+                  onClick={submitConsult}
+                  className="w-full bg-[#b10000] py-4 text-base font-medium text-white disabled:opacity-40"
+                >
+                  {consultSubmitted ? '상담 신청 완료' : consultSubmitting ? '상담 신청 중...' : '이 조건으로 상담 신청하기'}
+                </button>
+                {consultError && <p className="text-sm text-[#b10000]">{consultError}</p>}
+                {consultSubmitted && (
+                  <p className="text-sm font-semibold text-[#145c4c]">상담 신청이 접수되었습니다. 담당자가 확인 후 연락드릴게요.</p>
+                )}
+              </section>
+
+              <section className="space-y-2">
+                <h2 className="text-lg font-bold">자주 묻는 질문</h2>
+                {PEST_FAQS.map((faq) => (
+                  <div key={faq.question} className="border border-[#dddddd] bg-white p-4">
+                    <p className="font-bold">{faq.question}</p>
+                    <p className="mt-2 text-sm leading-6 text-[#6a6a6a]">{faq.answer}</p>
+                  </div>
+                ))}
+              </section>
+
+              <button onClick={goToFirstScreen} className="w-full border border-[#dddddd] py-3 text-sm font-bold text-[#6a6a6a]">
+                첫 화면으로 돌아가기
+              </button>
+              <SupportActions />
+            </section>
+          )}
+
+          {!isRestoring && step === 3 && estimateMode !== 'pest_only' && (
             <section className="space-y-5">
-              <button onClick={() => { setStep(2); setMessageSent(true); }} className="text-sm text-[#6a6a6a]">
-                ← 뒤로
+              <button onClick={goToFirstScreen} className="text-sm text-[#6a6a6a]">
+                ← 첫 화면으로
               </button>
 
               <div className="space-y-3">
@@ -672,7 +948,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                   return (
                     <button
                       key={plan.key}
-                      onClick={() => { setSelectedPlan(plan.key); setProtectionOption(null); setPendingScrollTarget('protection'); }}
+                      onClick={() => { setSelectedPlan(plan.key); setProtectionOption('none'); setPendingScrollTarget('rail'); }}
                       className={`w-full border p-4 text-left transition ${
                         active
                           ? 'border-[#b10000] bg-[#fff1ee]'
@@ -693,39 +969,6 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                   );
                 })}
               </div>
-
-              {selectedPlan && (
-              <div ref={protectionRef} className={`scroll-mt-6 space-y-3 rounded-[14px] p-3 transition ${!protectionOption ? 'border-2 border-[#b10000] bg-[#fff8f6]' : 'border border-transparent'}`}>
-                <h2 className="text-sm font-bold">보양이 필요한가요?</h2>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => { setProtectionOption('none'); setPendingScrollTarget('rail'); }}
-                    className={`border p-4 text-left ${
-                      protectionOption === 'none'
-                        ? 'border-[#b10000] bg-[#fff1ee]'
-                        : 'border-[#dddddd] bg-white'
-                    }`}
-                  >
-                    <p className="font-bold">추가하지 않기</p>
-                    <p className="mt-1 text-sm text-[#6a6a6a]">공사 현장 또는 빈집인 경우</p>
-                  </button>
-                  <button
-                    onClick={() => { setProtectionOption('premium'); setPendingScrollTarget('rail'); }}
-                    className={`border p-4 text-left ${
-                      protectionOption === 'premium'
-                        ? 'border-[#b10000] bg-[#fff1ee]'
-                        : 'border-[#dddddd] bg-white'
-                    }`}
-                  >
-                    <p className="font-bold">프리미엄 보양</p>
-                    <p className="mt-1 text-sm text-[#6a6a6a]">생활 중인 집에서 시공할 경우</p>
-                  </button>
-                </div>
-                {!protectionOption && (
-                  <p className="text-xs text-[#6a6a6a]">다음 단계로 진행하려면 집 상황에 맞는 보양 방식을 선택해주세요.</p>
-                )}
-              </div>
-              )}
 
               {selectedPlan && protectionOption && (
               <div ref={railRef} className="scroll-mt-6 space-y-3">
@@ -830,7 +1073,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
                   </p>
                 )}
                 <p className="mt-3 text-sm leading-6 text-[#6a6a6a]">
-                  보양 옵션을 선택하기 전에는 보양비가 빠진 기본 기준입니다. 창호 구조와 현장 상태에 따라 최종 금액은 달라질 수 있습니다. 상담을 통해 시공대상이나 방법을 조율하여 원하시는 예산에 맞춰드릴 수 있습니다.
+                  기본 보양 작업이 포함된 예상 금액입니다. 창호 구조와 현장 상태에 따라 최종 금액은 달라질 수 있습니다. 상담을 통해 시공대상이나 방법을 조율하여 원하시는 예산에 맞춰드릴 수 있습니다.
                 </p>
               </div>
               )}
@@ -926,7 +1169,7 @@ export default function SelfEstimateV2Client({ initialRestoreToken = '' }: { ini
         </main>
       </div>
 
-      {!isRestoring && step === 3 && !isConsultVisible && !isInlineEstimateVisible && !hasReachedEstimateSection && (
+      {!isRestoring && step === 3 && estimateMode !== 'pest_only' && !isConsultVisible && !isInlineEstimateVisible && !hasReachedEstimateSection && (
         <div className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(env(safe-area-inset-bottom)+12px)]">
           <div className="mx-auto max-w-md rounded-[14px] border border-[#ebebeb] bg-white/95 p-4 shadow-[0_-8px_24px_rgba(0,0,0,0.12)] backdrop-blur">
             <p className="text-xs text-[#6a6a6a]">현재 선택 기준 예상 견적</p>

@@ -4,8 +4,10 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
+  Network,
   Users,
   FileText,
+  ReceiptText,
   HardHat,
   LogOut,
   Menu,
@@ -19,6 +21,8 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const NAV_ITEMS = [
   { href: '/admin/dashboard', label: '대시보드', icon: LayoutDashboard },
+  { href: '/admin/operations', label: 'SaaS 운영', icon: Network },
+  { href: '/admin/settlements', label: '정산 관리', icon: ReceiptText },
   { href: '/admin/customers', label: '고객 관리', icon: Users },
   { href: '/admin/estimate', label: '견적 목록', icon: FileText },
   { href: '/worker/list', label: '시공 현황', icon: HardHat },
@@ -26,6 +30,8 @@ const NAV_ITEMS = [
 
 const PAGE_TITLES: Record<string, string> = {
   '/admin/dashboard': '대시보드',
+  '/admin/operations': 'SaaS 운영',
+  '/admin/settlements': '정산 관리',
   '/admin/customers': '고객 관리',
   '/admin/estimate': '견적 목록',
   '/admin/users': '사용자 관리',

@@ -29,8 +29,15 @@ yarn-error.log*
 .env*.local
 .env
 
+# local AI tool permissions (may contain command history or credentials)
+/.claude/settings.json
+/.claude/settings.local.json
+
 # vercel
 .vercel
+
+# local recovery packages
+/ZAPGO_RECOVERY_PRIVATE/
 
 # typescript
 *.tsbuildinfo
@@ -40,4 +47,3 @@ next-env.d.ts
 /supabase/.temp
 /supabase/.branches
 /supabase/.migrations
-

@@ -42,6 +42,23 @@ export type ServiceType = 'FOUR_SIDE' | 'SIDE_ONLY' | 'FRAME';
 
 export type AdjustmentType = 'ADD' | 'DISCOUNT';
 
+export type StandardCustomerStatus =
+  | 'NEW'
+  | 'CONSULT_PENDING'
+  | 'CONSULTING'
+  | 'QUOTE_SENT'
+  | 'SCHEDULED'
+  | 'COMPLETED'
+  | 'SETTLEMENT_PENDING'
+  | 'SETTLED'
+  | 'AS_REQUESTED'
+  | 'CLOSED';
+
+export type PaymentStatus = 'UNPAID' | 'DEPOSIT_PAID' | 'PAID' | 'REFUNDED';
+export type SettlementStatus = 'NONE' | 'PENDING' | 'CONFIRMED' | 'PAID' | 'HOLD';
+export type IncentiveStatus = 'NONE' | 'IN_PROGRESS' | 'PAYABLE' | 'HOLD' | 'PAID' | 'CANCELED';
+export type TaxInvoiceStatus = 'NOT_REQUIRED' | 'NEEDED' | 'REQUESTED' | 'ISSUED' | 'CANCELED';
+
 // --- DB Row 타입 ---
 
 export interface Agency {
@@ -49,6 +66,28 @@ export interface Agency {
   name: string;
   referral_code: string;
   status: string;
+  created_at: string;
+  updated_at: string;
+  code?: string | null;
+  owner_name?: string | null;
+  owner_email?: string | null;
+  owner_phone?: string | null;
+  region?: string | null;
+  royalty_rate?: number;
+}
+
+export interface Referrer {
+  id: string;
+  agency_id: string | null;
+  name: string;
+  code: string;
+  type: string;
+  email: string | null;
+  phone: string | null;
+  status: string;
+  incentive_type: string;
+  incentive_amount: number;
+  incentive_rate: number;
   created_at: string;
   updated_at: string;
 }
@@ -89,6 +128,18 @@ export interface Customer {
   payer_name: string | null;
   referral_code: string | null;
   agency_id: string | null;
+  standard_status?: StandardCustomerStatus;
+  referrer_id?: string | null;
+  source_code?: string | null;
+  source_path?: string | null;
+  last_contacted_at?: string | null;
+  assigned_user_id?: string | null;
+  payment_status?: PaymentStatus;
+  settlement_status?: SettlementStatus;
+  incentive_status?: IncentiveStatus;
+  royalty_amount?: number;
+  incentive_amount?: number;
+  tax_invoice_status?: TaxInvoiceStatus;
   created_at: string;
   updated_at: string;
 }

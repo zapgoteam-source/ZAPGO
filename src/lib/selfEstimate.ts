@@ -1,6 +1,7 @@
 export type IssueKey = 'dust' | 'draft' | 'bug' | 'heating' | 'noise' | 'odor';
 export type PlanKey = 'fabric' | 'mohair' | 'side';
 export type ProtectionKey = 'none' | 'premium';
+export type EstimateMode = 'window_seal' | 'pest_only';
 
 export const ISSUE_LABELS: Record<IssueKey, string> = {
   dust: '먼지날림',
@@ -18,16 +19,18 @@ export const PLAN_LABELS: Record<PlanKey, string> = {
 };
 
 export const PROTECTION_LABELS: Record<ProtectionKey, string> = {
-  none: '보양 추가 없음',
-  premium: '프리미엄 보양',
+  none: '기본 보양 포함',
+  premium: '기본 보양 포함',
 };
 
 const LABOR_PER_WORKER = 250_000;
 const FABRIC_FOUR_UNIT = 30_000;
 const SIDE_ONLY_UNIT = 15_000;
 const MOHAIR_PER_PYEONG = 35_000;
-const PREMIUM_PROTECTION_PRICE = 80_000;
+const BASIC_PROTECTION_PRICE = 55_000;
 const VAT_RATE = 1.1;
+const PEST_ONLY_VISIT_FEE = 110_000;
+const PEST_ONLY_UNIT_PRICE = 33_000;
 
 export type SelfEstimateTotalsInput = {
   pyeong: number;
@@ -61,7 +64,7 @@ export function calculateSelfEstimateTotals({
   const pyeongNum = Number(pyeong) || 0;
   const sashNum = Number(sash) || 0;
   const labor = getSelfEstimateWorkerCount(pyeongNum) * LABOR_PER_WORKER;
-  const protectionCost = protectionOption === 'premium' ? PREMIUM_PROTECTION_PRICE : 0;
+  const protectionCost = BASIC_PROTECTION_PRICE;
   const pestCost = pestSolution ? Math.max(1, Number(pestScreenCount) || 1) * 23_000 : 0;
   const multiplier = includeRailMohair ? 1.4 : 1;
   const fabricBase = withVat((labor + sashNum * FABRIC_FOUR_UNIT) * multiplier);
@@ -73,6 +76,22 @@ export function calculateSelfEstimateTotals({
     mohair: mohairBase + protectionCost + pestCost,
     side: sideBase + protectionCost + pestCost,
   } satisfies Record<PlanKey, number>;
+}
+
+
+export function calculatePestOnlyEstimate(screenCount: number) {
+  const count = Math.max(1, Number(screenCount) || 1);
+  const visitFee = PEST_ONLY_VISIT_FEE;
+  const unitPrice = PEST_ONLY_UNIT_PRICE;
+  const solutionCost = count * unitPrice;
+
+  return {
+    screenCount: count,
+    visitFee,
+    unitPrice,
+    solutionCost,
+    total: visitFee + solutionCost,
+  };
 }
 
 export function formatKRW(amount: number) {

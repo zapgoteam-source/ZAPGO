@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       type = 'consult',
+      estimateMode,
       buttonClickedAt,
       submittedAt,
       phone,
@@ -41,6 +42,10 @@ export async function POST(request: NextRequest) {
       protectionOption,
       includeRailMohair,
       pestSolution,
+      pestScreenCount,
+      pestVisitFee,
+      pestUnitPrice,
+      pestOnlyEstimate,
       selectedEstimate,
       fabricBaseEstimate,
       mohairBaseEstimate,
@@ -51,38 +56,66 @@ export async function POST(request: NextRequest) {
 
     const region = getRegionFromAddress(address || '');
     const isFollowup = type === 'followup';
+    const isPestOnly = estimateMode === 'pest_only';
     const title = isFollowup ? '상담 미신청 고객 정보가 접수되었습니다' : '새 상담 요청이 접수되었습니다';
     const subject = isFollowup ? `[미상담고객] ${region} / ${phone || '연락처 미입력'}` : `[상담요청] ${region} / ${phone || '연락처 미입력'}`;
 
-    const consultRows: Array<[string, unknown]> = [
-      ['버튼을 누른 일자와 시간', buttonClickedAt ? formatKoreanDateTime(buttonClickedAt) : '미입력'],
-      ['상담 신청 일자와 시간', submittedAt ? formatKoreanDateTime(submittedAt) : formatKoreanDateTime()],
-      ['연락처', phone],
-      ['주소', address],
-      ['겪고 있는 문제', Array.isArray(issues) ? translateIssues(issues) : issues],
-      ['평형', pyeong ? `${pyeong}평` : '미입력'],
-      ['창문수', sash ? `${sash}개` : '미입력'],
-      ['시공방식', selectedPlan],
-      ['보양여부', protectionOption],
-      ['창틀모헤어 여부', includeRailMohair],
-      ['방충솔루션', pestSolution],
-      ['선택 기준 예상견적', selectedEstimate],
-      ['메모', notes || '없음'],
-      ['대리점 코드', refCode || '직접 유입'],
-    ];
+    const consultRows: Array<[string, unknown]> = isPestOnly
+      ? [
+          ['버튼을 누른 일자와 시간', buttonClickedAt ? formatKoreanDateTime(buttonClickedAt) : '미입력'],
+          ['상담 신청 일자와 시간', submittedAt ? formatKoreanDateTime(submittedAt) : formatKoreanDateTime()],
+          ['연락처', phone],
+          ['주소', address],
+          ['겪고 있는 문제', Array.isArray(issues) ? translateIssues(issues) : issues],
+          ['시공방식', '방충솔루션 단독'],
+          ['방충망 수량', pestScreenCount ? `${pestScreenCount}개` : '미입력'],
+          ['출장비', pestVisitFee],
+          ['방충솔루션 단가', pestUnitPrice],
+          ['선택 기준 예상견적', selectedEstimate || pestOnlyEstimate],
+          ['메모', notes || '없음'],
+          ['대리점 코드', refCode || '직접 유입'],
+        ]
+      : [
+          ['버튼을 누른 일자와 시간', buttonClickedAt ? formatKoreanDateTime(buttonClickedAt) : '미입력'],
+          ['상담 신청 일자와 시간', submittedAt ? formatKoreanDateTime(submittedAt) : formatKoreanDateTime()],
+          ['연락처', phone],
+          ['주소', address],
+          ['겪고 있는 문제', Array.isArray(issues) ? translateIssues(issues) : issues],
+          ['평형', pyeong ? `${pyeong}평` : '미입력'],
+          ['창문수', sash ? `${sash}개` : '미입력'],
+          ['시공방식', selectedPlan],
+          ['보양여부', protectionOption],
+          ['창틀모헤어 여부', includeRailMohair],
+          ['방충솔루션', pestSolution],
+          ['선택 기준 예상견적', selectedEstimate],
+          ['메모', notes || '없음'],
+          ['대리점 코드', refCode || '직접 유입'],
+        ];
 
-    const followupRows: Array<[string, unknown]> = [
-      ['버튼을 누른 일자와 시간', buttonClickedAt ? formatKoreanDateTime(buttonClickedAt) : '미입력'],
-      ['연락처', phone],
-      ['도로명주소', address],
-      ['겪고 있는 문제', Array.isArray(issues) ? translateIssues(issues) : issues],
-      ['평형', pyeong ? `${pyeong}평` : '미입력'],
-      ['창문수', sash ? `${sash}개` : '미입력'],
-      ['패브릭씰러 기본견적', fabricBaseEstimate],
-      ['일반모헤어 기본견적', mohairBaseEstimate],
-      ['측면시공 기본견적', sideBaseEstimate],
-      ['대리점 코드', refCode || 'zapgoself'],
-    ];
+    const followupRows: Array<[string, unknown]> = isPestOnly
+      ? [
+          ['버튼을 누른 일자와 시간', buttonClickedAt ? formatKoreanDateTime(buttonClickedAt) : '미입력'],
+          ['연락처', phone],
+          ['도로명주소', address],
+          ['겪고 있는 문제', Array.isArray(issues) ? translateIssues(issues) : issues],
+          ['방충망 수량', pestScreenCount ? `${pestScreenCount}개` : '미입력'],
+          ['출장비', pestVisitFee],
+          ['방충솔루션 단가', pestUnitPrice],
+          ['방충솔루션 예상견적', pestOnlyEstimate],
+          ['대리점 코드', refCode || 'zapgoself'],
+        ]
+      : [
+          ['버튼을 누른 일자와 시간', buttonClickedAt ? formatKoreanDateTime(buttonClickedAt) : '미입력'],
+          ['연락처', phone],
+          ['도로명주소', address],
+          ['겪고 있는 문제', Array.isArray(issues) ? translateIssues(issues) : issues],
+          ['평형', pyeong ? `${pyeong}평` : '미입력'],
+          ['창문수', sash ? `${sash}개` : '미입력'],
+          ['패브릭씰러 기본견적', fabricBaseEstimate],
+          ['일반모헤어 기본견적', mohairBaseEstimate],
+          ['측면시공 기본견적', sideBaseEstimate],
+          ['대리점 코드', refCode || 'zapgoself'],
+        ];
 
     const { error } = await resend.emails.send({
       from: 'onboarding@resend.dev',

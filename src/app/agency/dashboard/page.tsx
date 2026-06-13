@@ -4,14 +4,36 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { Agency, Customer } from '@/types';
+
+type AgencyDashboard = {
+  agency: {
+    id: string;
+    name: string;
+    code: string;
+    referralUrl: string;
+  };
+  summary: {
+    leads: number;
+    consultPending: number;
+    scheduled: number;
+    completed: number;
+    revenue: number;
+    unanswered: number;
+  };
+  customers: Array<{
+    id: string;
+    name: string;
+    phone: string;
+    status: string;
+    createdAt: string;
+  }>;
+};
 
 export default function AgencyDashboardPage() {
   const { role, user, userProfile, loading } = useAuth();
   const router = useRouter();
-  const [agency, setAgency] = useState<Agency | null>(null);
-  const [customerCount, setCustomerCount] = useState(0);
-  const [recentCustomers, setRecentCustomers] = useState<Customer[]>([]);
+  const [dashboard, setDashboard] = useState<AgencyDashboard | null>(null);
+  const [dataError, setDataError] = useState('');
 
   useEffect(() => {
     if (!loading && role !== 'AGENCY') router.replace('/login');
@@ -20,24 +42,18 @@ export default function AgencyDashboardPage() {
   useEffect(() => {
     if (!user || role !== 'AGENCY' || !userProfile?.agency_id) return;
     async function fetch() {
-      // 대리점 정보
-      const { data: ag } = await supabase
-        .from('agencies')
-        .select('*')
-        .eq('id', userProfile!.agency_id)
-        .single();
-      if (ag) setAgency(ag as Agency);
-
-      // 고객 목록
-      const { data: customers, count } = await supabase
-        .from('customers')
-        .select('*', { count: 'exact' })
-        .eq('referral_code', ag?.referral_code)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      setCustomerCount(count || 0);
-      setRecentCustomers((customers as Customer[]) || []);
+      setDataError('');
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      const response = await window.fetch(`/api/agency/dashboard?agency_id=${userProfile!.agency_id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        setDataError(payload.error || '대리점 데이터를 불러오지 못했습니다.');
+        return;
+      }
+      setDashboard(payload);
     }
     fetch();
   }, [user, role, userProfile]);
@@ -51,8 +67,8 @@ export default function AgencyDashboardPage() {
   }
 
   const referralUrl =
-    typeof window !== 'undefined' && agency
-      ? `${window.location.origin}/login?ref=${agency.referral_code}`
+    typeof window !== 'undefined' && dashboard
+      ? `${window.location.origin}${dashboard.agency.referralUrl}`
       : '';
 
   return (
@@ -60,11 +76,11 @@ export default function AgencyDashboardPage() {
       <div className="max-w-md mx-auto px-4 py-6">
         <div className="mb-6">
           <h1 className="text-xl font-bold text-gray-900">대리점 대시보드</h1>
-          {agency && <p className="text-sm text-gray-500 mt-0.5">{agency.name}</p>}
+          {dashboard && <p className="text-sm text-gray-500 mt-0.5">{dashboard.agency.name}</p>}
         </div>
 
         {/* 추천 링크 */}
-        {agency && (
+        {dashboard && (
           <div className="bg-yellow-50 border border-yellow-200 p-4 mb-4">
             <p className="text-sm font-bold text-yellow-800 mb-2">추천 링크</p>
             <p className="text-xs text-yellow-700 mb-2">고객에게 이 링크를 공유하세요</p>
@@ -77,7 +93,13 @@ export default function AgencyDashboardPage() {
                 복사
               </button>
             </div>
-            <p className="text-xs text-yellow-600 mt-2">코드: {agency.referral_code}</p>
+            <p className="text-xs text-yellow-600 mt-2">코드: {dashboard.agency.code}</p>
+          </div>
+        )}
+
+        {dataError && (
+          <div className="mb-4 border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">
+            {dataError}
           </div>
         )}
 
@@ -86,15 +108,13 @@ export default function AgencyDashboardPage() {
           <div className="bg-white border border-gray-200 p-4">
             <p className="text-xs text-gray-500">유입 고객</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">
-              {customerCount}<span className="text-sm font-normal ml-1">명</span>
+              {dashboard?.summary.leads ?? 0}<span className="text-sm font-normal ml-1">명</span>
             </p>
           </div>
           <div className="bg-white border border-gray-200 p-4">
-            <p className="text-xs text-gray-500">이번 달</p>
+            <p className="text-xs text-gray-500">상담 대기</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">
-              {recentCustomers.filter(
-                (c) => new Date(c.created_at).getMonth() === new Date().getMonth()
-              ).length}
+              {dashboard?.summary.consultPending ?? 0}
               <span className="text-sm font-normal ml-1">명</span>
             </p>
           </div>
@@ -111,16 +131,16 @@ export default function AgencyDashboardPage() {
               전체보기
             </button>
           </div>
-          {recentCustomers.length === 0 ? (
+          {!dashboard || dashboard.customers.length === 0 ? (
             <div className="py-6 text-center text-gray-400 text-sm">아직 유입 고객이 없습니다</div>
           ) : (
             <div className="divide-y divide-gray-50">
-              {recentCustomers.map((c) => (
+              {dashboard.customers.slice(0, 5).map((c) => (
                 <div key={c.id} className="px-4 py-3">
                   <div className="flex justify-between">
                     <p className="text-sm font-medium text-gray-800">{c.name}</p>
                     <span className="text-xs text-gray-400">
-                      {new Date(c.created_at).toLocaleDateString('ko-KR')}
+                      {new Date(c.createdAt).toLocaleDateString('ko-KR')}
                     </span>
                   </div>
                   <p className="text-xs text-gray-500 mt-0.5">{c.phone} · {c.status}</p>
