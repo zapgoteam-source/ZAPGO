@@ -10,6 +10,8 @@
 
 ## 새 Mac에서 복구
 
+### GitHub에서 복구
+
 ```bash
 git clone https://github.com/zapgoteam-source/ZAPGO.git
 cd ZAPGO
@@ -18,6 +20,20 @@ npx vercel link
 npx vercel env pull .env.local --environment=production
 npm run build
 ```
+
+### Google Drive Git 번들에서 복구
+
+GitHub 푸시가 완료되지 않았거나 GitHub에 접근할 수 없다면
+`ZAPGO_RECOVERY_PRIVATE/ZAPGO-complete-2026-06-13.bundle`을 사용한다.
+
+```bash
+git clone ZAPGO-complete-2026-06-13.bundle ZAPGO
+cd ZAPGO
+npm install
+```
+
+번들에는 2026년 6월 13일 기준 전체 Git 이력과 최신 커밋
+`b1b0a94`가 포함되어 있다. 번들은 실제 clone 및 체크섬 검증을 완료했다.
 
 Vercel에서 내려받을 수 없는 로컬 설정이 있다면 Google Drive의
 `ZAPGO_RECOVERY_PRIVATE` 폴더에 저장된 암호화 백업을 복호화해 사용한다.
